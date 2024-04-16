@@ -13,17 +13,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
   description: 'Convert comments starting with ## to Markdown',
   autoStart: true,
   optional: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settingRegistry: ISettingRegistry | null) => {
+  activate: (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry | null
+  ) => {
     console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
 
     if (settingRegistry) {
       settingRegistry
         .load(plugin.id)
         .then(settings => {
-          console.log('jupyterlab-double-sharp settings loaded:', settings.composite);
+          console.log(
+            'jupyterlab-double-sharp settings loaded:',
+            settings.composite
+          );
         })
         .catch(reason => {
-          console.error('Failed to load settings for jupyterlab-double-sharp.', reason);
+          console.error(
+            'Failed to load settings for jupyterlab-double-sharp.',
+            reason
+          );
         });
     }
   }
