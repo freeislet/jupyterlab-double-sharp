@@ -2106,7 +2106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/application@npm:^4.0.0, @jupyterlab/application@npm:^4.1.6":
+"@jupyterlab/application@npm:^4.1.6":
   version: 4.1.6
   resolution: "@jupyterlab/application@npm:4.1.6"
   dependencies:
@@ -7262,10 +7262,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "jupyterlab-double-sharp@workspace:."
   dependencies:
-    "@jupyterlab/application": ^4.0.0
+    "@jupyterlab/application": ^4.1.6
+    "@jupyterlab/apputils": ^4.2.6
     "@jupyterlab/builder": ^4.0.0
     "@jupyterlab/settingregistry": ^4.0.0
     "@jupyterlab/testutils": ^4.0.0
+    "@lumino/widgets": ^2.3.2
     "@types/jest": ^29.2.0
     "@types/json-schema": ^7.0.11
     "@types/react": ^18.0.26
