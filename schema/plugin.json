@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "jupyterlab-double-sharp",
+  "description": "jupyterlab-double-sharp settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}
