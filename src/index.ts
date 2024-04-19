@@ -2,71 +2,114 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { INotebookTracker } from '@jupyterlab/notebook';
-// import { ICommandPalette } from '@jupyterlab/apputils';
-// import { Widget } from '@lumino/widgets';
-import { markdownIcon, runIcon } from '@jupyterlab/ui-components';
+import {
+  EditorExtensionRegistry,
+  IEditorExtensionRegistry
+} from '@jupyterlab/codemirror';
+import {
+  Decoration,
+  DecorationSet,
+  EditorView,
+  ViewPlugin,
+  ViewUpdate
+} from '@codemirror/view';
+import { Extension, Facet, RangeSetBuilder } from '@codemirror/state';
 
-const CommandIds = {
-  /**
-   * Command to render a markdown cell.
-   */
-  renderMarkdownCell: 'toolbar-button:render-markdown-cell',
-  /**
-   * Command to run a code cell.
-   */
-  runCodeCell: 'toolbar-button:run-code-cell'
-};
+// Defines new styles for this extension
+const baseTheme = EditorView.baseTheme({
+  // We need to set some transparency because the stripe are above
+  // the selection layer
+  '&light .cm-zebraStripe': { backgroundColor: '#d4fafaaa' },
+  '&dark .cm-zebraStripe': { backgroundColor: '#1a2727aa' }
+});
+
+// Resolve step to use in the editor
+const stepSize = Facet.define<number, number>({
+  combine: values => (values.length ? Math.min(...values) : 2)
+});
+
+// Add decoration to editor lines
+const stripe = Decoration.line({
+  attributes: { class: 'cm-zebraStripe' }
+});
+
+// Create the range of lines requiring decorations
+function stripeDeco(view: EditorView) {
+  const step = view.state.facet(stepSize) as number;
+  const builder = new RangeSetBuilder<Decoration>();
+  for (const { from, to } of view.visibleRanges) {
+    for (let pos = from; pos <= to; ) {
+      const line = view.state.doc.lineAt(pos);
+      if (line.number % step === 0) {
+        builder.add(line.from, line.from, stripe);
+      }
+      pos = line.to + 1;
+    }
+  }
+  return builder.finish();
+}
+
+// Update the decoration status of the editor view
+const showStripes = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+
+    constructor(view: EditorView) {
+      this.decorations = stripeDeco(view);
+    }
+
+    update(update: ViewUpdate) {
+      // Update the stripes if the document changed,
+      // the viewport changed or the stripes step changed.
+      const oldStep = update.startState.facet(stepSize);
+      if (
+        update.docChanged ||
+        update.viewportChanged ||
+        oldStep !== update.view.state.facet(stepSize)
+      ) {
+        this.decorations = stripeDeco(update.view);
+      }
+    }
+  },
+  {
+    decorations: v => v.decorations
+  }
+);
+
+// Full extension composed of elemental extensions
+export function zebraStripes(options: { step?: number } = {}): Extension {
+  return [
+    baseTheme,
+    typeof options.step !== 'number' ? [] : stepSize.of(options.step),
+    showStripes
+  ];
+}
 
 /**
  * Activate the extension.
  */
-function activate(
-  app: JupyterFrontEnd,
-  tracker: INotebookTracker,
-  settingRegistry: ISettingRegistry | null
-) {
+function activate(app: JupyterFrontEnd, extensions: IEditorExtensionRegistry) {
   console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
 
-  if (settingRegistry) {
-    settingRegistry
-      .load(plugin.id)
-      .then(settings => {
-        console.log(
-          'jupyterlab-double-sharp settings loaded:',
-          settings.composite
-        );
-      })
-      .catch(reason => {
-        console.error(
-          'Failed to load settings for jupyterlab-double-sharp.',
-          reason
-        );
-      });
-  }
-
-  const { commands } = app;
-
-  /* Adds a command enabled only on code cell */
-  commands.addCommand(CommandIds.runCodeCell, {
-    icon: runIcon,
-    caption: 'Run a code cell',
-    execute: () => {
-      commands.execute('notebook:run-cell');
-    },
-    isVisible: () => tracker.activeCell?.model.type === 'code'
-  });
-
-  /* Adds a command enabled only on markdown cell */
-  commands.addCommand(CommandIds.renderMarkdownCell, {
-    icon: markdownIcon,
-    caption: 'Render a markdown cell',
-    execute: () => {
-      commands.execute('notebook:run-cell');
-    },
-    isVisible: () => tracker.activeCell?.model.type === 'markdown'
-  });
+  // Register a new editor configurable extension
+  extensions.addExtension(
+    Object.freeze({
+      name: 'jupyterlab-double-sharp:zebra-stripes',
+      // Default CodeMirror extension parameters
+      default: 2,
+      factory: () =>
+        // The factory will be called for every new CodeMirror editor
+        EditorExtensionRegistry.createConfigurableExtension((step: number) =>
+          zebraStripes({ step })
+        ),
+      // JSON schema defining the CodeMirror extension parameters
+      schema: {
+        type: 'number',
+        title: 'Show stripes',
+        description: 'Display zebra stripes every "step" in CodeMirror editors.'
+      }
+    })
+  );
 }
 
 /**
@@ -74,10 +117,9 @@ function activate(
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-double-sharp:plugin',
-  description: 'Convert comments starting with ## to Markdown',
+  description: 'Convert comments starting with ## to markdown-like heading',
   autoStart: true,
-  requires: [INotebookTracker], //[ICommandPalette],
-  optional: [ISettingRegistry],
+  requires: [IEditorExtensionRegistry],
   activate
 };
 
