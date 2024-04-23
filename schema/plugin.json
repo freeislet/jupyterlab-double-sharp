@@ -1,20 +1,21 @@
 {
   "jupyter.lab.shortcuts": [],
-  "title": "jupyterlab-double-sharp",
-  "description": "jupyterlab-double-sharp settings.",
+  "title": "Double Sharp (##)",
+  "description": "Double Sharp settings.",
   "type": "object",
-  "properties": {},
-  "additionalProperties": false,
-  "jupyter.lab.toolbars": {
-    "Cell": [
-      {
-        "name": "run-code-cell",
-        "command": "toolbar-button:run-code-cell"
-      },
-      {
-        "name": "render-markdows-cell",
-        "command": "toolbar-button:render-markdown-cell"
-      }
-    ]
-  }
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "title": "Limit",
+      "description": "This is an example of an integer setting.",
+      "default": 25
+    },
+    "flag": {
+      "type": "boolean",
+      "title": "Simple flag",
+      "description": "This is an example of a boolean setting.",
+      "default": false
+    }
+  },
+  "additionalProperties": false
 }

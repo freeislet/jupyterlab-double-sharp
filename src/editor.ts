@@ -1,4 +1,6 @@
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
+  IEditorExtensionRegistry,
   EditorExtensionRegistry,
   IEditorExtensionFactory
 } from '@jupyterlab/codemirror';
@@ -11,12 +13,14 @@ import {
   ViewUpdate
 } from '@codemirror/view';
 // import { Extension, Facet, RangeSetBuilder } from '@codemirror/state';
-import { RangeSetBuilder } from '@codemirror/state';
+import { Facet, RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
+import { SyntaxNodeRef } from '@lezer/common';
 
 // styles
 const commentBaseTheme = EditorView.baseTheme({
-  '.cm-commentLine': { backgroundColor: '#bababa1a' }
+  '.cm-commentLine': { backgroundColor: '#aaa2' },
+  '.cm-commentLine > span': { color: '#55f' }
 });
 
 // line decoration
@@ -24,34 +28,48 @@ const commentDecoration = Decoration.line({
   attributes: { class: 'cm-commentLine' }
 });
 
+// facet
+const testFacet = Facet.define<boolean, boolean>({
+  combine: values => (values.length ? values[values.length - 1] : false)
+});
+
 // view plugin
 class CommentPlugin implements PluginValue {
   decorations: DecorationSet;
-  firstUpdate = true; // 문서 생성 update 시 docChanged false 이슈 우회
 
   constructor(view: EditorView) {
     this.decorations = this.commentDeco(view);
   }
 
   update(update: ViewUpdate) {
-    if (update.docChanged || update.viewportChanged || this.firstUpdate) {
+    if (
+      update.docChanged ||
+      update.viewportChanged ||
+      syntaxTree(update.startState) != syntaxTree(update.state) ||
+      update.startState.facet(testFacet) !== update.view.state.facet(testFacet)
+    ) {
       this.decorations = this.commentDeco(update.view);
-      this.firstUpdate = false;
     }
   }
 
-  commentDeco(view: EditorView) {
+  commentDeco(view: EditorView): DecorationSet {
+    const test = view.state.facet(testFacet);
+    if (!test) return Decoration.none;
+
+    function enter(node: SyntaxNodeRef): boolean | void {
+      if (node.name == 'Comment') {
+        const comment = view.state.doc.sliceString(node.from, node.to);
+        const isExt = comment.startsWith('##');
+        if (isExt) {
+          const deco = commentDecoration;
+          builder.add(node.from, node.from, deco);
+        }
+      }
+    }
+
     const builder = new RangeSetBuilder<Decoration>();
     for (const { from, to } of view.visibleRanges) {
-      syntaxTree(view.state).iterate({
-        from,
-        to,
-        enter: node => {
-          if (node.name == 'Comment') {
-            builder.add(node.from, node.from, commentDecoration);
-          }
-        }
-      });
+      syntaxTree(view.state).iterate({ enter, from, to });
     }
     return builder.finish();
   }
@@ -61,21 +79,42 @@ const commentPlugin = ViewPlugin.fromClass(CommentPlugin, {
   decorations: v => v.decorations
 });
 
-// TODO: CommentHeadingParameters
-// interface EditorExtensionParameters {
-//   step: number;
-// }
+interface CommentParameters {
+  test: boolean;
+}
 
-export const editorExtensionFactory: IEditorExtensionFactory = Object.freeze({
-  name: 'jupyterlab-double-sharp:comment-parser',
-  factory: (options: IEditorExtensionFactory.IOptions) =>
-    EditorExtensionRegistry.createImmutableExtension(
-      options.model.mimeType === 'text/x-ipython' ||
-        options.model.mimeType === 'text/x-python'
-        ? [commentBaseTheme, commentPlugin]
-        : []
-    )
-});
+export const setupEditorExtension = (
+  registry: IEditorExtensionRegistry,
+  settings: ISettingRegistry.ISettings
+) => {
+  const factory: IEditorExtensionFactory<CommentParameters> = Object.freeze({
+    name: 'jupyterlab-double-sharp:editor-comment',
+    default: { test: true },
+    factory(options: IEditorExtensionFactory.IOptions) {
+      const valid = options.model.mimeType === 'text/x-ipython';
+      return EditorExtensionRegistry.createConfigurableExtension(
+        (params: CommentParameters) =>
+          valid
+            ? [testFacet.of(params.test), commentBaseTheme, commentPlugin]
+            : []
+      );
+    },
+    schema: {
+      title: 'Double Sharp Editor Options',
+      type: 'object',
+      properties: {
+        test: {
+          title: 'test',
+          type: 'boolean',
+          description:
+            'Display zebra stripes every "step" in CodeMirror editors.'
+        }
+      }
+    }
+  });
+
+  registry.addExtension(factory);
+};
 
 // const baseTheme = EditorView.baseTheme({
 //   '&light .cm-zebraStripe': { backgroundColor: '#d4fafa' },
