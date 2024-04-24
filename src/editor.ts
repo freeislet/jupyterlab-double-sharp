@@ -47,7 +47,7 @@ class CommentPlugin implements PluginValue {
     if (
       update.docChanged ||
       update.viewportChanged ||
-      syntaxTree(update.startState) != syntaxTree(update.state) ||
+      syntaxTree(update.startState) !== syntaxTree(update.state) ||
       update.startState.facet(facets.highlight) !==
         update.view.state.facet(facets.highlight)
     ) {
@@ -60,7 +60,7 @@ class CommentPlugin implements PluginValue {
     if (!test) return Decoration.none;
 
     function enter(node: SyntaxNodeRef): boolean | void {
-      if (node.name == 'Comment') {
+      if (node.name === 'Comment') {
         const comment = view.state.doc.sliceString(node.from, node.to);
         const isExt = comment.startsWith('##');
         if (isExt) {
@@ -82,7 +82,7 @@ const commentPlugin = ViewPlugin.fromClass(CommentPlugin, {
   decorations: v => v.decorations
 });
 
-interface CommentParameters {
+interface ICommentParameters {
   highlight: boolean;
 }
 
@@ -90,13 +90,13 @@ export const setupEditorExtension = (
   registry: IEditorExtensionRegistry,
   settings: ISettingRegistry.ISettings
 ) => {
-  const factory: IEditorExtensionFactory<CommentParameters> = Object.freeze({
+  const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
     name: 'jupyterlab-double-sharp:editor-comment',
     default: { highlight: true },
     factory(options: IEditorExtensionFactory.IOptions) {
       const valid = options.model.mimeType === 'text/x-ipython';
       return EditorExtensionRegistry.createConfigurableExtension(
-        (params: CommentParameters) =>
+        (params: ICommentParameters) =>
           valid
             ? [
                 facets.highlight.of(params.highlight),
