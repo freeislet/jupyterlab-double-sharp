@@ -2,7 +2,37 @@
 
 [![Github Actions Status](https://github.com/freeislet/jupyterlab-double-sharp/workflows/Build/badge.svg)](https://github.com/freeislet/jupyterlab-double-sharp/actions/workflows/build.yml)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/freeislet/jupyterlab-double-sharp/main?urlpath=lab)
-Convert comments starting with ## to Markdown
+
+(WIP)
+Jupyterlab extension that improves workflow with client-side magic commands and GUI that provides convenience such as execution dependency management, external file loading and more.
+
+## Client-Side Magic Command
+
+TBD
+
+### ##%run
+
+TBD
+
+### ##%load
+
+TBD
+
+## GUI enhancements
+
+TBD
+
+### Group Toolbar
+
+TBD
+
+### Cell Toolbar
+
+TBD
+
+## Settings
+
+TBD
 
 ## Requirements
 
