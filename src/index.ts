@@ -42,3 +42,4 @@ const plugin: JupyterFrontEndPlugin<void> = {
 };
 
 export default plugin;
+export * from './icon';
