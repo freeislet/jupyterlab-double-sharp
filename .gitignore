@@ -125,4 +125,5 @@ dmypy.json
 .yarn/
 
 # etc
+.vscode/
 sandbox/
