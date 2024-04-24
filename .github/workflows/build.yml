@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: extension-artifacts
-          path: dist/jupyterlab-double-sharp*
+          path: dist/jupyterlab_double_sharp*
           if-no-files-found: error
 
   test_isolated:
@@ -81,7 +81,7 @@ jobs:
           sudo rm -rf $(which node)
           sudo rm -rf $(which node)
 
-          pip install "jupyterlab>=4.0.0,<5" jupyterlab-double-sharp*.whl
+          pip install "jupyterlab>=4.0.0,<5" jupyterlab_double_sharp*.whl
 
 
           jupyter labextension list
@@ -111,7 +111,7 @@ jobs:
       - name: Install the extension
         run: |
           set -eux
-          python -m pip install "jupyterlab>=4.0.0,<5" jupyterlab-double-sharp*.whl
+          python -m pip install "jupyterlab>=4.0.0,<5" jupyterlab_double_sharp*.whl
 
       - name: Install dependencies
         working-directory: ui-tests
