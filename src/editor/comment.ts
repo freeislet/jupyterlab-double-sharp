@@ -1,9 +1,3 @@
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  IEditorExtensionRegistry,
-  EditorExtensionRegistry,
-  IEditorExtensionFactory
-} from '@jupyterlab/codemirror';
 import {
   Decoration,
   DecorationSet,
@@ -12,8 +6,7 @@ import {
   ViewPlugin,
   ViewUpdate
 } from '@codemirror/view';
-// import { Extension, Facet, RangeSetBuilder } from '@codemirror/state';
-import { Facet, RangeSetBuilder } from '@codemirror/state';
+import { Extension, Facet, RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
 
@@ -82,42 +75,16 @@ const commentPlugin = ViewPlugin.fromClass(CommentPlugin, {
   decorations: v => v.decorations
 });
 
-interface ICommentParameters {
-  highlight: boolean;
+// extension
+
+export interface ICommentParameters {
+  highlight?: boolean;
 }
 
-export const setupEditorExtension = (
-  registry: IEditorExtensionRegistry,
-  settings: ISettingRegistry.ISettings
-) => {
-  const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
-    name: 'jupyterlab-double-sharp:editor-comment',
-    default: { highlight: true },
-    factory(options: IEditorExtensionFactory.IOptions) {
-      const valid = options.model.mimeType === 'text/x-ipython';
-      return EditorExtensionRegistry.createConfigurableExtension(
-        (params: ICommentParameters) =>
-          valid
-            ? [
-                facets.highlight.of(params.highlight),
-                commentBaseTheme,
-                commentPlugin
-              ]
-            : []
-      );
-    },
-    schema: {
-      title: 'Double Sharp Editor Options',
-      type: 'object',
-      properties: {
-        highlight: {
-          title: 'Highlight ## lines',
-          type: 'boolean'
-          // description: '...'
-        }
-      }
-    }
-  });
-
-  registry.addExtension(factory);
-};
+export function getCommentExtension(params: ICommentParameters): Extension {
+  return [
+    params.highlight ? facets.highlight.of(params.highlight) : [],
+    commentBaseTheme,
+    commentPlugin
+  ];
+}
