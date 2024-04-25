@@ -2,7 +2,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   IEditorExtensionRegistry,
   EditorExtensionRegistry,
-  IEditorExtensionFactory
+  IEditorExtensionFactory,
+  IConfigurableExtension
 } from '@jupyterlab/codemirror';
 import { getCommentExtension, ICommentParameters } from './comment';
 
@@ -22,11 +23,12 @@ type IEditorExtensionParameters = ICommentParameters & {};
 
 function createConfigurableExtension(
   options: IEditorExtensionFactory.IOptions
-) {
+): IConfigurableExtension<IEditorExtensionParameters> | null {
   const valid = options.model.mimeType === 'text/x-ipython';
+  if (!valid) return null;
+
   return EditorExtensionRegistry.createConfigurableExtension(
-    (params: IEditorExtensionParameters) =>
-      valid ? [getCommentExtension(params)] : []
+    (params: IEditorExtensionParameters) => getCommentExtension(params)
   );
 }
 
