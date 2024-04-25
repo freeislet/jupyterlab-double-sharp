@@ -39,11 +39,9 @@ jobs:
         run: |
           set -eux
           python -m pip install .[test]
-          # python -m pip install .[test] 2>&1 | grep -ie "Successfully installed jupyterlab-double-sharp"
 
           jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "jupyterlab-double-sharp.*OK"
-          # jupyter labextension list에 jupyterlab-double-sharp 보이지 않는 문제로 install 단계에서 설치 확인하도록 수정
           python -m jupyterlab.browser_check
 
       - name: Package the extension
@@ -82,12 +80,10 @@ jobs:
           sudo rm -rf $(which node)
 
           pip install "jupyterlab>=4.0.0,<5" jupyterlab_double_sharp*.whl
-          # pip install "jupyterlab>=4.0.0,<5" jupyterlab_double_sharp*.whl | grep -ie "Successfully installed"
 
 
           jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "jupyterlab-double-sharp.*OK"
-          # jupyter labextension list에 jupyterlab-double-sharp 보이지 않는 문제로 생략
           python -m jupyterlab.browser_check --no-browser-test
 
   integration-tests:
