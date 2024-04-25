@@ -3,7 +3,7 @@ requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0
 build-backend = "hatchling.build"
 
 [project]
-name = "jupyterlab-double-sharp"
+name = "jupyterlab_double_sharp"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
@@ -33,24 +33,24 @@ source = "nodejs"
 fields = ["description", "authors", "urls"]
 
 [tool.hatch.build.targets.sdist]
-artifacts = ["jupyterlab-double-sharp/labextension"]
+artifacts = ["jupyterlab_double_sharp/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"jupyterlab-double-sharp/labextension" = "share/jupyter/labextensions/jupyterlab-double-sharp"
+"jupyterlab_double_sharp/labextension" = "share/jupyter/labextensions/jupyterlab-double-sharp"
 "install.json" = "share/jupyter/labextensions/jupyterlab-double-sharp/install.json"
 
 [tool.hatch.build.hooks.version]
-path = "jupyterlab-double-sharp/_version.py"
+path = "jupyterlab_double_sharp/_version.py"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder>=0.5"]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "jupyterlab-double-sharp/labextension/static/style.js",
-    "jupyterlab-double-sharp/labextension/package.json",
+    "jupyterlab_double_sharp/labextension/static/style.js",
+    "jupyterlab_double_sharp/labextension/package.json",
 ]
-skip-if-exists = ["jupyterlab-double-sharp/labextension/static/style.js"]
+skip-if-exists = ["jupyterlab_double_sharp/labextension/static/style.js"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod"
@@ -60,7 +60,7 @@ npm = ["jlpm"]
 build_cmd = "install:extension"
 npm = ["jlpm"]
 source_dir = "src"
-build_dir = "jupyterlab-double-sharp/labextension"
+build_dir = "jupyterlab_double_sharp/labextension"
 
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"

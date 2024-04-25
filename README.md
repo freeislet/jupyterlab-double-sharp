@@ -1,4 +1,4 @@
-# jupyterlab-double-sharp
+# jupyterlab_double_sharp
 
 [![Github Actions Status](https://github.com/freeislet/jupyterlab-double-sharp/workflows/Build/badge.svg)](https://github.com/freeislet/jupyterlab-double-sharp/actions/workflows/build.yml)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/freeislet/jupyterlab-double-sharp/main?urlpath=lab)
@@ -43,7 +43,7 @@ TBD
 To install the extension, execute:
 
 ```bash
-pip install jupyterlab-double-sharp
+pip install jupyterlab_double_sharp
 ```
 
 ## Uninstall
@@ -51,7 +51,7 @@ pip install jupyterlab-double-sharp
 To remove the extension, execute:
 
 ```bash
-pip uninstall jupyterlab-double-sharp
+pip uninstall jupyterlab_double_sharp
 ```
 
 ## Contributing
@@ -66,7 +66,7 @@ The `jlpm` command is JupyterLab's pinned version of
 
 ```bash
 # Clone the repo to your local environment
-# Change directory to the jupyterlab-double-sharp directory
+# Change directory to the jupyterlab_double_sharp directory
 # Install package in development mode
 pip install -e "."
 # Link your development version of the extension with JupyterLab
@@ -95,7 +95,7 @@ jupyter lab build --minimize=False
 ### Development uninstall
 
 ```bash
-pip uninstall jupyterlab-double-sharp
+pip uninstall jupyterlab_double_sharp
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`

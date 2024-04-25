@@ -11,9 +11,8 @@ kind: frontend
 labextension_name: jupyterlab-double-sharp
 mimetype: ''
 mimetype_name: ''
-project_short_description: 'Convert comments starting with ## to Markdown'
-python_name: jupyterlab-double-sharp
+project_short_description: 'Jupyterlab extension that improves workflow with client-side magic commands and GUI that provides convenience such as execution dependency management, external file loading and more.'
+python_name: jupyterlab_double_sharp
 repository: https://github.com/freeislet/jupyterlab-double-sharp
 test: true
 viewer_name: ''
-

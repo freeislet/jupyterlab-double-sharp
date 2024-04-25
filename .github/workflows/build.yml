@@ -38,11 +38,11 @@ jobs:
       - name: Build the extension
         run: |
           set -eux
-          # python -m pip install .[test]
-          python -m pip install .[test] 2>&1 | grep -ie "Successfully installed jupyterlab-double-sharp"
+          python -m pip install .[test]
+          # python -m pip install .[test] 2>&1 | grep -ie "Successfully installed jupyterlab-double-sharp"
 
           jupyter labextension list
-          # jupyter labextension list 2>&1 | grep -ie "jupyterlab-double-sharp.*OK"
+          jupyter labextension list 2>&1 | grep -ie "jupyterlab-double-sharp.*OK"
           # jupyter labextension list에 jupyterlab-double-sharp 보이지 않는 문제로 install 단계에서 설치 확인하도록 수정
           python -m jupyterlab.browser_check
 
@@ -52,7 +52,7 @@ jobs:
 
           pip install build
           python -m build
-          pip uninstall -y "jupyterlab-double-sharp" jupyterlab
+          pip uninstall -y "jupyterlab_double_sharp" jupyterlab
 
       - name: Upload extension packages
         uses: actions/upload-artifact@v4
@@ -82,10 +82,12 @@ jobs:
           sudo rm -rf $(which node)
 
           pip install "jupyterlab>=4.0.0,<5" jupyterlab_double_sharp*.whl
+          # pip install "jupyterlab>=4.0.0,<5" jupyterlab_double_sharp*.whl | grep -ie "Successfully installed"
 
 
           jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "jupyterlab-double-sharp.*OK"
+          # jupyter labextension list에 jupyterlab-double-sharp 보이지 않는 문제로 생략
           python -m jupyterlab.browser_check --no-browser-test
 
   integration-tests:
@@ -140,7 +142,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jupyterlab-double-sharp-playwright-tests
+          name: jupyterlab_double_sharp-playwright-tests
           path: |
             ui-tests/test-results
             ui-tests/playwright-report
