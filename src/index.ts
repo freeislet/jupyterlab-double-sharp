@@ -5,7 +5,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
-import { setupEditorExtension } from './editor';
+import { setupEditorExtensions } from './editor';
 
 /**
  * Initialization data for the jupyterlab-double-sharp extension.
@@ -30,7 +30,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.composite
         );
 
-        setupEditorExtension(editorExtensionRegistry, settings);
+        setupEditorExtensions(editorExtensionRegistry, settings);
       })
       .catch(reason => {
         console.error(
