@@ -13,9 +13,11 @@ import {
   ViewPlugin,
   ViewUpdate
 } from '@codemirror/view';
-import { Facet, RangeSetBuilder } from '@codemirror/state';
+import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
+
+import { ConfigFacet } from './utils';
 
 // styles
 const commentBaseTheme = EditorView.baseTheme({
@@ -28,12 +30,8 @@ const commentDecoration = Decoration.line({
   attributes: { class: 'cm-commentLine' }
 });
 
-// facet
-const facets = {
-  highlight: Facet.define<boolean, boolean>({
-    combine: values => (values.length ? values[values.length - 1] : false)
-  })
-};
+// config (facet + compartment)
+const highlightConfig = ConfigFacet.defineCombined(false);
 
 // view plugin
 class CommentPlugin implements PluginValue {
@@ -48,15 +46,15 @@ class CommentPlugin implements PluginValue {
       update.docChanged ||
       update.viewportChanged ||
       syntaxTree(update.startState) !== syntaxTree(update.state) ||
-      update.startState.facet(facets.highlight) !==
-        update.view.state.facet(facets.highlight)
+      update.startState.facet(highlightConfig.facet) !==
+        update.view.state.facet(highlightConfig.facet)
     ) {
       this.decorations = this.commentDeco(update.view);
     }
   }
 
   commentDeco(view: EditorView): DecorationSet {
-    const test = view.state.facet(facets.highlight);
+    const test = view.state.facet(highlightConfig.facet);
     if (!test) return Decoration.none;
 
     function enter(node: SyntaxNodeRef): boolean | void {
@@ -111,7 +109,8 @@ function createEditorExtension(
       console.log('comment params:', params);
       console.trace();
       return [
-        params.highlight ? facets.highlight.of(params.highlight) : [],
+        // highlightConfig.facet.of(params.highlight ?? false),
+        highlightConfig.instance(params.highlight ?? false),
         commentBaseTheme,
         commentPlugin
       ];
@@ -121,10 +120,20 @@ function createEditorExtension(
 
 const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
   name: 'jupyterlab-double-sharp:editor-comment',
-  default: { highlight: true },
   factory: createEditorExtension,
+  default: { highlight: true },
   schema
 });
+
+export function setupCommentExtension(
+  registry: IEditorExtensionRegistry,
+  settings: ISettingRegistry.ISettings
+) {
+  loadSettings(settings);
+  settings.changed.connect(loadSettings);
+
+  registry.addExtension(factory);
+}
 
 // settings
 
@@ -136,16 +145,4 @@ function loadSettings(settings: ISettingRegistry.ISettings): void {
   console.log(
     `Settings Example extension: Limit is set to '${limit}' and flag to '${flag}'`
   );
-}
-
-// setup
-
-export function setupCommentExtension(
-  registry: IEditorExtensionRegistry,
-  settings: ISettingRegistry.ISettings
-) {
-  loadSettings(settings);
-  settings.changed.connect(loadSettings);
-
-  registry.addExtension(factory);
 }
