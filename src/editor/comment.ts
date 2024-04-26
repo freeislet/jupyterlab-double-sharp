@@ -23,8 +23,8 @@ const FACTORY_NAME = 'jupyterlab-double-sharp:editor-comment';
 
 // styles
 const commentBaseTheme = EditorView.baseTheme({
-  '.cm-commentLine': { backgroundColor: '#aaa2' },
-  '.cm-commentLine > span': { color: '#55f' }
+  '.cm-commentLine': { backgroundColor: '#aaa3' },
+  '.cm-commentLine > span': { color: 'var(--jp-info-color1)' }
 });
 
 // line decoration
@@ -136,8 +136,8 @@ function createEditorExtension(
       // highlightConfig.instance(params.highlight ?? false),
       // NOTE: extension과 연결된 EditorView를 참조할 수 없어서 그냥 facet 사용 (단, schema 등록 X)
       highlightConfig.facet.of(params.highlight ?? false),
-        commentBaseTheme,
-        commentPlugin
+      commentBaseTheme,
+      commentPlugin
     ]
   );
 }
