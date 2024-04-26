@@ -4,6 +4,7 @@ import {
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { setupEditorExtensions } from './editor';
 
@@ -14,11 +15,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterlab-double-sharp:plugin',
   description: 'Convert comments starting with ## to markdown-like heading',
   autoStart: true,
-  requires: [ISettingRegistry, IEditorExtensionRegistry],
+  requires: [ISettingRegistry, IEditorExtensionRegistry, INotebookTracker],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    editorExtensionRegistry: IEditorExtensionRegistry
+    editorExtensionRegistry: IEditorExtensionRegistry,
+    notebookTracker: INotebookTracker
   ) => {
     console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
 
@@ -30,7 +32,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.composite
         );
 
-        setupEditorExtensions(editorExtensionRegistry, settings);
+        setupEditorExtensions(
+          editorExtensionRegistry,
+          settings,
+          notebookTracker
+        );
       })
       .catch(reason => {
         console.error(

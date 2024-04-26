@@ -1,4 +1,3 @@
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   IEditorExtensionRegistry,
   EditorExtensionRegistry,
@@ -16,6 +15,15 @@ import {
 import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {
+  INotebookTracker,
+  NotebookActions,
+  Notebook
+} from '@jupyterlab/notebook';
+import {
+  ICellModel /*, CodeCellModel, isCodeCellModel*/
+} from '@jupyterlab/cells';
 
 import { ConfigFacet } from './utils';
 
@@ -152,7 +160,8 @@ const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
 
 export function setupCommentExtension(
   registry: IEditorExtensionRegistry,
-  settings: ISettingRegistry.ISettings
+  settings: ISettingRegistry.ISettings,
+  notebookTracker: INotebookTracker
 ) {
   function updateSettings(settings: ISettingRegistry.ISettings) {
     loadAndApplySettings(settings, registry);
@@ -162,4 +171,39 @@ export function setupCommentExtension(
   settings.changed.connect(updateSettings);
 
   registry.addExtension(factory);
+
+  // signal test
+  // - 참고: https://stackoverflow.com/questions/69657393/how-to-use-events-in-jupyterlab-extensions
+  NotebookActions.executionScheduled.connect((sender, args) => {
+    console.log('executionScheduled', sender, args);
+  });
+  NotebookActions.executed.connect((sender, args) => {
+    console.log('executed', sender, args);
+  });
+  notebookTracker.activeCellChanged.connect((sender, cell) => {
+    console.log('activeCellChanged', sender, cell);
+
+    if (!cell) return;
+
+    console.log(cell.model.sharedModel.getSource());
+
+    cell.model.contentChanged.connect(cellModel =>
+      __cellContentChanged(cellModel, notebookTracker.currentWidget?.content)
+    );
+    // cell.model.stateChanged.connect(__cellStateChanged);
+  });
+
+  function __cellContentChanged(cellModel: ICellModel, notebook?: Notebook) {
+    let id = cellModel.id;
+    console.log('Content of cell ' + id + ' changed');
+    console.log(cellModel, notebook);
+    console.log(cellModel.sharedModel.getSource());
+  }
+  // function __cellStateChanged(cellModel: ICellModel, change: any) {
+  //   console.log('State of cell ' + cellModel.id + ' changed:');
+  //   console.log('name: ' + change.name);
+  //   console.log('old value: ' + change.oldValue);
+  //   console.log('new value: ' + change.newValue);
+  //   console.log(cellModel, change);
+  // }
 }
