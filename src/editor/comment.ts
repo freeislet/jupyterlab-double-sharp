@@ -19,6 +19,8 @@ import { SyntaxNodeRef } from '@lezer/common';
 
 import { ConfigFacet } from './utils';
 
+const FACTORY_NAME = 'jupyterlab-double-sharp:editor-comment';
+
 // styles
 const commentBaseTheme = EditorView.baseTheme({
   '.cm-commentLine': { backgroundColor: '#aaa2' },
@@ -80,19 +82,44 @@ const commentPlugin = ViewPlugin.fromClass(CommentPlugin, {
   decorations: v => v.decorations
 });
 
+// settings
+
+function loadAndApplySettings(
+  settings: ISettingRegistry.ISettings,
+  registry: IEditorExtensionRegistry
+) {
+  // Read the settings and convert to the correct type
+  const limit = settings.get('limit').composite as number;
+  const flag = settings.get('flag').composite as boolean;
+
+  console.log(
+    `Settings Example extension: Limit is set to '${limit}' and flag to '${flag}'`
+  );
+
+  const editor = settings.get('editor').composite as object;
+  const handlers = (registry as EditorExtensionRegistry)['handlers'];
+  for (const handler of handlers) {
+    handler.setOption(FACTORY_NAME, editor);
+  }
+  // console.log('registry.baseConfiguration', registry.baseConfiguration);
+  // (registry as EditorExtensionRegistry).baseConfiguration = {
+  //   FACTORY_NAME: editor
+  // };
+}
+
 // extension
 
-const schema = {
-  title: 'Double Sharp Editor Options',
-  type: 'object',
-  properties: {
-    highlight: {
-      title: 'Highlight ## lines',
-      type: 'boolean'
-      // description: '...'
-    }
-  }
-};
+// const schema = {
+//   title: 'Double Sharp Editor Options',
+//   type: 'object',
+//   properties: {
+//     highlight: {
+//       title: 'Highlight ## lines',
+//       type: 'boolean'
+//       // description: '...'
+//     }
+//   }
+// };
 
 interface ICommentParameters {
   highlight?: boolean;
@@ -105,44 +132,33 @@ function createEditorExtension(
   if (!valid) return null;
 
   return EditorExtensionRegistry.createConfigurableExtension(
-    (params: ICommentParameters) => {
-      console.log('comment params:', params);
-      console.trace();
-      return [
-        // highlightConfig.facet.of(params.highlight ?? false),
-        highlightConfig.instance(params.highlight ?? false),
+    (params: ICommentParameters) => [
+      // highlightConfig.instance(params.highlight ?? false),
+      // NOTE: extension과 연결된 EditorView를 참조할 수 없어서 그냥 facet 사용 (단, schema 등록 X)
+      highlightConfig.facet.of(params.highlight ?? false),
         commentBaseTheme,
         commentPlugin
-      ];
-    }
+    ]
   );
 }
 
 const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
-  name: 'jupyterlab-double-sharp:editor-comment',
+  name: FACTORY_NAME,
   factory: createEditorExtension,
-  default: { highlight: true },
-  schema
+  default: { highlight: true }
+  // schema // NOTE: CodeMirror 세팅 화면이 아닌 Double Sharp 세팅에 표시하기 위해 schema 주석 처리
 });
 
 export function setupCommentExtension(
   registry: IEditorExtensionRegistry,
   settings: ISettingRegistry.ISettings
 ) {
-  loadSettings(settings);
-  settings.changed.connect(loadSettings);
+  function updateSettings(settings: ISettingRegistry.ISettings) {
+    loadAndApplySettings(settings, registry);
+  }
+
+  updateSettings(settings);
+  settings.changed.connect(updateSettings);
 
   registry.addExtension(factory);
-}
-
-// settings
-
-function loadSettings(settings: ISettingRegistry.ISettings): void {
-  // Read the settings and convert to the correct type
-  const limit = settings.get('limit').composite as number;
-  const flag = settings.get('flag').composite as boolean;
-
-  console.log(
-    `Settings Example extension: Limit is set to '${limit}' and flag to '${flag}'`
-  );
 }

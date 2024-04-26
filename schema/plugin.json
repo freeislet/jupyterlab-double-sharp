@@ -6,17 +6,29 @@
   "description": "Double Sharp settings.",
   "type": "object",
   "properties": {
-    "limit": {
-      "type": "integer",
-      "title": "Limit",
-      "description": "This is an example of an integer setting.",
-      "default": 25
+    "editor": {
+      "title": "Editor Options",
+      "type": "object",
+      "properties": {
+        "highlight": {
+          "title": "Highlight ## lines",
+          "type": "boolean",
+          "highlight": true
+        }
+      },
+      "additionalProperties": false
     },
     "flag": {
-      "type": "boolean",
       "title": "Simple flag",
+      "type": "boolean",
       "description": "This is an example of a boolean setting.",
       "default": false
+    },
+    "limit": {
+      "title": "Limit",
+      "type": "integer",
+      "description": "This is an example of an integer setting.",
+      "default": 25
     }
   },
   "additionalProperties": false
