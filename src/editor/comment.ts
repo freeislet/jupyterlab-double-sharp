@@ -109,6 +109,7 @@ function loadAndApplySettings(
 
 // extension
 
+// NOTE: CodeMirror 세팅 화면이 아닌 Double Sharp 세팅에 표시하기 위해 plugin.json에 추가
 // const schema = {
 //   title: 'Double Sharp Editor Options',
 //   type: 'object',
