@@ -16,14 +16,8 @@ import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  INotebookTracker
-  // NotebookActions
-  // Notebook
-} from '@jupyterlab/notebook';
 
 import { ConfigFacet } from './utils';
-import { NotebookCellActions } from '../cell';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-comment';
 
@@ -159,8 +153,7 @@ const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
 
 export function setupCommentExtension(
   registry: IEditorExtensionRegistry,
-  settings: ISettingRegistry.ISettings,
-  notebookTracker: INotebookTracker
+  settings: ISettingRegistry.ISettings
 ) {
   function updateSettings(settings: ISettingRegistry.ISettings) {
     loadAndApplySettings(settings, registry);
@@ -170,14 +163,4 @@ export function setupCommentExtension(
   settings.changed.connect(updateSettings);
 
   registry.addExtension(factory);
-
-  // cell actions 테스트
-  NotebookCellActions.cellContentChanged.connect((_, args) => {
-    console.log('cell content changed', args);
-    // const { model, cell } = args;
-    // console.log(model.sharedModel.getSource());
-    // console.log(cell?.editor);
-  });
-
-  notebookTracker;
 }
