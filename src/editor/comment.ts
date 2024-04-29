@@ -18,12 +18,12 @@ import { SyntaxNodeRef } from '@lezer/common';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   INotebookTracker,
-  NotebookActions,
-  Notebook
+  NotebookActions
+  // Notebook
 } from '@jupyterlab/notebook';
-import {
-  ICellModel /*, CodeCellModel, isCodeCellModel*/
-} from '@jupyterlab/cells';
+// import {
+//   ICellModel /*, CodeCellModel, isCodeCellModel*/
+// } from '@jupyterlab/cells';
 
 import { ConfigFacet } from './utils';
 
@@ -172,7 +172,18 @@ export function setupCommentExtension(
 
   registry.addExtension(factory);
 
-  // signal test
+  // notebook signal test
+  notebookTracker.widgetAdded.connect((_, notebookPanel) => {
+    console.log('notebook panel added', notebookPanel);
+
+    // notebookPanel.model?.contentChanged.connect((sender, args) => {
+    //   console.log('notebook panel model changed', sender, args);
+    // });
+    // notebookPanel.model?.cells.changed.connect((sender, args) => {
+    //   console.log('notebook panel cells changed', sender, args);
+    // });
+  });
+  // cell signal test
   // - 참고: https://stackoverflow.com/questions/69657393/how-to-use-events-in-jupyterlab-extensions
   NotebookActions.executionScheduled.connect((sender, args) => {
     console.log('executionScheduled', sender, args);
@@ -180,25 +191,25 @@ export function setupCommentExtension(
   NotebookActions.executed.connect((sender, args) => {
     console.log('executed', sender, args);
   });
-  notebookTracker.activeCellChanged.connect((sender, cell) => {
-    console.log('activeCellChanged', sender, cell);
+  // notebookTracker.activeCellChanged.connect((sender, cell) => {
+  //   console.log('activeCellChanged', sender, cell);
 
-    if (!cell) return;
+  //   if (!cell) return;
 
-    console.log(cell.model.sharedModel.getSource());
+  //   console.log(cell.model.sharedModel.getSource());
 
-    cell.model.contentChanged.connect(cellModel =>
-      __cellContentChanged(cellModel, notebookTracker.currentWidget?.content)
-    );
-    // cell.model.stateChanged.connect(__cellStateChanged);
-  });
+  //   cell.model.contentChanged.connect(cellModel =>
+  //     __cellContentChanged(cellModel, notebookTracker.currentWidget?.content)
+  //   );
+  //   // cell.model.stateChanged.connect(__cellStateChanged);
+  // });
 
-  function __cellContentChanged(cellModel: ICellModel, notebook?: Notebook) {
-    let id = cellModel.id;
-    console.log('Content of cell ' + id + ' changed');
-    console.log(cellModel, notebook);
-    console.log(cellModel.sharedModel.getSource());
-  }
+  // function __cellContentChanged(cellModel: ICellModel, notebook?: Notebook) {
+  //   let id = cellModel.id;
+  //   console.log('Content of cell ' + id + ' changed');
+  //   console.log(cellModel, notebook);
+  //   console.log(cellModel.sharedModel.getSource());
+  // }
   // function __cellStateChanged(cellModel: ICellModel, change: any) {
   //   console.log('State of cell ' + cellModel.id + ' changed:');
   //   console.log('name: ' + change.name);
