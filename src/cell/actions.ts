@@ -31,7 +31,6 @@ export class CellActionConnector {
     this.cellMap.set(model, cell);
 
     model.contentChanged.connect(this._onCellContentChanged, this);
-    cell?.disposed;
 
     // console.log('CellActionConnector.add', model, this.cellMap);
   }
