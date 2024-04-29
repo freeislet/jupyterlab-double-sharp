@@ -6,6 +6,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { setupCellExtensions } from './cell';
 import { setupEditorExtensions } from './editor';
 
 /**
@@ -23,6 +24,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker
   ) => {
     console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
+
+    setupCellExtensions(app);
 
     settingRegistry
       .load(plugin.id)

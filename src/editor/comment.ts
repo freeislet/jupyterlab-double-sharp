@@ -26,6 +26,7 @@ import {
 // } from '@jupyterlab/cells';
 
 import { ConfigFacet } from './utils';
+import { NotebookCellActions } from '../cell/actions';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-comment';
 
@@ -172,6 +173,13 @@ export function setupCommentExtension(
 
   registry.addExtension(factory);
 
+  // cell actions 테스트
+  NotebookCellActions.cellContentChanged.connect((_, args) => {
+    console.log('cell content changed', args);
+    // const { model, cell } = args;
+    // console.log(model.sharedModel.getSource());
+    // console.log(cell?.editor);
+  });
   // notebook signal test
   notebookTracker.widgetAdded.connect((_, notebookPanel) => {
     console.log('notebook panel added', notebookPanel);
