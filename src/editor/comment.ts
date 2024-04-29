@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import { ConfigFacet } from './utils';
-import { NotebookCellActions } from '../cell/actions';
+import { NotebookCellActions } from '../cell';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-comment';
 
