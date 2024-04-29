@@ -8,3 +8,9 @@
 .jp-ToolbarButtonComponent.lm-mod-hidden {
   display: none;
 }
+
+/* notebook widget 테스트 */
+.jp-myextension-myheader {
+  min-height: 20px;
+  background-color: lightsalmon;
+}
