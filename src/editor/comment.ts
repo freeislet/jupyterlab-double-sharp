@@ -102,10 +102,10 @@ function loadAndApplySettings(
     `Settings Example extension: Limit is set to '${limit}' and flag to '${flag}'`
   );
 
-  const editor = settings.get('editor').composite as object;
+  const editorSettings = settings.get('editor').composite as object;
   const handlers = (registry as EditorExtensionRegistry)['handlers'];
   for (const handler of handlers) {
-    handler.setOption(FACTORY_NAME, editor);
+    handler.setOption(FACTORY_NAME, editorSettings);
   }
   // console.log('registry.baseConfiguration', registry.baseConfiguration);
   // (registry as EditorExtensionRegistry).baseConfiguration = {
@@ -142,6 +142,7 @@ function createEditorExtension(
     (params: ICommentParameters) => [
       // highlightConfig.instance(params.highlight ?? false),
       // NOTE: extension과 연결된 EditorView를 참조할 수 없어서 그냥 facet 사용 (단, schema 등록 X)
+      // TODO: 전체 EditorView 참조 방식 검토 (NotebookCellActions.forAllCells 같은 방식?)
       highlightConfig.facet.of(params.highlight ?? false),
       commentBaseTheme,
       commentPlugin
