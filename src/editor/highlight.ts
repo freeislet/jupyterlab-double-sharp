@@ -19,10 +19,10 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ConfigFacet } from './utils';
 
-const FACTORY_NAME = 'jupyterlab-double-sharp:editor-comment';
+const FACTORY_NAME = 'jupyterlab-double-sharp:editor-highlight';
 
 // styles
-const commentBaseTheme = EditorView.baseTheme({
+const highlightTheme = EditorView.baseTheme({
   '.cm-commentLine': { backgroundColor: '#aaa3' },
   '.cm-commentLine > span': { color: 'var(--jp-info-color1)' }
 });
@@ -36,7 +36,7 @@ const commentDecoration = Decoration.line({
 const highlightConfig = ConfigFacet.defineCombined(false);
 
 // view plugin
-class CommentPlugin implements PluginValue {
+class HighlightPlugin implements PluginValue {
   decorations: DecorationSet;
 
   constructor(view: EditorView) {
@@ -78,7 +78,7 @@ class CommentPlugin implements PluginValue {
   }
 }
 
-const commentPlugin = ViewPlugin.fromClass(CommentPlugin, {
+const highlightPlugin = ViewPlugin.fromClass(HighlightPlugin, {
   decorations: v => v.decorations
 });
 
@@ -122,36 +122,36 @@ function loadAndApplySettings(
 //   }
 // };
 
-interface ICommentParameters {
+interface IHighlightParams {
   highlight?: boolean;
 }
 
 function createEditorExtension(
   options: IEditorExtensionFactory.IOptions
-): IConfigurableExtension<ICommentParameters> | null {
+): IConfigurableExtension<IHighlightParams> | null {
   const valid = options.model.mimeType === 'text/x-ipython';
   if (!valid) return null;
 
   return EditorExtensionRegistry.createConfigurableExtension(
-    (params: ICommentParameters) => [
+    (params: IHighlightParams) => [
       // highlightConfig.instance(params.highlight ?? false),
       // NOTE: extension과 연결된 EditorView를 참조할 수 없어서 그냥 facet 사용 (단, schema 등록 X)
       // TODO: 전체 EditorView 참조 방식 검토 (NotebookCellActions.forAllCells 같은 방식?)
       highlightConfig.facet.of(params.highlight ?? false),
-      commentBaseTheme,
-      commentPlugin
+      highlightTheme,
+      highlightPlugin
     ]
   );
 }
 
-const factory: IEditorExtensionFactory<ICommentParameters> = Object.freeze({
+const factory: IEditorExtensionFactory<IHighlightParams> = Object.freeze({
   name: FACTORY_NAME,
   factory: createEditorExtension,
   default: { highlight: true }
   // schema // NOTE: CodeMirror 세팅 화면이 아닌 Double Sharp 세팅에 표시하기 위해 schema 주석 처리
 });
 
-export function setupCommentExtension(
+export function setupHighlightExtension(
   registry: IEditorExtensionRegistry,
   settings: ISettingRegistry.ISettings
 ) {

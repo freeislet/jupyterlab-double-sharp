@@ -1,11 +1,11 @@
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { setupCommentExtension } from './comment';
+import { setupHighlightExtension } from './highlight';
 
-export function setupEditorExtensions(
+export function setupEditor(
   registry: IEditorExtensionRegistry,
   settings: ISettingRegistry.ISettings
 ) {
-  setupCommentExtension(registry, settings);
+  setupHighlightExtension(registry, settings);
 }
