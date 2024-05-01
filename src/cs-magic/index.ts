@@ -1,4 +1,5 @@
 import { StatementActions } from '../editor';
+import { CSMagicExecutor } from './executor';
 
 export function setupClientSideMagicCommand() {
   // TODO: markdown 관련 모듈로 이동
@@ -12,18 +13,19 @@ export function setupClientSideMagicCommand() {
         .map(s => s.statement)
         .join('\n');
 
-      console.log(contents);
+      // console.log(contents);
+      contents;
       // TODO: markdown header, heading 추가
     }
   );
 
   StatementActions.commandExecuted.connect(
     (_, params: StatementActions.ICommandParams) => {
-      const { model, cell, command } = params;
-      model;
-      cell;
-      console.log(command.statement);
-      // TODO: command dispatch
+      const { cell, command } = params;
+      if (!cell) return;
+
+      // console.log(command.statement);
+      CSMagicExecutor.execute(cell, command.statement);
     }
   );
 }

@@ -95,7 +95,7 @@ export function setupStatementModule() {
       const source = cell.model.sharedModel.getSource();
       const matches = Private.matchAllStatements(source);
       for (const match of matches) {
-        if (match.isCommand) {
+        if (match.isCommand && match.statement) {
           Private.commandExecuted.emit({
             model: cell.model,
             cell,
