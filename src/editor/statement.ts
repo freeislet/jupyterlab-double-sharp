@@ -65,11 +65,7 @@ export function setupStatementModule() {
       }
     }
 
-    const content = contents.join('\n');
-    console.log(content);
-    // TODO: markdown header, heading 추가
-
-    Private.contentChanged.emit({ model, cell, content });
+    Private.contentChanged.emit({ model, cell, content: contents.join('\n') });
   });
 
   NotebookActions.executionScheduled.connect(
@@ -84,8 +80,6 @@ export function setupStatementModule() {
         const statement = match[1];
         const isCommand = statement.startsWith('%');
         if (isCommand) {
-          console.log(statement);
-
           Private.commandExecuted.emit({
             model: cell.model,
             cell,
