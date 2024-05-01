@@ -11,10 +11,11 @@ export namespace CSMagic {
   export class Skip implements ICommand {
     readonly name = 'skip';
 
-    execute(cell: Cell, test?: string) {
-      console.log(this.name, cell, test);
-      // TBD
-      Metadata.updateCellExecution(cell.model, { skip: true });
+    execute(cell: Cell, message?: string) {
+      Metadata.updateCellExecution(cell.model, {
+        skip: true,
+        skipMessage: message
+      });
     }
   }
 
@@ -22,8 +23,7 @@ export namespace CSMagic {
     readonly name = 'cache';
 
     execute(cell: Cell) {
-      console.log(this.name, cell);
-      // TBD
+      Metadata.updateCellExecution(cell.model, { useCache: true });
     }
   }
 }

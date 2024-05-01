@@ -3,8 +3,9 @@ import { ICellModel } from '@jupyterlab/cells';
 export namespace Metadata {
   export interface ICellExecution {
     skip: boolean;
-    use_cache: boolean;
-    dependencies: string[] | undefined;
+    skipMessage?: string;
+    useCache: boolean;
+    dependencies?: string[];
   }
 
   const CELL_EXECUTION = '##execution';
