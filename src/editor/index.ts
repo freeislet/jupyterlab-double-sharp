@@ -11,3 +11,5 @@ export function setupEditor(
   setupHighlightExtension(registry, settings);
   setupStatementModule();
 }
+
+export { StatementActions, IStatementMatch } from './statement';

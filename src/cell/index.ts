@@ -6,4 +6,4 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
 }
 
-export * from './actions';
+export { CellActions, CellActionConnector } from './actions';

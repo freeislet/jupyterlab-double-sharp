@@ -4,22 +4,32 @@ import { Cell } from '@jupyterlab/cells';
 
 import { CellActions } from '../cell';
 
+export interface IStatementMatch {
+  statement: string;
+  isCommand: boolean;
+  start?: number;
+  end?: number;
+}
+
 export namespace StatementActions {
-  export interface IContentParams extends CellActions.IParams {
-    content: string;
+  export interface IStatementParams extends CellActions.IParams {
+    statements: IStatementMatch[];
   }
 
   export interface ICommandParams extends CellActions.IParams {
-    command: string;
+    command: IStatementMatch;
   }
 }
 
 export class StatementActions {
   /**
-   * 일반 ## comment의 내용 변경.
+   * ## comment 내용 변경. (일반 content 및 ##% command 모두 포함)
    */
-  static get contentChanged(): ISignal<any, StatementActions.IContentParams> {
-    return Private.contentChanged;
+  static get statementChanged(): ISignal<
+    any,
+    StatementActions.IStatementParams
+  > {
+    return Private.statementChanged;
   }
 
   /**
@@ -31,20 +41,30 @@ export class StatementActions {
 }
 
 namespace Private {
-  export const contentChanged = new Signal<
+  export const statementChanged = new Signal<
     any,
-    StatementActions.IContentParams
+    StatementActions.IStatementParams
   >({});
   export const commandExecuted = new Signal<
     any,
     StatementActions.ICommandParams
   >({});
 
-  export function matchAllStatements(
+  export function* matchAllStatements(
     source: string
-  ): IterableIterator<RegExpMatchArray> {
+  ): Generator<IStatementMatch> {
     const matches = source.matchAll(/^##[^\S\r\n]*(.*)/gm); // ##으로 시작하는 텍스트 캡쳐
-    return matches;
+    for (const match of matches) {
+      const statement = match[1];
+      const start = match.index;
+      const statementMatch: IStatementMatch = {
+        statement,
+        isCommand: statement.startsWith('%'),
+        start,
+        end: start !== undefined ? start + statement.length : undefined
+      };
+      yield statementMatch;
+    }
   }
 }
 
@@ -53,37 +73,33 @@ export function setupStatementModule() {
     // console.log('cell content changed', args);
 
     const { model, cell } = args;
-    const contents: string[] = [];
 
     const source = model.sharedModel.getSource();
     const matches = Private.matchAllStatements(source);
-    for (const match of matches) {
-      const statement = match[1];
-      const isCommand = statement.startsWith('%');
-      if (!isCommand) {
-        contents.push(statement);
-      }
-    }
 
-    Private.contentChanged.emit({ model, cell, content: contents.join('\n') });
+    // TODO: 변경 여부 판단
+
+    Private.statementChanged.emit({
+      model,
+      cell,
+      statements: Array.from(matches)
+    });
   });
 
   NotebookActions.executionScheduled.connect(
     (_, args: { notebook: Notebook; cell: Cell }) => {
-      console.log('execution scheduled', args);
+      // console.log('execution scheduled', args);
 
       const { cell } = args;
 
       const source = cell.model.sharedModel.getSource();
       const matches = Private.matchAllStatements(source);
       for (const match of matches) {
-        const statement = match[1];
-        const isCommand = statement.startsWith('%');
-        if (isCommand) {
+        if (match.isCommand) {
           Private.commandExecuted.emit({
             model: cell.model,
             cell,
-            command: statement
+            command: match
           });
         }
       }

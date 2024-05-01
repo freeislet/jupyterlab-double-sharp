@@ -1,13 +1,18 @@
-import { StatementActions } from '../editor/statement';
+import { StatementActions } from '../editor';
 
 export function setupClientSideMagicCommand() {
   // TODO: markdown 관련 모듈로 이동
-  StatementActions.contentChanged.connect(
-    (_, params: StatementActions.IContentParams) => {
-      const { model, cell, content } = params;
+  StatementActions.statementChanged.connect(
+    (_, params: StatementActions.IStatementParams) => {
+      const { model, cell, statements } = params;
       model;
       cell;
-      console.log(content);
+      const contents = statements
+        .filter(s => !s.isCommand)
+        .map(s => s.statement)
+        .join('\n');
+
+      console.log(contents);
       // TODO: markdown header, heading 추가
     }
   );
@@ -17,7 +22,7 @@ export function setupClientSideMagicCommand() {
       const { model, cell, command } = params;
       model;
       cell;
-      console.log(command);
+      console.log(command.statement);
       // TODO: command dispatch
     }
   );
