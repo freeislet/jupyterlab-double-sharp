@@ -1,5 +1,7 @@
 import { Cell } from '@jupyterlab/cells';
 
+import { Metadata } from '../metadata';
+
 export namespace CSMagic {
   export interface ICommand {
     readonly name: string;
@@ -12,6 +14,7 @@ export namespace CSMagic {
     execute(cell: Cell, test?: string) {
       console.log(this.name, cell, test);
       // TBD
+      Metadata.updateCellExecution(cell.model, { skip: true });
     }
   }
 
