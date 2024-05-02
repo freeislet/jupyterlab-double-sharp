@@ -26,7 +26,6 @@ export namespace ExecutionPlan {
 
 export class ExecutionPlan {
   /**
-   *
    * @param cells Cell 배열로부터 ExecutionPlan 생성
    * @returns
    */
@@ -81,6 +80,11 @@ export class ExecutionPlan {
     } else if (this._added(cell)) {
       item.execute = false;
       item.extra.excludedReason = 'already included';
+    }
+
+    // dependencies
+    if (item.execute) {
+      // TODO
     }
 
     this._cellExecutions.push(item);

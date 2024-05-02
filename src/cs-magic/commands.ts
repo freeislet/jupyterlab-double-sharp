@@ -26,4 +26,8 @@ export namespace CSMagic {
       Metadata.updateCellExecution(cell.model, { useCache: true });
     }
   }
+
+  // TODO: depend
+  // TODO: tag
+  // TODO: load
 }
