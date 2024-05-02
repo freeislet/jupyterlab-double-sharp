@@ -11,9 +11,13 @@ export namespace Metadata {
   const CELL_EXECUTION = '##execution';
 
   export function getCellExecution(
-    model: ICellModel
+    model: ICellModel,
+    coalesceDefault = false
   ): ICellExecution | undefined {
-    return model.getMetadata(CELL_EXECUTION);
+    const metadata = model.getMetadata(CELL_EXECUTION);
+    return coalesceDefault
+      ? { skip: false, useCache: false, ...metadata }
+      : metadata;
   }
 
   export function setCellExecution(model: ICellModel, value: ICellExecution) {
