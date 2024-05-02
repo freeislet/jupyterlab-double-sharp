@@ -26,14 +26,36 @@ export namespace ExecutionPlan {
 
 export class ExecutionPlan {
   /**
-   * @param cells Cell 배열로부터 ExecutionPlan 생성
-   * @returns
+   * Cell 배열로부터 ExecutionPlan 생성
    */
   static fromCells(cells: Cell[]): ExecutionPlan {
     const plan = new ExecutionPlan();
     plan.build(cells);
     return plan;
   }
+
+  private static _current: ExecutionPlan | null = null;
+
+  /**
+   * global 접근 가능하도록 static ExecutionPlan 설정
+   * NOTE: NotebookActions의 Private.runCells를 patch할 수 없으므로,
+   *       CodeCell.execute 안에서 현재 실행계획을 참조하도록 함
+   */
+  static begin(plan: ExecutionPlan) {
+    if (this._current) throw 'Execution plan has already begun.';
+    this._current = plan;
+  }
+
+  static end() {
+    if (this._current) throw 'Execution plan has not begun.';
+    this._current = null;
+  }
+
+  static get current(): ExecutionPlan | null {
+    return this._current;
+  }
+
+  //
 
   protected _cellExecutions: ExecutionPlan.ICellExecution[] = [];
   protected _cells = new Set<Cell>();
@@ -98,5 +120,14 @@ export class ExecutionPlan {
 
   protected _added(cell: Cell): boolean {
     return this._cells.has(cell);
+  }
+
+  /**
+   * Cell의 dependencies 샐 조회
+   * CodeCell.execute 안에서 종속 셀들을 먼저 실행하기 위한 용도로서, 해당 cell이 dependency이면 [] 리턴
+   */
+  getDependenciesOf(cell: Cell): Cell[] {
+    // TODO
+    return [];
   }
 }
