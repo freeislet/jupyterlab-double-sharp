@@ -1,8 +1,8 @@
 import { ISignal, Signal } from '@lumino/signaling';
-import { Notebook, NotebookActions } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 
 import { CellActions } from '../cell';
+import { ExecutionActions } from '../execution';
 
 export interface IStatementMatch {
   statement: string;
@@ -86,21 +86,26 @@ export function setupStatementModule() {
     });
   });
 
-  NotebookActions.executionScheduled.connect(
-    (_, args: { notebook: Notebook; cell: Cell }) => {
+  ExecutionActions.beforeExecution.connect(
+    (_, args: { cells: readonly Cell[] }) => {
+      // NOTE: ExecutionPlan 수립을 위해 NotebookActions.runXXX 이전에 metadata를 설정해야 하므로,
+      //       MetaNotebookActions.executionScheduled 대신 자체적으로 추가한 Signal 사용
+
       // console.log('execution scheduled', args);
 
-      const { cell } = args;
+      const { cells } = args;
 
-      const source = cell.model.sharedModel.getSource();
-      const matches = Private.matchAllStatements(source);
-      for (const match of matches) {
-        if (match.isCommand && match.statement) {
-          Private.commandExecuted.emit({
-            model: cell.model,
-            cell,
-            command: match
-          });
+      for (const cell of cells) {
+        const source = cell.model.sharedModel.getSource();
+        const matches = Private.matchAllStatements(source);
+        for (const match of matches) {
+          if (match.isCommand && match.statement) {
+            Private.commandExecuted.emit({
+              model: cell.model,
+              cell,
+              command: match
+            });
+          }
         }
       }
     }

@@ -7,10 +7,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
+import { ExecutionActions } from './actions';
 import { ExecutionPlan } from './plan';
-
-// NOTE: dependency 처리를 위해 Private.runCells를 patch하면 좋지만,
-//       불가능하므로 NotebookAction.runXXX 함수들을 모두 patch
 
 namespace OrgNotebookActions {
   export const run = NotebookActions.run;
@@ -34,6 +32,7 @@ namespace NewNotebookActions {
     action: T,
     args: IArguments
   ): Promise<boolean> {
+    ExecutionActions.beforeExecution.emit({ cells });
     ExecutionPlan.beginFromCells(cells);
     const ret = action.call(null, ...args);
     ExecutionPlan.end();
@@ -45,13 +44,14 @@ namespace NewNotebookActions {
     action: T,
     args: IArguments
   ): Promise<boolean> {
+    ExecutionActions.beforeExecution.emit({ cells });
     ExecutionPlan.beginFromCells(cells);
     const ret = await action.call(null, ...args);
     ExecutionPlan.end();
     return ret;
   }
 
-  function getSelectedCells(notebook: Notebook): readonly Cell[] {
+  function getSelectedCells(notebook: Notebook): Cell[] {
     return notebook.widgets.filter(child => notebook.isSelectedOrActive(child));
   }
 
