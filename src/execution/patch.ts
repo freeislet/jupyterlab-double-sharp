@@ -135,10 +135,15 @@ namespace NewCodeCell {
     const plan = ExecutionPlan.current;
     if (plan) {
       let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
-      const cells = plan.getExecutionCodeCellsOf(cell);
-      for (const cell of cells) {
-        ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
-        console.log('CodeCell.execute msg:', ret);
+
+      const executionCell = plan.getExecutionCellsOf(cell);
+      if (executionCell) {
+        executionCell.processExcludedCells();
+
+        for (const codeCell of executionCell.codeCellsToExecute) {
+          ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
+          console.log('CodeCell.execute ret:', ret);
+        }
       }
       return ret;
     } else {
