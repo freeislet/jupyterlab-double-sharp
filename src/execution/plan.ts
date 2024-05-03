@@ -26,13 +26,6 @@ export namespace ExecutionPlan {
 }
 
 export class ExecutionPlan {
-  /**
-   * Cell 배열로부터 ExecutionPlan 생성
-   */
-  static fromCells(cells: Cell[]): ExecutionPlan {
-    return new ExecutionPlan().build(cells);
-  }
-
   private static _current: ExecutionPlan | null = null;
 
   /**
@@ -45,6 +38,10 @@ export class ExecutionPlan {
     this._current = plan;
   }
 
+  static beginFromCells(cells: readonly Cell[]) {
+    const plan = new ExecutionPlan().build(cells);
+    ExecutionPlan.begin(plan);
+  }
   static end() {
     if (!this._current) throw 'Execution plan has not begun.';
     this._current = null;
@@ -59,8 +56,6 @@ export class ExecutionPlan {
   protected _cellExecutions: ExecutionPlan.ICellExecution[] = [];
   protected _allCells = new Set<Cell>();
 
-  constructor() {}
-
   get cellExecutions(): ExecutionPlan.ICellExecution[] {
     return this._cellExecutions;
   }
@@ -71,7 +66,12 @@ export class ExecutionPlan {
     return cells;
   }
 
-  build(cells: Cell[]): ExecutionPlan {
+  constructor() {}
+
+  /**
+   * Cell 배열로부터 ExecutionPlan 생성
+   */
+  build(cells: readonly Cell[]): ExecutionPlan {
     this._cellExecutions = cells.map(c => this._buildItem(c));
     return this;
   }
@@ -80,8 +80,6 @@ export class ExecutionPlan {
     cell: Cell,
     dependencyLevel?: number
   ): ExecutionPlan.ICellExecution {
-    this._allCells.add(cell);
-
     const item: ExecutionPlan.ICellExecution = {
       cell,
       execute: true,
@@ -106,6 +104,8 @@ export class ExecutionPlan {
       item.execute = false;
       item.extra.excludedReason = 'already exists';
     }
+
+    this._allCells.add(cell); // NOTE: 반드시 바로 위 exclude 체크와 아래 dependencies 사이에 추가해야 함
 
     // dependencies
     if (item.execute) {
@@ -136,7 +136,7 @@ export class ExecutionPlan {
 
     const cells: Cell[] = [];
     this._collectExecutionCells(cellExecution, cells);
-    console.log('execution cells', cells);
+    // console.log('execution cells', cells, cellExecution);
     return cells;
   }
 

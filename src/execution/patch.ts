@@ -25,7 +25,31 @@ namespace OrgCodeCell {
 }
 
 namespace NewNotebookActions {
-  function getSelectedCells(notebook: Notebook): Cell[] {
+  type ActionType = (...args: any) => Promise<boolean>;
+
+  function _run<T extends ActionType>(
+    cells: readonly Cell[],
+    action: T,
+    args: IArguments
+  ): Promise<boolean> {
+    ExecutionPlan.beginFromCells(cells);
+    const ret = action.call(null, ...args);
+    ExecutionPlan.end();
+    return ret;
+  }
+
+  async function _runAsync<T extends ActionType>(
+    cells: readonly Cell[],
+    action: T,
+    args: IArguments
+  ): Promise<boolean> {
+    ExecutionPlan.beginFromCells(cells);
+    const ret = await action.call(null, ...args);
+    ExecutionPlan.end();
+    return ret;
+  }
+
+  function getSelectedCells(notebook: Notebook): readonly Cell[] {
     return notebook.widgets.filter(child => notebook.isSelectedOrActive(child));
   }
 
@@ -36,18 +60,7 @@ namespace NewNotebookActions {
     translator?: ITranslator
   ): Promise<boolean> {
     const cells = getSelectedCells(notebook);
-    const plan = ExecutionPlan.fromCells(cells);
-    ExecutionPlan.begin(plan);
-
-    const ret = OrgNotebookActions.run(
-      notebook,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
-
-    ExecutionPlan.end();
-    return ret;
+    return _run(cells, OrgNotebookActions.run, arguments);
   }
 
   export async function runAndAdvance(
@@ -56,13 +69,8 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.runAndAdvance');
-    return await OrgNotebookActions.runAndAdvance(
-      notebook,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
+    const cells = getSelectedCells(notebook);
+    return await _runAsync(cells, OrgNotebookActions.runAndAdvance, arguments);
   }
 
   export async function runAndInsert(
@@ -71,13 +79,8 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.runAndInsert');
-    return await OrgNotebookActions.runAndInsert(
-      notebook,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
+    const cells = getSelectedCells(notebook);
+    return await _runAsync(cells, OrgNotebookActions.runAndInsert, arguments);
   }
 
   export function runCells(
@@ -87,14 +90,7 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.runCells');
-    return OrgNotebookActions.runCells(
-      notebook,
-      cells,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
+    return _run(cells, OrgNotebookActions.runCells, arguments);
   }
 
   export function runAll(
@@ -103,13 +99,8 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.runAll');
-    return OrgNotebookActions.runAll(
-      notebook,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
+    const allCells = notebook.widgets;
+    return _run(allCells, OrgNotebookActions.runAll, arguments);
   }
 
   export function runAllAbove(
@@ -118,13 +109,8 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.runAllAbove');
-    return OrgNotebookActions.runAllAbove(
-      notebook,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
+    const aboveCells = notebook.widgets.slice(0, notebook.activeCellIndex);
+    return _run(aboveCells, OrgNotebookActions.runAllAbove, arguments);
   }
 
   export function runAllBelow(
@@ -133,13 +119,8 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.runAllBelow');
-    return OrgNotebookActions.runAllBelow(
-      notebook,
-      sessionContext,
-      sessionDialogs,
-      translator
-    );
+    const belowCells = notebook.widgets.slice(notebook.activeCellIndex);
+    return _run(belowCells, OrgNotebookActions.runAllBelow, arguments);
   }
 }
 
