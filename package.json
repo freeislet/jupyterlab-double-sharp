@@ -167,7 +167,8 @@
                 "all"
             ],
             "eqeqeq": "error",
-            "prefer-arrow-callback": "error"
+            "prefer-arrow-callback": "error",
+            "no-inner-declarations": "off"
         }
     },
     "prettier": {

@@ -1,3 +1,5 @@
+/* eslint-disable prefer-rest-params */
+
 import { NotebookActions, Notebook } from '@jupyterlab/notebook';
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { ISessionContext, ISessionContextDialogs } from '@jupyterlab/apputils';
