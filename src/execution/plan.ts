@@ -1,4 +1,4 @@
-import { Cell, isCodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, isCodeCellModel } from '@jupyterlab/cells';
 
 import { Metadata } from '../metadata';
 
@@ -7,8 +7,8 @@ export namespace ExecutionPlan {
    * Cell 실행정보
    */
   export interface ICellExecution {
-    execute: boolean;
     cell: Cell;
+    execute: boolean;
     extra: ICellExecutionExtra;
   }
 
@@ -16,7 +16,7 @@ export namespace ExecutionPlan {
    * Cell 실행 관련 추가 정보 (디버그, 시각화 용)
    */
   export interface ICellExecutionExtra {
-    dependencyLevel: number;
+    dependencyLevel?: number;
     excludedReason?: ExcludedReason;
     skipMessage?: string;
   }
@@ -47,7 +47,7 @@ export class ExecutionPlan {
   }
 
   static end() {
-    if (this._current) throw 'Execution plan has not begun.';
+    if (!this._current) throw 'Execution plan has not begun.';
     this._current = null;
   }
 
@@ -60,6 +60,8 @@ export class ExecutionPlan {
   protected _cellExecutions: ExecutionPlan.ICellExecution[] = [];
   protected _cells = new Set<Cell>();
 
+  constructor() {}
+
   get cellExecutions(): ExecutionPlan.ICellExecution[] {
     return this._cellExecutions;
   }
@@ -68,29 +70,62 @@ export class ExecutionPlan {
     return this._cellExecutions.filter(ce => ce.execute).map(ce => ce.cell);
   }
 
-  constructor() {}
+  /**
+   * Cell의 dependencies를 포함하여 실행할 셀 목록 조회
+   * CodeCell.execute 안에서 종속 셀들과 함께 실행하기 위한 용도
+   * (X) 해당 cell이 dependency이면 [] 리턴
+   */
+  getExecutionCellsOf(cell: Cell): Cell[] {
+    const index = this._cellExecutions.findIndex(ce => ce.cell === cell);
+    if (index < 0) return [];
+
+    let firstIndex = index; // cell dependency 첫 번째 인덱스 (없으면 cell index)
+    const baseLevel = this._cellExecutions[index].extra.dependencyLevel ?? 0;
+
+    for (let i = index - 1; i >= 0; --i) {
+      const level = this._cellExecutions[i].extra.dependencyLevel ?? 0;
+      const inGroup = level > baseLevel;
+      if (inGroup) {
+        firstIndex = i;
+      } else break;
+    }
+
+    const executionCells = this._cellExecutions
+      .slice(firstIndex, index + 1)
+      .filter(ce => ce.execute);
+    console.log('execution cells', executionCells, firstIndex, index);
+
+    return executionCells.map(ce => ce.cell);
+  }
+
+  getExecutionCodeCellsOf(cell: Cell): CodeCell[] {
+    const cells = this.getExecutionCellsOf(cell);
+    return cells.filter(c => isCodeCellModel(c.model)) as CodeCell[];
+  }
 
   build(cells: Cell[]): ExecutionPlan {
     for (const cell of cells) {
-      this._add(cell, 0);
+      this._add(cell);
     }
 
     return this;
   }
 
-  protected _add(cell: Cell, dependencyLevel = 0) {
+  protected _add(cell: Cell, dependencyLevel?: number) {
     if (!cell) return;
 
     const metadata = Metadata.getCellExecution(cell.model, true)!;
     console.log(metadata);
 
     const item: ExecutionPlan.ICellExecution = {
-      execute: true,
       cell,
-      extra: {
-        dependencyLevel
-      }
+      execute: true,
+      extra: {}
     };
+
+    if (dependencyLevel !== undefined) {
+      item.extra.dependencyLevel = dependencyLevel;
+    }
 
     if (metadata.skip) {
       item.execute = false;
@@ -120,14 +155,5 @@ export class ExecutionPlan {
 
   protected _added(cell: Cell): boolean {
     return this._cells.has(cell);
-  }
-
-  /**
-   * Cell의 dependencies 샐 조회
-   * CodeCell.execute 안에서 종속 셀들을 먼저 실행하기 위한 용도로서, 해당 cell이 dependency이면 [] 리턴
-   */
-  getDependenciesOf(cell: Cell): Cell[] {
-    // TODO
-    return [];
   }
 }

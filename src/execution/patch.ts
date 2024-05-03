@@ -5,6 +5,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
+import { ExecutionPlan } from './plan';
+
 // NOTE: dependency 처리를 위해 Private.runCells를 patch하면 좋지만,
 //       불가능하므로 NotebookAction.runXXX 함수들을 모두 patch
 
@@ -23,19 +25,29 @@ namespace OrgCodeCell {
 }
 
 namespace NewNotebookActions {
+  function getSelectedCells(notebook: Notebook): Cell[] {
+    return notebook.widgets.filter(child => notebook.isSelectedOrActive(child));
+  }
+
   export function run(
     notebook: Notebook,
     sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    console.log('NotebookActions.run');
-    return OrgNotebookActions.run(
+    const cells = getSelectedCells(notebook);
+    const plan = ExecutionPlan.fromCells(cells);
+    ExecutionPlan.begin(plan);
+
+    const ret = OrgNotebookActions.run(
       notebook,
       sessionContext,
       sessionDialogs,
       translator
     );
+
+    ExecutionPlan.end();
+    return ret;
   }
 
   export async function runAndAdvance(
@@ -137,8 +149,18 @@ namespace NewCodeCell {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    console.log('CodeCell.execute');
-    return OrgCodeCell.execute(cell, sessionContext, metadata);
+    const plan = ExecutionPlan.current;
+    if (plan) {
+      let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
+      const cells = plan.getExecutionCodeCellsOf(cell);
+      for (const cell of cells) {
+        ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
+        console.log('CodeCell.execute msg:', ret);
+      }
+      return ret;
+    } else {
+      return OrgCodeCell.execute(cell, sessionContext, metadata);
+    }
   }
 }
 
