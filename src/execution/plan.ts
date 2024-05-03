@@ -9,6 +9,7 @@ export namespace ExecutionPlan {
   export interface ICellExecution {
     cell: Cell;
     execute: boolean;
+    dependencies?: ICellExecution[];
     extra: ICellExecutionExtra;
   }
 
@@ -21,7 +22,7 @@ export namespace ExecutionPlan {
     skipMessage?: string;
   }
 
-  export type ExcludedReason = 'skipped' | 'cached' | 'already included';
+  export type ExcludedReason = 'skipped' | 'cached' | 'already exists';
 }
 
 export class ExecutionPlan {
@@ -29,9 +30,7 @@ export class ExecutionPlan {
    * Cell 배열로부터 ExecutionPlan 생성
    */
   static fromCells(cells: Cell[]): ExecutionPlan {
-    const plan = new ExecutionPlan();
-    plan.build(cells);
-    return plan;
+    return new ExecutionPlan().build(cells);
   }
 
   private static _current: ExecutionPlan | null = null;
@@ -58,7 +57,7 @@ export class ExecutionPlan {
   //
 
   protected _cellExecutions: ExecutionPlan.ICellExecution[] = [];
-  protected _cells = new Set<Cell>();
+  protected _allCells = new Set<Cell>();
 
   constructor() {}
 
@@ -66,56 +65,22 @@ export class ExecutionPlan {
     return this._cellExecutions;
   }
 
-  get cellsToExecute(): Cell[] {
-    return this._cellExecutions.filter(ce => ce.execute).map(ce => ce.cell);
-  }
-
-  /**
-   * Cell의 dependencies를 포함하여 실행할 셀 목록 조회
-   * CodeCell.execute 안에서 종속 셀들과 함께 실행하기 위한 용도
-   * (X) 해당 cell이 dependency이면 [] 리턴
-   */
-  getExecutionCellsOf(cell: Cell): Cell[] {
-    const index = this._cellExecutions.findIndex(ce => ce.cell === cell);
-    if (index < 0) return [];
-
-    let firstIndex = index; // cell dependency 첫 번째 인덱스 (없으면 cell index)
-    const baseLevel = this._cellExecutions[index].extra.dependencyLevel ?? 0;
-
-    for (let i = index - 1; i >= 0; --i) {
-      const level = this._cellExecutions[i].extra.dependencyLevel ?? 0;
-      const inGroup = level > baseLevel;
-      if (inGroup) {
-        firstIndex = i;
-      } else break;
-    }
-
-    const executionCells = this._cellExecutions
-      .slice(firstIndex, index + 1)
-      .filter(ce => ce.execute);
-    console.log('execution cells', executionCells, firstIndex, index);
-
-    return executionCells.map(ce => ce.cell);
-  }
-
-  getExecutionCodeCellsOf(cell: Cell): CodeCell[] {
-    const cells = this.getExecutionCellsOf(cell);
-    return cells.filter(c => isCodeCellModel(c.model)) as CodeCell[];
+  get executionCells(): Cell[] {
+    const cells: Cell[] = [];
+    this._cellExecutions.forEach(ce => this._collectExecutionCells(ce, cells));
+    return cells;
   }
 
   build(cells: Cell[]): ExecutionPlan {
-    for (const cell of cells) {
-      this._add(cell);
-    }
-
+    this._cellExecutions = cells.map(c => this._buildItem(c));
     return this;
   }
 
-  protected _add(cell: Cell, dependencyLevel?: number) {
-    if (!cell) return;
-
-    const metadata = Metadata.getCellExecution(cell.model, true)!;
-    console.log(metadata);
+  protected _buildItem(
+    cell: Cell,
+    dependencyLevel?: number
+  ): ExecutionPlan.ICellExecution {
+    this._allCells.add(cell);
 
     const item: ExecutionPlan.ICellExecution = {
       cell,
@@ -127,6 +92,9 @@ export class ExecutionPlan {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
+    const metadata = Metadata.getCellExecution(cell.model, true)!;
+    // console.log(metadata);
+
     if (metadata.skip) {
       item.execute = false;
       item.extra.excludedReason = 'skipped';
@@ -134,18 +102,19 @@ export class ExecutionPlan {
     } else if (metadata.useCache && this._cached(cell)) {
       item.execute = false;
       item.extra.excludedReason = 'cached';
-    } else if (this._added(cell)) {
+    } else if (this.exists(cell)) {
       item.execute = false;
-      item.extra.excludedReason = 'already included';
+      item.extra.excludedReason = 'already exists';
     }
 
     // dependencies
     if (item.execute) {
       // TODO
+      // const nextDependencyLevel = (dependencyLevel ?? 0) + 1
+      // item.dependencies = dependencies.map(c => this._buildItem(c, nextDependencyLevel))
     }
 
-    this._cellExecutions.push(item);
-    this._cells.add(cell);
+    return item;
   }
 
   protected _cached(cell: Cell): boolean {
@@ -153,7 +122,39 @@ export class ExecutionPlan {
     return codeCellModel?.isDirty === false;
   }
 
-  protected _added(cell: Cell): boolean {
-    return this._cells.has(cell);
+  exists(cell: Cell): boolean {
+    return this._allCells.has(cell);
+  }
+
+  /**
+   * Cell의 dependencies를 포함하여 실행할 셀 목록 조회
+   * CodeCell.execute 안에서 종속 셀들과 함께 실행하기 위한 용도
+   */
+  getExecutionCellsOf(cell: Cell): Cell[] {
+    const cellExecution = this._cellExecutions.find(ce => ce.cell === cell);
+    if (!cellExecution) return [];
+
+    const cells: Cell[] = [];
+    this._collectExecutionCells(cellExecution, cells);
+    console.log('execution cells', cells);
+    return cells;
+  }
+
+  getExecutionCodeCellsOf(cell: Cell): CodeCell[] {
+    const cells = this.getExecutionCellsOf(cell);
+    return cells.filter(c => isCodeCellModel(c.model)) as CodeCell[];
+  }
+
+  protected _collectExecutionCells(
+    cellExecution: ExecutionPlan.ICellExecution,
+    outCells: Cell[]
+  ) {
+    if (!cellExecution.execute) return;
+
+    for (const dependency of cellExecution.dependencies ?? []) {
+      this._collectExecutionCells(dependency, outCells);
+    }
+
+    outCells.push(cellExecution.cell);
   }
 }
