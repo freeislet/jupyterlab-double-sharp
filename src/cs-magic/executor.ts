@@ -2,6 +2,7 @@ import { Cell } from '@jupyterlab/cells';
 
 import { CSMagic } from './commands';
 import { tokenize } from './utils';
+import { CellStyle } from '../cell';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
@@ -24,5 +25,6 @@ export class CSMagicExecutor {
     if (!command) return;
 
     command.execute(cell, ...tokens.slice(1));
+    CellStyle.update(cell);
   }
 }

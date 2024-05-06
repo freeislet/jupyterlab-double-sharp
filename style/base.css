@@ -14,3 +14,24 @@
   min-height: 20px;
   background-color: lightsalmon;
 }
+
+/*
+ * Cell states
+ */
+
+.jp-Notebook .jp-Cell.jp-DoubleSharp-skip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--jp-layout-color2);
+  opacity: 0.5;
+  border-radius: 2px;
+}
+
+.jp-Notebook .jp-Cell.jp-DoubleSharp-cache::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--jp-layout-color2);
+  border-radius: 2px;
+}

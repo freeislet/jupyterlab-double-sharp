@@ -7,3 +7,4 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
 }
 
 export { CellActions, CellActionConnector } from './actions';
+export { CellStyle } from './style';

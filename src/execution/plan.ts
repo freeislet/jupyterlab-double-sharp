@@ -140,12 +140,13 @@ export class ExecutionCells {
           }
         }
       } else {
+        const msg = executionCell.extra.message;
         const cell = executionCell.cell;
-        if (isCodeCellModel(cell.model)) {
+        if (msg && isCodeCellModel(cell.model)) {
           const output = {
             output_type: 'stream',
             name: 'stdout',
-            text: `## ${executionCell.extra.message}\n`
+            text: `## ${msg}\n`
           };
           const codeCell = cell as CodeCell;
           codeCell.outputArea.model.clear(true);
