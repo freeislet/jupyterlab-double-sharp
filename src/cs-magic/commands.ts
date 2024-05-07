@@ -1,6 +1,6 @@
 import { Cell } from '@jupyterlab/cells';
 
-import { Metadata } from '../metadata';
+import { CellMetadata } from '../cell/metadata';
 
 export namespace CSMagic {
   export interface ICommand {
@@ -12,7 +12,7 @@ export namespace CSMagic {
     readonly name = 'skip';
 
     execute(cell: Cell, message?: string) {
-      Metadata.updateCellExecution(cell.model, {
+      CellMetadata.updateExecution(cell.model, {
         skip: true,
         skipMessage: message
       });
@@ -23,7 +23,7 @@ export namespace CSMagic {
     readonly name = 'cache';
 
     execute(cell: Cell) {
-      Metadata.updateCellExecution(cell.model, { useCache: true });
+      CellMetadata.updateExecution(cell.model, { useCache: true });
     }
   }
 

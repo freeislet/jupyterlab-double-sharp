@@ -1,10 +1,27 @@
 import { Cell } from '@jupyterlab/cells';
 
-import { Metadata } from '../metadata';
+import { CellActions } from './actions';
+import { CellMetadata } from './metadata';
+
+export function setupCellStyles() {
+  CellActions.metadataChanged.connect(
+    (_, args: CellActions.IMapChangeParams) => {
+      console.log(args);
+
+      const { cell, change } = args;
+
+      if (!cell) return;
+
+      if (change.key.startsWith('##')) {
+        CellStyle.update(cell);
+      }
+    }
+  );
+}
 
 export namespace CellStyle {
   export function update(cell: Cell) {
-    const cellExecution = Metadata.getCellExecution(cell.model, true)!;
+    const cellExecution = CellMetadata.getExecution(cell.model, true)!;
 
     const classes = {
       'jp-DoubleSharp-skip': cellExecution.skip,

@@ -1,6 +1,6 @@
 import { Cell, CodeCell, isCodeCellModel } from '@jupyterlab/cells';
 
-import { Metadata } from '../metadata';
+import { CellMetadata } from '../cell/metadata';
 
 export namespace ExecutionPlan {
   /**
@@ -70,7 +70,7 @@ export class ExecutionCells {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
-    const metadata = Metadata.getCellExecution(cell.model, true)!;
+    const metadata = CellMetadata.getExecution(cell.model, true)!;
     // console.log(metadata);
 
     if (metadata.skip) {
