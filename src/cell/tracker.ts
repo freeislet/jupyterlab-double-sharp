@@ -6,6 +6,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 import { CellActionConnector } from './actions';
+import { CellStyle } from './style';
 
 /**
  * CellTracker
@@ -18,6 +19,7 @@ export class CellTracker implements IDisposable {
   constructor(panel: NotebookPanel) {
     this._panel = panel;
 
+    panel.context.ready.then(() => this.updateCells());
     panel.context.model.cells.changed.connect(this._onCellsChanged, this);
   }
 
@@ -32,6 +34,15 @@ export class CellTracker implements IDisposable {
     this._panel = null;
 
     Signal.clearData(this);
+  }
+
+  updateCells() {
+    const cells = this._panel?.content.widgets;
+    if (cells) {
+      for (const cell of cells) {
+        CellStyle.update(cell);
+      }
+    }
   }
 
   protected _onCellsChanged(

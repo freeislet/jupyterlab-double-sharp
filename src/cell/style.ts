@@ -16,6 +16,7 @@ export namespace CellStyle {
     // }
 
     setClasses(cell, classes);
+    // console.log(classes);
   }
 
   function setClasses(cell: Cell, classes: { [name: string]: boolean }) {
