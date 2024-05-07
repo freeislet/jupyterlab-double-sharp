@@ -35,3 +35,6 @@
   background-color: var(--jp-layout-color2);
   border-radius: 2px;
 }
+.jp-Notebook .jp-Cell.jp-DoubleSharp-cache.jp-mod-dirty::before {
+  background-color: var(--jp-warn-color3);
+}
