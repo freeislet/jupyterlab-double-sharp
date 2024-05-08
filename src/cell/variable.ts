@@ -4,7 +4,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { KernelMessage } from '@jupyterlab/services';
 import { IStream, MultilineString } from '@jupyterlab/nbformat';
-import { CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
@@ -33,14 +33,16 @@ export class VariableTracker implements IDisposable {
     return this._trackers.get(panel);
   }
 
+  static getByCell(cell: Cell): VariableTracker | undefined {
+    const panel = cell.parent?.parent;
+    return panel ? this.get(panel as NotebookPanel) : undefined;
+  }
+
   static {
     ExecutionActions.afterExecution.connect((_, args) => {
       const { cells } = args;
 
-      const panel = cells.length ? cells[0].parent?.parent : null;
-      if (!panel) return;
-
-      const tracker = this.get(panel as NotebookPanel);
+      const tracker = cells.length ? this.getByCell(cells[0]) : null;
       if (!tracker) return;
 
       tracker.updateKernelVariables();
