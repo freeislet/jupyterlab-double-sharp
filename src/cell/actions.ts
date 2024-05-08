@@ -2,6 +2,7 @@ import { ICellModel, Cell } from '@jupyterlab/cells';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IMapChange } from '@jupyter/ydoc';
+import { IDisposable } from '@lumino/disposable';
 
 export namespace CellActions {
   export interface IParams {
@@ -51,10 +52,23 @@ namespace Private {
   );
 }
 
-export class CellActionConnector {
+export class CellActionConnector implements IDisposable {
+  private _isDisposed = false;
   readonly cellMap = new Map<ICellModel, Cell | undefined>();
 
   constructor() {}
+
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  dispose() {
+    if (this.isDisposed) return;
+
+    this._isDisposed = true;
+    this.cellMap.clear();
+    Signal.clearData(this);
+  }
 
   add(model: ICellModel, cell?: Cell) {
     this.cellMap.set(model, cell);

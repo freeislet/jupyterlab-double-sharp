@@ -14,10 +14,10 @@ import { CellStyle } from './style';
 export class CellTracker implements IDisposable {
   private _isDisposed = false;
   private _actionConnector = new CellActionConnector();
-  private _panel: NotebookPanel | null;
+  readonly panel: NotebookPanel;
 
   constructor(panel: NotebookPanel) {
-    this._panel = panel;
+    this.panel = panel;
 
     panel.context.ready.then(() => this.updateCells());
     panel.context.model.cells.changed.connect(this._onCellsChanged, this);
@@ -31,13 +31,13 @@ export class CellTracker implements IDisposable {
     if (this.isDisposed) return;
 
     this._isDisposed = true;
-    this._panel = null;
+    this._actionConnector.dispose();
 
     Signal.clearData(this);
   }
 
   updateCells() {
-    const cells = this._panel?.content.widgets;
+    const cells = this.panel.content.widgets;
     if (cells) {
       for (const cell of cells) {
         CellStyle.update(cell);
@@ -68,7 +68,7 @@ export class CellTracker implements IDisposable {
   }
 
   private _getCell(model: ICellModel): Cell | undefined {
-    return this._panel?.content.widgets.find(widget => widget.model === model);
+    return this.panel.content.widgets.find(widget => widget.model === model);
   }
 }
 
