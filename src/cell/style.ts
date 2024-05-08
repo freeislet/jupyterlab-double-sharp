@@ -1,23 +1,6 @@
 import { Cell } from '@jupyterlab/cells';
 
-import { CellActions } from './actions';
 import { CellMetadata } from './metadata';
-
-export function setupCellStyles() {
-  CellActions.metadataChanged.connect(
-    (_, args: CellActions.IMapChangeParams) => {
-      console.log(args);
-
-      const { cell, change } = args;
-
-      if (!cell) return;
-
-      if (change.key.startsWith('##')) {
-        CellStyle.update(cell);
-      }
-    }
-  );
-}
 
 export namespace CellStyle {
   export function update(cell: Cell) {
