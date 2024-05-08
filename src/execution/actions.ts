@@ -14,4 +14,11 @@ export class ExecutionActions {
   static readonly beforeExecution = new Signal<any, ExecutionActions.IParams>(
     {}
   );
+
+  /**
+   * NotebookActions.runXXX 실행 후
+   */
+  static readonly afterExecution = new Signal<any, ExecutionActions.IParams>(
+    {}
+  );
 }

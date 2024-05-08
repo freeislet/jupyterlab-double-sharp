@@ -36,6 +36,7 @@ namespace NewNotebookActions {
     ExecutionPlan.beginFromCells(cells);
     const ret = action.call(null, ...args);
     ExecutionPlan.end();
+    ExecutionActions.afterExecution.emit({ cells });
     return ret;
   }
 
@@ -48,6 +49,7 @@ namespace NewNotebookActions {
     ExecutionPlan.beginFromCells(cells);
     const ret = await action.call(null, ...args);
     ExecutionPlan.end();
+    ExecutionActions.afterExecution.emit({ cells });
     return ret;
   }
 
