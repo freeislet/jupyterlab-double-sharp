@@ -3,13 +3,14 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { KernelMessage } from '@jupyterlab/services';
-import { IStream, MultilineString } from '@jupyterlab/nbformat';
+import { IStream } from '@jupyterlab/nbformat';
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
 
 import { ExecutionActions } from '../execution/actions';
+import { joinMultiline } from '../util';
 
 export interface ICellVariables {
   /**
@@ -94,24 +95,14 @@ export class VariableTracker implements IDisposable {
       store_history: false
     };
     const future = kernel.requestExecute(reqContent);
-
-    function split(text: MultilineString): string[] {
-      const split1 = (str: string) => str.trim().split(/\s+/);
-
-      if (Array.isArray(text)) {
-        text.map(split1).flat();
-      } else if (!text.startsWith('Interactive namespace is empty')) {
-        return split1(text);
-      }
-      return [];
-    }
-
     future.onIOPub = (response: KernelMessage.IIOPubMessage) => {
       const msgType = response.header.msg_type;
       if (msgType === 'stream') {
         const content = response.content as IStream;
         if (content.name === 'stdout') {
-          this._kernelVars = split(content.text);
+          const text = joinMultiline(content.text);
+          const empty = text.startsWith('Interactive namespace is empty');
+          this._kernelVars = empty ? [] : text.trim().split(/\s+/);
           // console.log('kernel vars:', this._kernelVars);
         }
       }
