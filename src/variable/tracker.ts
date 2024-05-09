@@ -7,9 +7,8 @@ import { IStream } from '@jupyterlab/nbformat';
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { syntaxTree } from '@codemirror/language';
-import { SyntaxNodeRef } from '@lezer/common';
 
-import { ExecutionActions } from '../execution/actions';
+import { ExecutionActions } from '../execution';
 import { joinMultiline } from '../util';
 
 export interface ICellVariables {
@@ -118,30 +117,35 @@ export class VariableTracker implements IDisposable {
     const refVariables: string[] = [];
     const outVariables: string[] = [];
 
-    cell;
+    const editorView = (cell.editor as CodeMirrorEditor).editor;
+    const tree = syntaxTree(editorView.state);
+    const doc = editorView.state.doc;
 
-    // variable 테스트
-    function enter(node: SyntaxNodeRef): boolean | void {
-      // if (node.name === 'Comment') {
-      //   const comment = view.state.doc.sliceString(node.from, node.to);
-      //   const isExt = comment.startsWith('##');
-      //   if (isExt) {
-      //     const deco = commentDecoration;
-      //     builder.add(node.from, node.from, deco);
-      //   }
-      // }
-      // console.log(node.name, node.from, node.to, node);
+    // 참조 변수 수집
+    // 할당된 변수 수집
+    const assignNodes = tree.topNode.getChildren('AssignStatement');
+    for (const assignNode of assignNodes) {
+      // const varNodes = assignNode.getChildren('VariableName', null, 'AssignOp');
+      // NOTE: 위 코드로는 a = b = 1 구문에서 b를 얻지 못 함 (버그?)
+      const varNodes = assignNode.getChildren('VariableName');
+      const vars = varNodes
+        .filter(node => node.nextSibling?.name === 'AssignOp')
+        .map(node => doc.sliceString(node.from, node.to));
+      outVariables.push(...vars);
     }
 
-    const editorView = (cell.editor as CodeMirrorEditor).editor;
-    syntaxTree(editorView.state).iterate({ enter });
+    console.log(tree.topNode, { refVariables, outVariables });
 
     return { refVariables, outVariables };
   }
 
-  isCellCached(cell: CodeCell) {
-    cell;
+  isCellCached(cell: CodeCell): boolean {
+    const cellVars = this.getCellVariables(cell);
+
+    // TODO
+    cellVars;
     this._kernelVars;
+    return false;
   }
 }
 

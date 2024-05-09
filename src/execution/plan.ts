@@ -1,7 +1,7 @@
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import { CellMetadata } from '../cell/metadata';
-import { VariableTracker } from '../cell/variable';
+import { CellMetadata } from '../cell';
+import { VariableTracker } from '../variable';
 import { isCodeCell } from '../util';
 
 export namespace ExecutionPlan {
@@ -74,6 +74,11 @@ export class ExecutionCells {
     const metadata = CellMetadata.getExecution(cell.model, true)!;
     // console.log(metadata);
 
+    // 셀 변수 테스트
+    if (isCodeCell(cell)) {
+      VariableTracker.getByCell(cell)?.isCellCached(cell);
+    }
+
     if (metadata.skip) {
       item.execute = false;
       item.extra.excludedReason = 'skipped';
@@ -104,11 +109,8 @@ export class ExecutionCells {
 
   cached(cell: Cell): boolean {
     if (isCodeCell(cell) && cell.model.isDirty) {
-      // 셀 변수 추출 테스트
       const varTracker = VariableTracker.getByCell(cell);
-      const vars = varTracker?.getCellVariables(cell);
-      console.log(vars);
-      return true;
+      return Boolean(varTracker?.isCellCached(cell));
     }
     return false;
   }
