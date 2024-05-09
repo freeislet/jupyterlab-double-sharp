@@ -1,6 +1,8 @@
-import { Cell, CodeCell, isCodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { CellMetadata } from '../cell/metadata';
+import { VariableTracker } from '../cell/variable';
+import { isCodeCell } from '../util';
 
 export namespace ExecutionPlan {
   /**
@@ -40,8 +42,7 @@ export class ExecutionCells {
   }
 
   get codeCellsToExecute(): CodeCell[] {
-    const codeCells = this.cellsToExecute.filter(c => isCodeCellModel(c.model));
-    return codeCells as CodeCell[];
+    return this.cellsToExecute.filter(isCodeCell);
   }
 
   //
@@ -77,7 +78,7 @@ export class ExecutionCells {
       item.execute = false;
       item.extra.excludedReason = 'skipped';
       item.extra.message = this._message('skipped', metadata.skipMessage);
-    } else if (metadata.useCache && this._cached(cell)) {
+    } else if (metadata.useCache && this.cached(cell)) {
       item.execute = false;
       item.extra.excludedReason = 'cached';
     } else if (this.exists(cell)) {
@@ -101,9 +102,15 @@ export class ExecutionCells {
     return msg + (desc ? `: ${desc}` : noDesc);
   }
 
-  protected _cached(cell: Cell): boolean {
-    const codeCellModel = isCodeCellModel(cell.model) ? cell.model : undefined;
-    return codeCellModel?.isDirty === false;
+  cached(cell: Cell): boolean {
+    if (isCodeCell(cell) && cell.model.isDirty) {
+      // 셀 변수 추출 테스트
+      const varTracker = VariableTracker.getByCell(cell);
+      const vars = varTracker?.getCellVariables(cell);
+      console.log(vars);
+      return true;
+    }
+    return false;
   }
 
   exists(cell: Cell): boolean {
@@ -142,15 +149,14 @@ export class ExecutionCells {
       } else {
         const msg = executionCell.extra.message;
         const cell = executionCell.cell;
-        if (msg && isCodeCellModel(cell.model)) {
+        if (msg && isCodeCell(cell)) {
           const output = {
             output_type: 'stream',
             name: 'stdout',
             text: `## ${msg}\n`
           };
-          const codeCell = cell as CodeCell;
-          codeCell.outputArea.model.clear(true);
-          codeCell.outputArea.model.add(output);
+          cell.outputArea.model.clear(true);
+          cell.outputArea.model.add(output);
           // console.log(executionCell, output);
         }
       }
