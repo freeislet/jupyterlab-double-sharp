@@ -79,8 +79,10 @@ export class VariableTracker implements IDisposable {
     VariableTracker._trackers.delete(this.panel);
   }
 
-  get kernel(): Kernel.IKernelConnection | null | undefined {
-    return this.panel.sessionContext.session?.kernel;
+  get kernel(): Kernel.IKernelConnection {
+    const kernel = this.panel.sessionContext.session?.kernel;
+    if (!kernel) throw new Error('Session has no kernel.');
+    return kernel;
   }
 
   private _onKernelStarted() {

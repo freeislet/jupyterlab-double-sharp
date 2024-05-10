@@ -27,11 +27,6 @@ export function requestExecute(
   code: string,
   onExecuteResult?: (resultData: any) => void
 ): Promise<KernelMessage.IExecuteReplyMsg> {
-  if (!kernel) {
-    return Promise.reject(new Error('kernel is missing.'));
-  }
-  // console.log('kernel: ', kernel);
-
   const content: KernelMessage.IExecuteRequestMsg['content'] = {
     code,
     stop_on_error: false,
