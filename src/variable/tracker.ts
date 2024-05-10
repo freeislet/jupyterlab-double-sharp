@@ -2,14 +2,13 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { KernelMessage } from '@jupyterlab/services';
-import { IStream } from '@jupyterlab/nbformat';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { syntaxTree } from '@codemirror/language';
 
 import { ExecutionActions } from '../execution';
-import { joinMultiline } from '../util';
+import { requestExecute } from '../util';
 
 export interface ICellVariables {
   /**
@@ -53,7 +52,7 @@ export class VariableTracker implements IDisposable {
 
   private _isDisposed = false;
   readonly panel: NotebookPanel;
-  private _kernelVars: string[] = [];
+  private _kernelVars = new Set<string>();
 
   constructor(panel: NotebookPanel) {
     VariableTracker._trackers.set(panel, this);
@@ -74,43 +73,50 @@ export class VariableTracker implements IDisposable {
     if (this.isDisposed) return;
 
     this._isDisposed = true;
-    this._kernelVars = [];
+    this._kernelVars.clear();
 
     Signal.clearData(this);
     VariableTracker._trackers.delete(this.panel);
   }
 
-  async updateKernelVariables(): Promise<KernelMessage.IExecuteReplyMsg> {
-    const kernel = this.panel.sessionContext.session?.kernel;
-    if (!kernel) {
-      return Promise.reject(new Error('kernel is missing.'));
-    }
-
-    // console.log('kernel: ', kernel);
-
-    const reqContent: KernelMessage.IExecuteRequestMsg['content'] = {
-      code: '%who',
-      stop_on_error: false,
-      store_history: false
-    };
-    const future = kernel.requestExecute(reqContent);
-    future.onIOPub = (response: KernelMessage.IIOPubMessage) => {
-      const msgType = response.header.msg_type;
-      if (msgType === 'stream') {
-        const content = response.content as IStream;
-        if (content.name === 'stdout') {
-          const text = joinMultiline(content.text);
-          const empty = text.startsWith('Interactive namespace is empty');
-          this._kernelVars = empty ? [] : text.trim().split(/\s+/);
-          // console.log('kernel vars:', this._kernelVars);
-        }
-      }
-    };
-    return future.done;
+  get kernel(): Kernel.IKernelConnection | null | undefined {
+    return this.panel.sessionContext.session?.kernel;
   }
 
   private _onKernelStarted() {
-    this.updateKernelVariables();
+    const code = `
+class DoubleSharpKernel:
+  @classmethod
+  def init(cls):
+    from IPython.core.magics.namespace import NamespaceMagics
+    from IPython import get_ipython
+
+    cls.magics = NamespaceMagics()
+    cls.magics.shell = get_ipython().kernel.shell
+  
+  @classmethod
+  def who(cls):
+    import json
+
+    vars = cls.magics.who_ls()
+    return json.dumps(vars, ensure_ascii=False)
+
+DoubleSharpKernel.init()
+`;
+    requestExecute(this.kernel!, code).then(() => this.updateKernelVariables());
+  }
+
+  updateKernelVariables(): Promise<KernelMessage.IExecuteReplyMsg> {
+    const future = requestExecute(
+      this.kernel!,
+      'DoubleSharpKernel.who()',
+      (vars: string[]) => {
+        this._kernelVars = new Set(vars);
+
+        console.log('kernel vars:', this._kernelVars);
+      }
+    );
+    return future;
   }
 
   getCellVariables(cell: CodeCell): ICellVariables {
