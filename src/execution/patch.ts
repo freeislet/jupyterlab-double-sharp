@@ -144,7 +144,7 @@ namespace NewCodeCell {
 
         for (const codeCell of executionCell.codeCellsToExecute) {
           ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
-          console.log('CodeCell.execute ret:', ret);
+          // console.log('CodeCell.execute ret:', ret);
         }
       }
       return ret;
