@@ -2,13 +2,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { syntaxTree } from '@codemirror/language';
 
+import { KernelExecutor } from './kernel';
 import { ExecutionActions } from '../execution';
-import { requestExecute } from '../util';
 
 export interface ICellVariables {
   /**
@@ -50,19 +49,14 @@ export class VariableTracker implements IDisposable {
 
   //
 
-  private _isDisposed = false;
-  readonly panel: NotebookPanel;
+  readonly kernelExecutor: KernelExecutor;
   private _kernelVars = new Set<string>();
+  private _isDisposed = false;
 
-  constructor(panel: NotebookPanel) {
+  constructor(public readonly panel: NotebookPanel) {
     VariableTracker._trackers.set(panel, this);
 
-    this.panel = panel;
-
-    panel.sessionContext.kernelChanged.connect(() => {
-      // console.log('sessionContext.kernelChanged');
-      this._onKernelStarted();
-    }, this);
+    this.kernelExecutor = new KernelExecutor(panel.sessionContext);
   }
 
   get isDisposed(): boolean {
@@ -79,46 +73,30 @@ export class VariableTracker implements IDisposable {
     VariableTracker._trackers.delete(this.panel);
   }
 
-  get kernel(): Kernel.IKernelConnection {
-    const kernel = this.panel.sessionContext.session?.kernel;
-    if (!kernel) throw new Error('Session has no kernel.');
-    return kernel;
+  get kernelVariables(): Set<string> {
+    return this._kernelVars;
   }
 
-  private _onKernelStarted() {
-    const code = `
-class DoubleSharpKernel:
-  @classmethod
-  def init(cls):
-    from IPython.core.magics.namespace import NamespaceMagics
-    from IPython import get_ipython
-
-    cls.magics = NamespaceMagics()
-    cls.magics.shell = get_ipython().kernel.shell
-  
-  @classmethod
-  def who(cls):
-    import json
-
-    vars = cls.magics.who_ls()
-    return json.dumps(vars, ensure_ascii=False)
-
-DoubleSharpKernel.init()
-`;
-    requestExecute(this.kernel!, code).then(() => this.updateKernelVariables());
+  async updateKernelVariables(): Promise<Set<string>> {
+    const vars = await this.kernelExecutor.getInteractiveVariables();
+    this._kernelVars = new Set(vars);
+    console.log('kernel vars:', this._kernelVars);
+    return this._kernelVars;
   }
 
-  updateKernelVariables(): Promise<KernelMessage.IExecuteReplyMsg> {
-    const future = requestExecute(
-      this.kernel!,
-      'DoubleSharpKernel.who()',
-      (vars: string[]) => {
-        this._kernelVars = new Set(vars);
+  async getCellVariablesFromKernel(cell: CodeCell): Promise<ICellVariables> {
+    const source = cell.model.sharedModel.getSource();
+    const codeInfo = await this.kernelExecutor.inspect(source);
+    console.log(codeInfo);
 
-        console.log('kernel vars:', this._kernelVars);
-      }
-    );
-    return future;
+    let cellVars: ICellVariables = {
+      refVariables: [],
+      outVariables: []
+    };
+
+    // TODO
+
+    return cellVars;
   }
 
   getCellVariables(cell: CodeCell): ICellVariables {
@@ -128,6 +106,8 @@ DoubleSharpKernel.init()
     const editorView = (cell.editor as CodeMirrorEditor).editor;
     const tree = syntaxTree(editorView.state);
     const doc = editorView.state.doc;
+
+    this.getCellVariablesFromKernel(cell);
 
     // 참조 변수 수집
     // 할당된 변수 수집
@@ -143,6 +123,8 @@ DoubleSharpKernel.init()
     }
 
     console.log(tree.topNode, { refVariables, outVariables });
+
+    // console.log(tree.topNode.getChildren('Statement'));
 
     return { refVariables, outVariables };
   }
