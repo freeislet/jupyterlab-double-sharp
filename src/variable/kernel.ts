@@ -93,17 +93,17 @@ export class KernelExecutor {
     options?: KernelExecutor.IExecuteOptions
   ): Promise<KernelMessage.IExecuteReplyMsg> {
     const { onResult, onExecuteResult, onStream } = options ?? {};
-    const handleResult = Boolean(onResult || onExecuteResult || onStream);
+    const useResult = Boolean(onResult || onExecuteResult || onStream);
 
     const content: KernelMessage.IExecuteRequestMsg['content'] = {
       code,
       stop_on_error: false,
       store_history: false,
-      silent: !handleResult
+      silent: !useResult
     };
     const future = this.kernel.requestExecute(content);
 
-    if (handleResult) {
+    if (useResult) {
       const resultAsJson = options?.resultAsJson ?? true;
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
@@ -140,10 +140,9 @@ export class KernelExecutor {
   }
 
   async inspect(source: string): Promise<any> {
-    const inspectCode = `
-source = """${source.replace(/"""/g, '\\"""')}"""
-DoubleSharpKernel.inspect(source)`;
-    // console.log(code);
+    const escaped = source.replace(/"""/g, '\\"""');
+    const code = `DoubleSharpKernel.inspect("""${escaped}""")`;
+    console.log(code);
 
     // let cellVars: ICellVariables = {
     //   refVariables: [],
@@ -152,7 +151,7 @@ DoubleSharpKernel.inspect(source)`;
 
     let ret: any;
 
-    await this.execute(inspectCode, {
+    await this.execute(code, {
       onResult: (result: any) => {
         // TODO
         ret = result;
