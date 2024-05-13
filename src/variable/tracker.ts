@@ -33,17 +33,17 @@ export class VariableTracker implements IDisposable {
 
   static getByCell(cell: Cell): VariableTracker | undefined {
     const panel = cell.parent?.parent;
-    return panel ? this.get(panel as NotebookPanel) : undefined;
+    if (panel) return this.get(panel as NotebookPanel);
+  }
+
+  static getByCells(cells: readonly Cell[]): VariableTracker | undefined {
+    if (cells.length) return this.getByCell(cells[0]);
   }
 
   static {
     ExecutionActions.afterExecution.connect((_, args) => {
-      const { cells } = args;
-
-      const tracker = cells.length ? this.getByCell(cells[0]) : null;
-      if (!tracker) return;
-
-      tracker.updateKernelVariables();
+      const tracker = this.getByCells(args.cells);
+      tracker?.updateKernelVariables();
     });
   }
 
