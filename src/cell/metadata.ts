@@ -1,8 +1,8 @@
 import { ICellModel } from '@jupyterlab/cells';
+import equal from 'fast-deep-equal';
 
 export namespace CellMetadata {
   export interface ICell {
-    id: string;
     subIds?: string[];
     parentId?: string;
     generated?: boolean;
@@ -18,43 +18,70 @@ export namespace CellMetadata {
   export interface IExecution {
     skip: boolean;
     skipMessage?: string;
-    useCache: boolean;
-    dependencies?: string[]; // TODO
+    cache: boolean;
+    // dependencies?: string[]; // TODO
+  }
+}
+
+export class CellMetadata {
+  static get Cell(): MetadataGroup<CellMetadata.ICell> {
+    return Private.Cell;
   }
 
-  // const CELL = '##Cell';
-  // const CONFIG = '##Config';
-  const EXECUTION = '##Execution';
-
-  export function getCell(
-    model: ICellModel,
-    coalesceDefault = false
-  ): IExecution | undefined {
-    const metadata = model.getMetadata(EXECUTION);
-    return coalesceDefault
-      ? { skip: false, useCache: false, ...metadata }
-      : metadata;
+  static get Config(): MetadataGroup<CellMetadata.IConfig> {
+    return Private.Config;
   }
 
-  export function getExecution(
-    model: ICellModel,
-    coalesceDefault = false
-  ): IExecution | undefined {
-    const metadata = model.getMetadata(EXECUTION);
-    return coalesceDefault
-      ? { skip: false, useCache: false, ...metadata }
-      : metadata;
+  static get Execution(): MetadataGroup<CellMetadata.IExecution> {
+    return Private.Execution;
   }
 
-  export function setExecution(model: ICellModel, value: IExecution) {
-    model.setMetadata(EXECUTION, value);
+  private constructor() {}
+}
+
+class MetadataGroup<T> {
+  constructor(
+    public readonly name: string,
+    public readonly defaultValue: T
+  ) {}
+
+  get(model: ICellModel): T | undefined {
+    return model.getMetadata(this.name);
   }
 
-  export function updateExecution(
-    model: ICellModel,
-    value: Partial<IExecution>
-  ) {
-    const newValue = { ...getExecution(model), ...value };
-    model.setMetadata(EXECUTION, newValue);
+  getCoalesced(model: ICellModel): T {
+    return { ...this.defaultValue, ...this.get(model) };
   }
+
+  set(model: ICellModel, value: T) {
+    model.setMetadata(this.name, value);
+  }
+
+  update(model: ICellModel, value: Partial<T>, deleteIfEqual = false) {
+    const newValue = { ...this.getCoalesced(model), ...value };
+    if (deleteIfEqual && equal(newValue, this.defaultValue)) {
+      this.delete(model);
+    } else {
+      this.set(model, newValue);
+    }
+  }
+
+  delete(model: ICellModel) {
+    model.deleteMetadata(this.name);
+  }
+}
+
+namespace Private {
+  export const Cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
+  export const Config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
+    skip: false,
+    cache: false
+  });
+  export const Execution = new MetadataGroup<CellMetadata.IExecution>(
+    '##Execution',
+    {
+      skip: false,
+      cache: false
+    }
+  );
 }

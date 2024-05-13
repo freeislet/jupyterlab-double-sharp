@@ -71,7 +71,7 @@ export class ExecutionCells {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
-    const metadata = CellMetadata.getExecution(cell.model, true)!;
+    const metadata = CellMetadata.Execution.getCoalesced(cell.model);
     // console.log(metadata);
 
     // 셀 변수 테스트
@@ -83,7 +83,7 @@ export class ExecutionCells {
       item.execute = false;
       item.extra.excludedReason = 'skipped';
       item.extra.message = this._message('skipped', metadata.skipMessage);
-    } else if (metadata.useCache && this.cached(cell)) {
+    } else if (metadata.cache && this.cached(cell)) {
       item.execute = false;
       item.extra.excludedReason = 'cached';
     } else if (this.exists(cell)) {

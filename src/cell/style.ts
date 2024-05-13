@@ -4,11 +4,11 @@ import { CellMetadata } from './metadata';
 
 export namespace CellStyle {
   export function update(cell: Cell) {
-    const cellExecution = CellMetadata.getExecution(cell.model, true)!;
+    const cellExecution = CellMetadata.Execution.getCoalesced(cell.model);
 
     const classes = {
       'jp-DoubleSharp-skip': cellExecution.skip,
-      'jp-DoubleSharp-cache': cellExecution.useCache
+      'jp-DoubleSharp-cache': cellExecution.cache
     };
 
     // if (cellExecution.skip) {
