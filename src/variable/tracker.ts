@@ -11,14 +11,14 @@ import { ExecutionActions } from '../execution';
 
 export interface ICellVariables {
   /**
-   * 셀에서 참조하는 변수 목록
-   */
-  refVariables: string[];
-
-  /**
    * 셀에서 정의하는 변수 목록
    */
-  outVariables: string[];
+  variables: string[];
+
+  /**
+   * 셀에서 참조하지만 정의하지 않는 외부 변수 목록
+   */
+  unboundVariables: string[];
 }
 
 /**
@@ -57,6 +57,9 @@ export class VariableTracker implements IDisposable {
     VariableTracker._trackers.set(panel, this);
 
     this.kernelExecutor = new KernelExecutor(panel.sessionContext);
+    this.kernelExecutor.ready.then(() => {
+      this.updateKernelVariables();
+    });
   }
 
   get isDisposed(): boolean {
@@ -84,30 +87,38 @@ export class VariableTracker implements IDisposable {
     return this._kernelVars;
   }
 
-  async getCellVariablesFromKernel(cell: CodeCell): Promise<ICellVariables> {
-    const source = cell.model.sharedModel.getSource();
-    const codeInfo = await this.kernelExecutor.inspect(source);
-    console.log(codeInfo);
-
-    let cellVars: ICellVariables = {
-      refVariables: [],
-      outVariables: []
-    };
-
-    // TODO
-
-    return cellVars;
+  async getCellVariables(cell: CodeCell): Promise<ICellVariables> {
+    const cellVars = await this.getCellVariablesFromKernel(cell);
+    console.log(cellVars);
+    return (
+      cellVars || {
+        variables: [],
+        unboundVariables: []
+      }
+    );
   }
 
-  getCellVariables(cell: CodeCell): ICellVariables {
-    const refVariables: string[] = [];
-    const outVariables: string[] = [];
+  async getCellVariablesFromKernel(
+    cell: CodeCell
+  ): Promise<ICellVariables | void> {
+    const source = cell.model.sharedModel.getSource();
+    const inspectResult = await this.kernelExecutor.inspect(source);
+    if (!inspectResult) return;
+
+    return {
+      variables: inspectResult.co_varnames,
+      unboundVariables: inspectResult.unbound
+    };
+  }
+
+  // deprecated
+  getCellVariablesFromAst(cell: CodeCell): ICellVariables {
+    const variables: string[] = [];
+    const unboundVariables: string[] = [];
 
     const editorView = (cell.editor as CodeMirrorEditor).editor;
     const tree = syntaxTree(editorView.state);
     const doc = editorView.state.doc;
-
-    this.getCellVariablesFromKernel(cell);
 
     // 참조 변수 수집
     // 할당된 변수 수집
@@ -119,14 +130,13 @@ export class VariableTracker implements IDisposable {
       const vars = varNodes
         .filter(node => node.nextSibling?.name === 'AssignOp')
         .map(node => doc.sliceString(node.from, node.to));
-      outVariables.push(...vars);
+      variables.push(...vars);
     }
 
-    console.log(tree.topNode, { refVariables, outVariables });
-
+    console.log(tree.topNode, { variables, unboundVariables });
     // console.log(tree.topNode.getChildren('Statement'));
 
-    return { refVariables, outVariables };
+    return { variables, unboundVariables };
   }
 
   isCellCached(cell: CodeCell): boolean {
