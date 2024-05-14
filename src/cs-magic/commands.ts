@@ -12,7 +12,7 @@ export namespace CSMagic {
     readonly name = 'skip';
 
     execute(cell: Cell, message?: string) {
-      CellMetadata.updateExecution(cell.model, {
+      CellMetadata.Execution.update(cell.model, {
         skip: true,
         skipMessage: message
       });
@@ -23,7 +23,7 @@ export namespace CSMagic {
     readonly name = 'cache';
 
     execute(cell: Cell) {
-      CellMetadata.updateExecution(cell.model, { useCache: true });
+      CellMetadata.Execution.update(cell.model, { cache: true });
     }
   }
 
