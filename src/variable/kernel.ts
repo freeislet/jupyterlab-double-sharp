@@ -1,10 +1,12 @@
 import { ISessionContext } from '@jupyterlab/apputils';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
-import { IExecuteResult } from '@jupyterlab/nbformat';
+import { IExecuteResult, IStream } from '@jupyterlab/nbformat';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PromiseDelegate } from '@lumino/coreutils';
 
-const INIT_SCRIPT = `
+import { joinMultiline } from '../util';
+
+const INIT_SCRIPT = String.raw`
 class DoubleSharpKernel:
   @classmethod
   def init(cls):
@@ -23,7 +25,7 @@ class DoubleSharpKernel:
   @classmethod
   def who(cls):
     vars = cls.magics.who_ls()
-    return cls.dumps(vars)
+    print(cls.dumps(vars))
   
   @classmethod
   def inspect(cls, source):
@@ -121,6 +123,17 @@ export class KernelExecutor {
             break;
 
           // TODO: stream
+          case 'stream':
+            if (onResult || onStream) {
+              const content = msg.content as IStream;
+              if (content.name === 'stdout') {
+                const text = joinMultiline(content.text);
+                const result = resultAsJson ? Private.parseJSON(text) : text;
+                onResult?.(result);
+                onStream?.(result);
+              }
+            }
+            break;
         }
       };
     }
