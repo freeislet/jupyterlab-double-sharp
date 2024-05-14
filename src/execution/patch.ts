@@ -25,29 +25,14 @@ namespace OrgCodeCell {
 }
 
 namespace NewNotebookActions {
-  type ActionType = (...args: any) => Promise<boolean>;
-
-  function _run<T extends ActionType>(
+  async function _run(
     cells: readonly Cell[],
-    action: T,
+    runFn: (...args: any) => Promise<boolean>,
     args: IArguments
   ): Promise<boolean> {
     ExecutionActions.beforeExecution.emit({ cells });
-    ExecutionPlan.beginFromCells(cells);
-    const ret = action.call(null, ...args);
-    ExecutionPlan.end();
-    ExecutionActions.afterExecution.emit({ cells });
-    return ret;
-  }
-
-  async function _runAsync<T extends ActionType>(
-    cells: readonly Cell[],
-    action: T,
-    args: IArguments
-  ): Promise<boolean> {
-    ExecutionActions.beforeExecution.emit({ cells });
-    ExecutionPlan.beginFromCells(cells);
-    const ret = await action.call(null, ...args);
+    await ExecutionPlan.beginFromCells(cells);
+    const ret = await runFn.call(null, ...args);
     ExecutionPlan.end();
     ExecutionActions.afterExecution.emit({ cells });
     return ret;
@@ -74,7 +59,7 @@ namespace NewNotebookActions {
     translator?: ITranslator
   ): Promise<boolean> {
     const cells = getSelectedCells(notebook);
-    return await _runAsync(cells, OrgNotebookActions.runAndAdvance, arguments);
+    return await _run(cells, OrgNotebookActions.runAndAdvance, arguments);
   }
 
   export async function runAndInsert(
@@ -84,7 +69,7 @@ namespace NewNotebookActions {
     translator?: ITranslator
   ): Promise<boolean> {
     const cells = getSelectedCells(notebook);
-    return await _runAsync(cells, OrgNotebookActions.runAndInsert, arguments);
+    return await _run(cells, OrgNotebookActions.runAndInsert, arguments);
   }
 
   export function runCells(
@@ -140,6 +125,8 @@ namespace NewCodeCell {
 
       const executionCell = plan.getExecutionCellsOf(cell);
       if (executionCell) {
+        // console.log('CodeCell.execute', plan, executionCell);
+
         executionCell.processExcludedCells();
 
         for (const codeCell of executionCell.codeCellsToExecute) {

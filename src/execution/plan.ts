@@ -52,15 +52,17 @@ export class ExecutionCells {
   /**
    * Cell 배열로부터 IExecutionCell 목록 생성
    */
-  build(cells: readonly Cell[]): this {
-    this._executionCells = cells.map(c => this._buildItem(c));
-    return this;
+  async build(cells: readonly Cell[]): Promise<ExecutionPlan.IExecutionCell[]> {
+    this._executionCells = await Promise.all(
+      cells.map(async cell => await this._buildItem(cell))
+    );
+    return this._executionCells;
   }
 
-  protected _buildItem(
+  protected async _buildItem(
     cell: Cell,
     dependencyLevel?: number
-  ): ExecutionPlan.IExecutionCell {
+  ): Promise<ExecutionPlan.IExecutionCell> {
     const item: ExecutionPlan.IExecutionCell = {
       cell,
       execute: true,
@@ -76,7 +78,8 @@ export class ExecutionCells {
 
     // 셀 변수 테스트
     if (isCodeCell(cell)) {
-      VariableTracker.getByCell(cell)?.isCellCached(cell);
+      // VariableTracker.getByCell(cell)?.isCellCached(cell);
+      await VariableTracker.getByCell(cell)?.getCellVariablesFromKernel(cell);
     }
 
     if (metadata.skip) {
@@ -194,8 +197,9 @@ export class ExecutionPlan extends ExecutionCells {
    * NOTE: NotebookActions의 Private.runCells를 patch할 수 없으므로,
    *       CodeCell.execute 안에서 현재 실행계획을 참조하도록 함
    */
-  static beginFromCells(cells: readonly Cell[]) {
-    const plan = new ExecutionPlan().build(cells);
+  static async beginFromCells(cells: readonly Cell[]) {
+    const plan = new ExecutionPlan();
+    await plan.build(cells);
     ExecutionPlan.begin(plan);
   }
 
