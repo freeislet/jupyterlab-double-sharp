@@ -3,8 +3,8 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { Cell, CodeCell } from '@jupyterlab/cells';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { syntaxTree } from '@codemirror/language';
+// import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+// import { syntaxTree } from '@codemirror/language';
 
 import { KernelExecutor } from './kernel';
 import { ExecutionActions } from '../execution';
@@ -98,7 +98,7 @@ export class VariableTracker implements IDisposable {
     );
   }
 
-  async getCellVariablesFromKernel(
+  private async getCellVariablesFromKernel(
     cell: CodeCell
   ): Promise<ICellVariables | void> {
     const source = cell.model.sharedModel.getSource();
@@ -112,32 +112,32 @@ export class VariableTracker implements IDisposable {
   }
 
   // deprecated
-  getCellVariablesFromAst(cell: CodeCell): ICellVariables {
-    const variables: string[] = [];
-    const unboundVariables: string[] = [];
+  // private getCellVariablesFromAst(cell: CodeCell): ICellVariables {
+  //   const variables: string[] = [];
+  //   const unboundVariables: string[] = [];
 
-    const editorView = (cell.editor as CodeMirrorEditor).editor;
-    const tree = syntaxTree(editorView.state);
-    const doc = editorView.state.doc;
+  //   const editorView = (cell.editor as CodeMirrorEditor).editor;
+  //   const tree = syntaxTree(editorView.state);
+  //   const doc = editorView.state.doc;
 
-    // 참조 변수 수집
-    // 할당된 변수 수집
-    const assignNodes = tree.topNode.getChildren('AssignStatement');
-    for (const assignNode of assignNodes) {
-      // const varNodes = assignNode.getChildren('VariableName', null, 'AssignOp');
-      // NOTE: 위 코드로는 a = b = 1 구문에서 b를 얻지 못 함 (버그?)
-      const varNodes = assignNode.getChildren('VariableName');
-      const vars = varNodes
-        .filter(node => node.nextSibling?.name === 'AssignOp')
-        .map(node => doc.sliceString(node.from, node.to));
-      variables.push(...vars);
-    }
+  //   // 참조 변수 수집
+  //   // 할당된 변수 수집
+  //   const assignNodes = tree.topNode.getChildren('AssignStatement');
+  //   for (const assignNode of assignNodes) {
+  //     // const varNodes = assignNode.getChildren('VariableName', null, 'AssignOp');
+  //     // NOTE: 위 코드로는 a = b = 1 구문에서 b를 얻지 못 함 (버그?)
+  //     const varNodes = assignNode.getChildren('VariableName');
+  //     const vars = varNodes
+  //       .filter(node => node.nextSibling?.name === 'AssignOp')
+  //       .map(node => doc.sliceString(node.from, node.to));
+  //     variables.push(...vars);
+  //   }
 
-    console.log(tree.topNode, { variables, unboundVariables });
-    // console.log(tree.topNode.getChildren('Statement'));
+  //   console.log(tree.topNode, { variables, unboundVariables });
+  //   // console.log(tree.topNode.getChildren('Statement'));
 
-    return { variables, unboundVariables };
-  }
+  //   return { variables, unboundVariables };
+  // }
 
   isCellCached(cell: CodeCell): boolean {
     const cellVars = this.getCellVariables(cell);
