@@ -34,11 +34,8 @@ export namespace CSMagic {
       return 'skip';
     }
 
-    execute(cell: Cell, message?: string) {
-      CellMetadata.Execution.update(cell.model, {
-        skip: true,
-        skipMessage: message
-      });
+    execute(cell: Cell) {
+      CellMetadata.Code.update(cell.model, { skip: true });
     }
   }
 
@@ -48,7 +45,7 @@ export namespace CSMagic {
     }
 
     execute(cell: Cell) {
-      CellMetadata.Execution.update(cell.model, { cache: true });
+      CellMetadata.Code.update(cell.model, { cache: true });
     }
   }
 

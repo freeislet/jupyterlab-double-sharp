@@ -1,6 +1,8 @@
 import { ICellModel } from '@jupyterlab/cells';
 import equal from 'fast-deep-equal';
 
+import { ICellVariables } from '../variable';
+
 export namespace CellMetadata {
   export interface ICell {
     subIds?: string[];
@@ -10,17 +12,20 @@ export namespace CellMetadata {
 
   export interface IConfig {
     skip: boolean;
-    skipMessage?: string;
     cache: boolean;
-    ignore?: string[];
   }
 
-  export interface IExecution {
+  export type ICode = {
     skip: boolean;
-    skipMessage?: string;
     cache: boolean;
-    // dependencies?: string[]; // TODO
-  }
+  } & ICellVariables;
+
+  // export interface IExecution {
+  //   skip: boolean;
+  //   skipMessage?: string;
+  //   cache: boolean;
+  //   // dependencies?: string[]; // TODO
+  // }
 }
 
 export class CellMetadata {
@@ -32,9 +37,13 @@ export class CellMetadata {
     return Private.Config;
   }
 
-  static get Execution(): MetadataGroup<CellMetadata.IExecution> {
-    return Private.Execution;
+  static get Code(): MetadataGroupDirtyable<CellMetadata.ICode> {
+    return Private.Code;
   }
+
+  // static get Execution(): MetadataGroup<CellMetadata.IExecution> {
+  //   return Private.Execution;
+  // }
 
   private constructor() {}
 }
@@ -71,17 +80,61 @@ class MetadataGroup<T> {
   }
 }
 
+class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
+  constructor(
+    public readonly name: string,
+    public readonly dirtyFlagName: string,
+    public readonly defaultValue: T
+  ) {
+    super(name, defaultValue);
+  }
+
+  isDirty(model: ICellModel): boolean {
+    const dirty = model.getMetadata(this.dirtyFlagName) as boolean;
+    return dirty ?? true;
+  }
+
+  setDirty(model: ICellModel, dirty = true) {
+    model.setMetadata(this.dirtyFlagName, dirty);
+  }
+
+  get(model: ICellModel): T | undefined {
+    if (this.isDirty(model)) return;
+    return super.get(model);
+  }
+
+  set(model: ICellModel, value: T) {
+    super.set(model, value);
+    this.setDirty(model, false);
+  }
+
+  delete(model: ICellModel) {
+    super.delete(model);
+    model.deleteMetadata(this.dirtyFlagName);
+  }
+}
+
 namespace Private {
   export const Cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
   export const Config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
     skip: false,
     cache: false
   });
-  export const Execution = new MetadataGroup<CellMetadata.IExecution>(
-    '##Execution',
+  export const Code = new MetadataGroupDirtyable<CellMetadata.ICode>(
+    '##Code',
+    '##Code-dirty',
     {
       skip: false,
-      cache: false
+      cache: false,
+      variables: [],
+      unboundVariables: []
     }
   );
+  // export const Execution = new MetadataGroup<CellMetadata.IExecution>(
+  //   '##Execution',
+  //   {
+  //     skip: false,
+  //     cache: false
+  //   }
+  // );
 }
