@@ -16,7 +16,10 @@ export class CSMagicExecutor {
     this.commands.set('%' + command.name, command);
   }
 
-  static execute(cell: Cell) {
+  static execute(
+    cell: Cell,
+    predicate?: (command: CSMagic.ICommand) => boolean
+  ) {
     // syntax 테스트 코드
     // const editorView = (cell.editor as CodeMirrorEditor).editor;
     // const tree = syntaxTree(editorView.state);
@@ -29,18 +32,27 @@ export class CSMagicExecutor {
     for (const match of matches) {
       if (match.isCommand && match.statement) {
         // console.log(command.statement);
-        this._executeStatement(cell, match.statement);
+        this._executeStatement(cell, match.statement, predicate);
       }
     }
   }
 
-  private static _executeStatement(cell: Cell, cmdStr: string) {
-    const tokens = tokenize(cmdStr);
+  static executeType(cell: Cell, type: CSMagic.CommandType) {
+    this.execute(cell, cell => cell.type === type);
+  }
+
+  private static _executeStatement(
+    cell: Cell,
+    statement: string,
+    predicate?: (command: CSMagic.ICommand) => boolean
+  ) {
+    const tokens = tokenize(statement);
     if (!tokens.length) return;
 
-    const cmdKey = tokens[0];
-    const command = this.commands.get(cmdKey);
+    const commandKey = tokens[0];
+    const command = this.commands.get(commandKey);
     if (!command) return;
+    if (predicate && !predicate(command)) return;
 
     command.execute(cell, ...tokens.slice(1));
   }
