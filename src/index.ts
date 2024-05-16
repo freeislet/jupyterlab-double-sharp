@@ -5,8 +5,11 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
-import { setupCellExtensions, setupCellStyles } from './cell';
-import { setupClientSideMagicCommand } from './cs-magic';
+import {
+  setupCellExtensions,
+  setupCellExecution,
+  setupCellStyles
+} from './cell';
 import { setupEditor } from './editor';
 import { setupExecution } from './execution';
 import { setupVariableExtensions } from './variable';
@@ -28,9 +31,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     setupVariableExtensions(app);
     setupCellExtensions(app);
+    setupCellExecution();
     setupCellStyles();
     setupExecution();
-    setupClientSideMagicCommand();
 
     settingRegistry
       .load(plugin.id)
