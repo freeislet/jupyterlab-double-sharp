@@ -2,7 +2,6 @@ import { Cell } from '@jupyterlab/cells';
 
 import { CSMagicExecutor } from './executor';
 import { ExecutionActions } from '../execution';
-import { matchAllStatements } from '../statement';
 
 export function setupClientSideMagicCommand() {
   // // TODO: markdown 관련 모듈로 이동
@@ -66,16 +65,7 @@ export function setupClientSideMagicCommand() {
 
       const { cells } = args;
 
-      for (const cell of cells) {
-        const source = cell.model.sharedModel.getSource();
-        const matches = matchAllStatements(source);
-        for (const match of matches) {
-          if (match.isCommand && match.statement) {
-            // console.log(command.statement);
-            CSMagicExecutor.execute(cell, match.statement);
-          }
-        }
-      }
+      cells.forEach(cell => CSMagicExecutor.execute(cell));
     }
   );
 }
