@@ -3,13 +3,36 @@ import { Cell } from '@jupyterlab/cells';
 import { CellMetadata } from '../cell/metadata';
 
 export namespace CSMagic {
+  export type CommandType = 'general' | 'config';
+
   export interface ICommand {
+    readonly type: CommandType;
     readonly name: string;
-    execute: (cell: Cell, ...args: string[]) => void;
+    execute(cell: Cell, ...args: string[]): void;
   }
 
-  export class Skip implements ICommand {
-    readonly name = 'skip';
+  abstract class Command implements ICommand {
+    abstract get type(): CommandType;
+    abstract get name(): string;
+    abstract execute(cell: Cell, ...args: string[]): void;
+  }
+
+  abstract class GeneralCommand extends Command {
+    get type(): CommandType {
+      return 'general';
+    }
+  }
+
+  abstract class ConfigCommand extends Command {
+    get type(): CommandType {
+      return 'config';
+    }
+  }
+
+  export class Skip extends ConfigCommand {
+    get name(): string {
+      return 'skip';
+    }
 
     execute(cell: Cell, message?: string) {
       CellMetadata.Execution.update(cell.model, {
@@ -19,12 +42,22 @@ export namespace CSMagic {
     }
   }
 
-  export class Cache implements ICommand {
-    readonly name = 'cache';
+  export class Cache extends ConfigCommand {
+    get name(): string {
+      return 'cache';
+    }
 
     execute(cell: Cell) {
       CellMetadata.Execution.update(cell.model, { cache: true });
     }
+  }
+
+  export class Dummy extends GeneralCommand {
+    get name(): string {
+      return 'dummy';
+    }
+
+    execute(cell: Cell) {}
   }
 
   // TODO: depend
