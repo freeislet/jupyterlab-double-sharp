@@ -1,8 +1,7 @@
 import { Cell } from '@jupyterlab/cells';
 
 import { CSMagic } from './commands';
-import { tokenize } from './utils';
-import { matchAllStatements } from '../statement';
+import { matchAllStatements, tokenize } from '../utils/statement';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
