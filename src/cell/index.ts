@@ -26,7 +26,7 @@ export function setupCellExecution() {
 export function setupCellStyles() {
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
-      console.log(args);
+      // console.log(args);
 
       const { cell, change } = args;
 
