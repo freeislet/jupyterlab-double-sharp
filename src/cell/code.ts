@@ -4,7 +4,7 @@ import { CellMetadata } from './metadata';
 import { VariableTracker } from '../variable';
 
 export namespace CellCode {
-  export async function get(cell: CodeCell): Promise<CellMetadata.ICode> {
+  export async function build(cell: CodeCell): Promise<CellMetadata.ICode> {
     const cachedCode = CellMetadata.Code.get(cell.model);
     if (cachedCode) return cachedCode;
 

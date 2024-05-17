@@ -1,8 +1,9 @@
 import { Cell } from '@jupyterlab/cells';
 
-import { CellConfig, CellCode } from '.';
+import { CellMetadata, CellConfig, CellCode } from '.';
 import { CSMagicExecutor } from '../cs-magic';
 import { isCodeCell } from '../utils/cell';
+import { VariableTracker } from '../variable';
 
 export namespace CellExecution {
   /**
@@ -10,20 +11,32 @@ export namespace CellExecution {
    * - ##% client-side magic command 실행
    *   - ##ConfigOverride metadata 업데이트 (skip, cache, ...)
    *   - load -> 셀 추가
-   * - skip 처리
-   * - ##Code metadata에 variables 정보 저장
    */
   export function prepare(cell: Cell) {
+    CellMetadata.ConfigOverride.delete(cell.model);
+    CSMagicExecutor.execute(cell);
+  }
+
+  /**
+   * 실행 셀 목록 조회 (실행 여부 판단, dependent cells 수집 포함)
+   * - skip 처리
+   * - ##Code metadata에 variables 정보 저장
+   * - dependent cells 수집
+   */
+  export async function getCellsToExecute(cell: Cell) {
+    const config = CellConfig.get(cell.model);
+    if (config.skip) return;
+
     if (isCodeCell(cell)) {
-      // ##% client-side magic command 실행 (##ConfigOverride metadata 업데이트 등)
-      CSMagicExecutor.execute(cell);
-
-      // skip 처리
-      const config = CellConfig.get(cell.model);
-      if (config.skip) return;
-
       // ##Code metadata 생성 (variables)
-      CellCode.get(cell);
+      const code = await CellCode.build(cell);
+
+      if (config.cache && code.variables) {
+        const variableTracker = VariableTracker.getByCell(cell);
+        const cached = variableTracker?.isCellCached(cell);
+      }
+
+      // TODO: dependency 체크
     }
   }
 
