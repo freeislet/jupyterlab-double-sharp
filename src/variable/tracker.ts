@@ -134,13 +134,12 @@ export class VariableTracker implements IDisposable {
   //   return { variables, unboundVariables };
   // }
 
-  isCellCached(cell: CodeCell): boolean {
-    const cellVars = this.getCellVariables(cell);
-
-    // TODO
-    cellVars;
-    this._kernelVars;
-    return false;
+  isVariablesCached(variables: string[]): boolean {
+    for (const variable of variables) {
+      const cached = this._kernelVars.has(variable);
+      if (!cached) return false;
+    }
+    return true;
   }
 }
 

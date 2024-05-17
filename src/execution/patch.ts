@@ -8,7 +8,8 @@ import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
 import { ExecutionActions } from './actions';
-import { ExecutionPlan } from './plan';
+// import { ExecutionPlan } from './plan';
+import { CellExecution } from '../cell';
 
 namespace OrgNotebookActions {
   export const run = NotebookActions.run;
@@ -31,9 +32,9 @@ namespace NewNotebookActions {
     args: IArguments
   ): Promise<boolean> {
     ExecutionActions.beforeExecution.emit({ cells });
-    await ExecutionPlan.beginFromCells(cells);
+    // ExecutionPlan.begin(await ExecutionPlan.fromCells(cells));
     const ret = await runFn.call(null, ...args);
-    ExecutionPlan.end();
+    // ExecutionPlan.end();
     ExecutionActions.afterExecution.emit({ cells });
     return ret;
   }
@@ -119,25 +120,19 @@ namespace NewCodeCell {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    const plan = ExecutionPlan.current;
-    if (plan) {
-      let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
+    // const plan = ExecutionPlan.current;
+    // if (plan) {
+    let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
 
-      const executionCell = plan.getExecutionCellsOf(cell);
-      if (executionCell) {
-        // console.log('CodeCell.execute', plan, executionCell);
-
-        executionCell.processExcludedCells();
-
-        for (const codeCell of executionCell.codeCellsToExecute) {
-          ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
-          // console.log('CodeCell.execute ret:', ret);
-        }
-      }
-      return ret;
-    } else {
-      return OrgCodeCell.execute(cell, sessionContext, metadata);
+    const cells = await CellExecution.getCellsToExecute(cell);
+    for (const codeCell of cells) {
+      ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
+      // console.log('CodeCell.execute ret:', ret);
     }
+    return ret;
+    // } else {
+    //   return OrgCodeCell.execute(cell, sessionContext, metadata);
+    // }
   }
 }
 

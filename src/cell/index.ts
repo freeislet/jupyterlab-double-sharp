@@ -3,6 +3,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CellExtension } from './tracker';
 import { CellExecution } from './execution';
 import { CellActions } from './actions';
+import { CellMetadata } from './metadata';
 import { CellStyle } from './style';
 import { ExecutionActions } from '../execution';
 
@@ -21,12 +22,19 @@ export function setupCellExecution() {
 
   // TODO: VariableTracker -> CellTracker 안에 CodeInspector로 포함
   //       afterExecution에서 kernel vars 수집
+
+  CellActions.contentChanged.connect((_, args: CellActions.IParams) => {
+    // console.log('cell contentChanged', args);
+
+    const { model } = args;
+    CellMetadata.Code.setDirty(model);
+  });
 }
 
 export function setupCellStyles() {
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
-      // console.log(args);
+      console.log(args);
 
       const { cell, change } = args;
 
@@ -39,7 +47,6 @@ export function setupCellStyles() {
   );
 }
 
-export { CellExecution, CellActions };
-export { CellMetadata } from './metadata';
+export { CellExecution, CellActions, CellMetadata };
 export { CellConfig } from './config';
 export { CellCode } from './code';
