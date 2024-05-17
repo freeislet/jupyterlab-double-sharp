@@ -38,3 +38,15 @@ export function tokenize(command: string): string[] {
   }
   return tokens;
 }
+
+/**
+ * boolean command 파라미터 파싱 (true/false, 1/0 지원)
+ * true 또는 0이 아닌 숫자면 true, 아니면 false
+ */
+export function paramAsBoolean(param: string): boolean {
+  param = param.toLowerCase();
+  if (param === 'true') return true;
+
+  const paramAsNumber = +param;
+  return !isNaN(paramAsNumber) && paramAsNumber !== 0;
+}
