@@ -32,7 +32,7 @@ export function setupCellStyles() {
 
       if (!cell) return;
 
-      if (change.key === '##Config' || change.key === '##Code') {
+      if (change.key.startsWith('##Config')) {
         CellStyle.update(cell);
       }
     }
@@ -41,3 +41,5 @@ export function setupCellStyles() {
 
 export { CellExecution, CellActions };
 export { CellMetadata } from './metadata';
+export { CellConfig } from './config';
+export { CellCode } from './code';

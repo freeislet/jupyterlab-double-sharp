@@ -30,6 +30,8 @@ export namespace CSMagic {
     }
   }
 
+  //
+
   export class Skip extends ConfigCommand {
     get name(): string {
       return 'skip';

@@ -1,29 +1,29 @@
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { Cell } from '@jupyterlab/cells';
 
-import { CellMetadata } from '.';
-import { CellCode } from './code';
+import { CellConfig, CellCode } from '.';
 import { CSMagicExecutor } from '../cs-magic';
 import { isCodeCell } from '../utils/cell';
 
 export namespace CellExecution {
   /**
    * 셀 실행 준비
-   * - ##Code metadata에 configs, variables 정보 저장
    * - ##% client-side magic command 실행
-   *   - ##Code metadata 업데이트 (skip, cache, ...)
+   *   - ##ConfigOverride metadata 업데이트 (skip, cache, ...)
    *   - load -> 셀 추가
    * - skip 처리
+   * - ##Code metadata에 variables 정보 저장
    */
   export function prepare(cell: Cell) {
     if (isCodeCell(cell)) {
-      // ##Code metadata 생성 (configs, variables)
-      CellCode.buildMetadata(cell);
+      // ##% client-side magic command 실행 (##ConfigOverride metadata 업데이트 등)
+      CSMagicExecutor.execute(cell);
 
-      // ##% client-side magic command 실행 (##Code metadata 업데이트 등)
-      // CSMagicExecutor.executeType(cell);
+      // skip 처리
+      const config = CellConfig.get(cell.model);
+      if (config.skip) return;
 
-      const code = CellMetadata.Code.getCoalesced(cell.model);
-      if (code.skip) return;
+      // ##Code metadata 생성 (variables)
+      CellCode.get(cell);
     }
   }
 

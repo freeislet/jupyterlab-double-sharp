@@ -1,15 +1,13 @@
 import { Cell } from '@jupyterlab/cells';
 
-import { CellMetadata } from './metadata';
+import { CellConfig } from './config';
 
 export namespace CellStyle {
   export function update(cell: Cell) {
-    const config = CellMetadata.Config.getCoalesced(cell.model);
-    const code = CellMetadata.Code.get(cell.model);
-
+    const config = CellConfig.get(cell.model);
     const classes = {
-      'jp-DoubleSharp-skip': code ? code.skip : config.skip,
-      'jp-DoubleSharp-cache': code ? code.cache : config.cache
+      'jp-DoubleSharp-skip': config.skip,
+      'jp-DoubleSharp-cache': config.cache
     };
 
     // if (cellExecution.skip) {
