@@ -4,7 +4,7 @@ import { IExecuteResult, IStream } from '@jupyterlab/nbformat';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { joinMultiline } from '../util';
+import { joinMultiline } from '../utils/nbformat';
 
 const INIT_SCRIPT = String.raw`
 class DoubleSharpKernel:

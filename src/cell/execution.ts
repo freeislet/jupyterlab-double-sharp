@@ -3,7 +3,7 @@ import { Cell, ICellModel } from '@jupyterlab/cells';
 import { CellMetadata } from '.';
 import { CellCode } from './code';
 import { CSMagicExecutor } from '../cs-magic';
-import { isCodeCell } from '../util';
+import { isCodeCell } from '../utils/cell';
 
 export namespace CellExecution {
   /**
@@ -20,7 +20,7 @@ export namespace CellExecution {
       CellCode.buildMetadata(cell);
 
       // ##% client-side magic command 실행 (##Code metadata 업데이트 등)
-      // CSMagicExecutor.execute(cell);
+      // CSMagicExecutor.executeType(cell);
 
       const code = CellMetadata.Code.getCoalesced(cell.model);
       if (code.skip) return;

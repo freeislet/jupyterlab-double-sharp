@@ -2,7 +2,7 @@ import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { CellMetadata } from '../cell';
 import { VariableTracker } from '../variable';
-import { isCodeCell } from '../util';
+import { isCodeCell } from '../utils/cell';
 
 export namespace ExecutionPlan {
   /**
@@ -73,19 +73,19 @@ export class ExecutionCells {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
-    const metadata = CellMetadata.Execution.getCoalesced(cell.model);
+    const metadata = CellMetadata.Code.getCoalesced(cell.model);
     // console.log(metadata);
 
     // 셀 변수 테스트
     if (isCodeCell(cell)) {
       // VariableTracker.getByCell(cell)?.isCellCached(cell);
-      await VariableTracker.getByCell(cell)?.getCellVariablesFromKernel(cell);
+      await VariableTracker.getByCell(cell)?.getCellVariables(cell);
     }
 
     if (metadata.skip) {
       item.execute = false;
       item.extra.excludedReason = 'skipped';
-      item.extra.message = this._message('skipped', metadata.skipMessage);
+      item.extra.message = this._message('skipped' /*, metadata.skipMessage*/);
     } else if (metadata.cache && this.cached(cell)) {
       item.execute = false;
       item.extra.excludedReason = 'cached';
@@ -192,17 +192,17 @@ export class ExecutionCells {
 export class ExecutionPlan extends ExecutionCells {
   private static _current: ExecutionPlan | null = null;
 
+  static async fromCells(cells: readonly Cell[]): Promise<ExecutionPlan> {
+    const plan = new ExecutionPlan();
+    await plan.build(cells);
+    return plan;
+  }
+
   /**
    * global 접근 가능하도록 static ExecutionPlan 설정
    * NOTE: NotebookActions의 Private.runCells를 patch할 수 없으므로,
    *       CodeCell.execute 안에서 현재 실행계획을 참조하도록 함
    */
-  static async beginFromCells(cells: readonly Cell[]) {
-    const plan = new ExecutionPlan();
-    await plan.build(cells);
-    ExecutionPlan.begin(plan);
-  }
-
   static begin(plan: ExecutionPlan) {
     if (this._current) throw 'Execution plan has already begun.';
     this._current = plan;
