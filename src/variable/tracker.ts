@@ -2,7 +2,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { Cell, CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 // import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 // import { syntaxTree } from '@codemirror/language';
 
@@ -87,28 +87,23 @@ export class VariableTracker implements IDisposable {
     return this._kernelVars;
   }
 
-  async getCellVariables(cell: CodeCell): Promise<ICellVariables> {
-    const cellVars = await this.getCellVariablesFromKernel(cell);
-    console.log(cellVars);
-    return (
-      cellVars || {
-        variables: [],
-        unboundVariables: []
-      }
-    );
+  async getCellVariables(cell: CodeCell): Promise<ICellVariables | void> {
+    return await this.getCellVariablesFromKernel(cell.model);
   }
 
   private async getCellVariablesFromKernel(
-    cell: CodeCell
+    model: ICodeCellModel
   ): Promise<ICellVariables | void> {
-    const source = cell.model.sharedModel.getSource();
+    const source = model.sharedModel.getSource();
     const inspectResult = await this.kernelExecutor.inspect(source);
     if (!inspectResult) return;
 
-    return {
+    const vars: ICellVariables = {
       variables: inspectResult.co_varnames,
       unboundVariables: inspectResult.unbound
     };
+    console.log(vars);
+    return vars;
   }
 
   // deprecated
