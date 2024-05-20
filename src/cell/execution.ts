@@ -65,16 +65,16 @@ export namespace CellExecution {
 
     const dependencies: CodeCell[] = [];
 
-    const lookups = getDependencyLookupCells(cell);
-    for (const cell of lookups) {
+    const scanCells = getDependencyScanCells(cell);
+    for (const cell of scanCells) {
       cell;
       // CSMagicExecutor.execute(cell);
     }
     return dependencies;
   }
 
-  function getDependencyLookupCells(cell: CodeCell): CodeCell[] {
-    // console.log('getDependencyLookupCells', cell);
+  function getDependencyScanCells(cell: CodeCell): CodeCell[] {
+    // console.log('getDependencyScanCells', cell);
 
     const notebook = cell.parent as Notebook;
     if (!notebook) return [];
