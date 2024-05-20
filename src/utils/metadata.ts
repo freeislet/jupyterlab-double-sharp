@@ -15,17 +15,17 @@ export class MetadataGroup<T> {
     return { ...this.defaultValue, ...this.get(model) };
   }
 
-  set(model: ICellModel, value: T) {
-    model.setMetadata(this.name, value);
+  set(model: ICellModel, value: T, deleteIfEqual = false) {
+    if (deleteIfEqual && equal(value, this.defaultValue)) {
+      this.delete(model);
+    } else {
+      model.setMetadata(this.name, value);
+    }
   }
 
   update(model: ICellModel, value: Partial<T>, deleteIfEqual = false) {
-    const newValue = { ...this.getCoalesced(model), ...value };
-    if (deleteIfEqual && equal(newValue, this.defaultValue)) {
-      this.delete(model);
-    } else {
-      this.set(model, newValue);
-    }
+    const coalescedValue = { ...this.getCoalesced(model), ...value };
+    this.set(model, coalescedValue, deleteIfEqual);
   }
 
   delete(model: ICellModel) {
@@ -56,9 +56,18 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     return super.get(model);
   }
 
-  set(model: ICellModel, value: T) {
-    super.set(model, value);
+  set(model: ICellModel, value: T, deleteIfEqual = false) {
     this.setDirty(model, false);
+    super.set(model, value, deleteIfEqual);
+  }
+
+  update(model: ICellModel, value: Partial<T>, deleteIfEqual = false) {
+    if (this.isDirty(model)) {
+      const coalescedValue = { ...this.defaultValue, ...value };
+      this.set(model, coalescedValue, deleteIfEqual);
+    } else {
+      super.update(model, value, deleteIfEqual);
+    }
   }
 
   delete(model: ICellModel) {
