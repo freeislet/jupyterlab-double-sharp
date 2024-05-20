@@ -49,4 +49,4 @@ export function setupCellStyles() {
 }
 
 export { CellExecution, CellContext, CellMetadata, CellActions };
-export { CellCode } from './code';
+export { CodeContext } from './code';

@@ -1,7 +1,7 @@
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { Notebook } from '@jupyterlab/notebook';
 
-import { CellContext, CellCode, CellMetadata } from '.';
+import { CellContext, CodeContext, CellMetadata } from '.';
 import { CSMagicExecutor } from '../cs-magic';
 import { VariableTracker } from '../variable';
 import { isCodeCell } from '../utils/cell';
@@ -30,7 +30,8 @@ export namespace CellExecution {
     if (config.skip) return [];
 
     // ##Code metadata에 variables 정보 저장 (또는, 기존 metadata 조회))
-    const code = await CellCode.build(cell);
+    const codeContext = new CodeContext(cell);
+    const code = await codeContext.build();
 
     if (config.cache && isCellCached(cell, code.variables)) {
       return [];
