@@ -34,7 +34,7 @@ export class CellMetadata {
     return Private.Config;
   }
 
-  static get ConfigOverride(): MetadataGroup<CellMetadata.IConfigOverride> {
+  static get ConfigOverride(): MetadataGroupDirtyable<CellMetadata.IConfigOverride> {
     return Private.ConfigOverride;
   }
 

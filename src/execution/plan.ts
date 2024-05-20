@@ -73,7 +73,7 @@ export class ExecutionCells {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
-    const metadata = CellMetadata.Code.getCoalesced(cell.model);
+    const metadata = CellMetadata.Config.getCoalesced(cell.model);
     // console.log(metadata);
 
     // 셀 변수 테스트
@@ -112,8 +112,8 @@ export class ExecutionCells {
 
   cached(cell: Cell): boolean {
     if (isCodeCell(cell) && cell.model.isDirty) {
-      const varTracker = VariableTracker.getByCell(cell);
-      return Boolean(varTracker?.isCellCached(cell));
+      // const varTracker = VariableTracker.getByCell(cell);
+      // return Boolean(varTracker?.isCellCached(cell));
     }
     return false;
   }

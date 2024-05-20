@@ -1,7 +1,7 @@
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { Notebook } from '@jupyterlab/notebook';
 
-import { CellConfig, CellCode } from '.';
+import { CellConfig, CellCode, CellMetadata } from '.';
 import { CSMagicExecutor } from '../cs-magic';
 import { VariableTracker } from '../variable';
 import { isCodeCell } from '../utils/cell';
@@ -36,7 +36,7 @@ export namespace CellExecution {
       return [];
     }
 
-    const cells = getDependentCells(cell, code.unboundVariables);
+    const cells = await getDependentCells(cell, code.unboundVariables);
     cells.push(cell);
     console.log('CellExecution cellsToExecute', cells);
     return cells;
@@ -54,10 +54,10 @@ export namespace CellExecution {
     return variableTracker.isVariablesCached(variables);
   }
 
-  function getDependentCells(
+  async function getDependentCells(
     cell: CodeCell,
     unboundVariables?: string[]
-  ): CodeCell[] {
+  ): Promise<CodeCell[]> {
     // console.log('getDependentCells', cell, unboundVariables);
 
     const noUnbound = !unboundVariables?.length;
@@ -67,8 +67,21 @@ export namespace CellExecution {
 
     const scanCells = getDependencyScanCells(cell);
     for (const cell of scanCells) {
-      cell;
-      // CSMagicExecutor.execute(cell);
+      if (CellMetadata.ConfigOverride.isDirty(cell.model)) {
+        CSMagicExecutor.executeConfig(cell);
+      }
+
+      // TODO: VariableContext 분리
+      //       CellContext 분리
+      //       실행 여부 판단, target vars, unresolved vars 처리
+      const config = CellConfig.get(cell.model);
+      if (config.skip) continue;
+
+      // const code = await CellCode.build(cell);
+
+      // if (config.cache && isCellCached(cell, code.variables)) {
+      //   continue;
+      // }
     }
     return dependencies;
   }
@@ -83,8 +96,8 @@ export namespace CellExecution {
     if (index < 0) return [];
 
     const aboves = notebook.widgets.slice(0, index);
-    const lookups = aboves.filter(c => isCodeCell(c)) as CodeCell[];
-    console.log('lookup cells', lookups);
-    return lookups;
+    const scanCells = aboves.filter(c => isCodeCell(c)) as CodeCell[];
+    console.log('scan cells', scanCells);
+    return scanCells;
   }
 }
