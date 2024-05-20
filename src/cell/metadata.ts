@@ -54,10 +54,12 @@ namespace Private {
   export const Config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
     skip: false
   });
-  export const ConfigOverride = new MetadataGroup<CellMetadata.IConfigOverride>(
-    '##ConfigOverride',
-    {}
-  );
+  export const ConfigOverride =
+    new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
+      '##ConfigOverride',
+      '##ConfigOverride-dirty',
+      {}
+    );
   export const Code = new MetadataGroupDirtyable<CellMetadata.ICode>(
     '##Code',
     '##Code-dirty',

@@ -1,7 +1,7 @@
 import { Cell, CodeCell } from '@jupyterlab/cells';
 import { Notebook } from '@jupyterlab/notebook';
 
-import { CellMetadata, CellConfig, CellCode } from '.';
+import { CellConfig, CellCode } from '.';
 import { CSMagicExecutor } from '../cs-magic';
 import { VariableTracker } from '../variable';
 import { isCodeCell } from '../utils/cell';
@@ -14,7 +14,6 @@ export namespace CellExecution {
    *   - load -> 셀 추가
    */
   export function prepare(cell: Cell) {
-    CellMetadata.ConfigOverride.delete(cell.model);
     CSMagicExecutor.execute(cell);
   }
 
@@ -68,7 +67,7 @@ export namespace CellExecution {
 
     const lookups = getDependencyLookupCells(cell);
     for (const cell of lookups) {
-      CellMetadata.ConfigOverride.delete(cell.model);
+      cell;
       // CSMagicExecutor.execute(cell);
     }
     return dependencies;
