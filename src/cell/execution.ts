@@ -23,15 +23,22 @@ export namespace CellExecution {
    * - cache 처리
    * - unbound variables dependent cells 수집
    */
-  export async function getCellsToExecute(cell: CodeCell): Promise<CodeCell[]> {
+  export async function getCellsToExecute(
+    cell: CodeCell
+  ): Promise<CodeCell[] | void> {
     // console.log('CellExecution cell', cell);
 
-    const config = CellContext.getConfig(cell.model);
-    if (config.skip) return [];
+    const cellContext = new CellContext(cell); // TODO: 인자로 CellContext 받기 검토
+    if (!cellContext.isCodeCell()) return;
+
+    const config = cellContext.getConfig();
+    if (config.skip) return;
 
     // ##Code metadata에 variables 정보 저장 (또는, 기존 metadata 조회))
-    const codeContext = new CodeContext(cell);
-    const code = await codeContext.build();
+    const codeContext = cellContext.getCodeContext();
+    if (!codeContext) return;
+
+    const code = await codeContext.getMetadata();
 
     if (config.cache && isCellCached(cell, code.variables)) {
       return [];

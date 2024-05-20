@@ -5,7 +5,7 @@ import { VariableTracker } from '../variable';
 import { CellError } from '../utils/error';
 
 export class CodeContext {
-  private _variableTracker: VariableTracker;
+  private _variableTracker?: VariableTracker;
 
   get variableTracker(): VariableTracker {
     if (!this._variableTracker) {
@@ -22,13 +22,13 @@ export class CodeContext {
 
   constructor(public readonly cell: CodeCell) {}
 
-  async build(): Promise<CellMetadata.ICode> {
-    return CodeContext.build(this.cell, this.variableTracker);
+  async getMetadata(): Promise<CellMetadata.ICode> {
+    return CodeContext.getMetadata(this.cell, this.variableTracker);
   }
 }
 
 export namespace CodeContext {
-  export async function build(
+  export async function getMetadata(
     cell: CodeCell,
     variableTracker: VariableTracker
   ): Promise<CellMetadata.ICode> {
@@ -39,5 +39,19 @@ export namespace CodeContext {
     const code = { ...vars };
     CellMetadata.Code.set(cell.model, code);
     return code;
+  }
+
+  export async function isCellCached(
+    cell: CodeCell,
+    variableTracker: VariableTracker
+  ): Promise<boolean> {
+    const code = await getMetadata(cell, variableTracker);
+    const variables = code.variables;
+    const noVariables = !variables?.length;
+    if (noVariables) return true;
+
+    // TODO: VariableContext 구현
+
+    return variableTracker.isVariablesCached(variables);
   }
 }

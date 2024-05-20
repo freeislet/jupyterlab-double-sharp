@@ -125,10 +125,13 @@ namespace NewCodeCell {
     let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
 
     const cells = await CellExecution.getCellsToExecute(cell);
-    for (const codeCell of cells) {
-      ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
-      // console.log('CodeCell.execute ret:', ret);
+    if (cells) {
+      for (const codeCell of cells) {
+        ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
+        // console.log('CodeCell.execute ret:', ret);
+      }
     }
+
     return ret;
     // } else {
     //   return OrgCodeCell.execute(cell, sessionContext, metadata);

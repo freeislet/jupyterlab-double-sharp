@@ -1,12 +1,24 @@
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 
 import { CellMetadata } from './metadata';
+import { CodeContext } from './code';
+import { isCodeCell } from '../utils/cell';
 
 export class CellContext {
   constructor(public readonly cell: Cell) {}
 
   getConfig(): Required<CellMetadata.IConfig> {
     return CellContext.getConfig(this.cell.model);
+  }
+
+  isCodeCell(): this is { cell: CodeCell } {
+    return isCodeCell(this.cell);
+  }
+
+  getCodeContext(): CodeContext | undefined {
+    if (this.isCodeCell()) {
+      return new CodeContext(this.cell);
+    }
   }
 }
 
