@@ -2,6 +2,7 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { CellMetadata } from './metadata';
 import { VariableTracker } from '../variable';
+import { CellError } from '../utils/error';
 
 export class CodeContext {
   private _variableTracker: VariableTracker;
@@ -10,10 +11,7 @@ export class CodeContext {
     if (!this._variableTracker) {
       const variableTracker = VariableTracker.getByCell(this.cell);
       if (!variableTracker) {
-        throw {
-          error: new Error('cannot find VariableTracker'),
-          cell: this.cell
-        };
+        throw new CellError(this.cell, 'cannot find VariableTracker');
       }
       this._variableTracker = variableTracker;
     }
