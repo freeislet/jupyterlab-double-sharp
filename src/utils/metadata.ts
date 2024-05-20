@@ -70,8 +70,8 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     }
   }
 
-  delete(model: ICellModel) {
-    super.delete(model);
+  clean(model: ICellModel) {
+    this.delete(model);
     model.deleteMetadata(this.dirtyFlagName);
   }
 }
