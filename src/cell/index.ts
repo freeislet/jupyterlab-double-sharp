@@ -2,9 +2,10 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { CellExtension } from './tracker';
 import { CellExecution } from './execution';
-import { CellActions } from './actions';
+import { CellContext } from './context';
 import { CellMetadata } from './metadata';
 import { CellStyle } from './style';
+import { CellActions } from './actions';
 import { ExecutionActions } from '../execution';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
@@ -47,6 +48,5 @@ export function setupCellStyles() {
   );
 }
 
-export { CellExecution, CellActions, CellMetadata };
-export { CellConfig } from './config';
+export { CellExecution, CellContext, CellMetadata, CellActions };
 export { CellCode } from './code';

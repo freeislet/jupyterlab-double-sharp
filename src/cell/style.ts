@@ -1,10 +1,10 @@
 import { Cell } from '@jupyterlab/cells';
 
-import { CellConfig } from './config';
+import { CellContext } from './context';
 
 export namespace CellStyle {
   export function update(cell: Cell) {
-    const config = CellConfig.get(cell.model);
+    const config = CellContext.getConfig(cell.model);
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
       'jp-DoubleSharp-cache': config.cache
