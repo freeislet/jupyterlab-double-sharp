@@ -47,7 +47,7 @@ export class CodeContext {
     if (cachedMetadata) return cachedMetadata;
 
     const vars = await this.variableTracker.getCellVariables(this.cell);
-    const metadata = { ...vars };
+    const metadata = CellMetadata.Code.getCoalescedValue(vars);
     CellMetadata.Code.set(this.cell.model, metadata);
     return metadata;
   }

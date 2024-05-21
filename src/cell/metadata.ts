@@ -15,7 +15,7 @@ export namespace CellMetadata {
 
   export type IConfigOverride = Partial<IConfig>;
 
-  export type ICode = Partial<ICellVariables>;
+  export type ICode = ICellVariables;
 
   // export interface IExecution {
   //   skip: boolean;
@@ -63,7 +63,10 @@ namespace Private {
   export const Code = new MetadataGroupDirtyable<CellMetadata.ICode>(
     '##Code',
     '##Code-dirty',
-    {}
+    {
+      variables: [],
+      unboundVariables: []
+    }
   );
   // export const Execution = new MetadataGroup<CellMetadata.IExecution>(
   //   '##Execution',
