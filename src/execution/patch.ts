@@ -8,7 +8,6 @@ import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
 import { ExecutionActions } from './actions';
-// import { ExecutionPlan } from './plan';
 import { CellExecution } from '../cell';
 
 namespace OrgNotebookActions {
@@ -120,22 +119,15 @@ namespace NewCodeCell {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    // const plan = ExecutionPlan.current;
-    // if (plan) {
     let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
 
     const cells = await CellExecution.getCellsToExecute(cell);
-    if (cells) {
-      for (const codeCell of cells) {
-        ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
-        // console.log('CodeCell.execute ret:', ret);
-      }
+    for (const codeCell of cells) {
+      ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
+      // console.log('CodeCell.execute ret:', ret);
     }
 
     return ret;
-    // } else {
-    //   return OrgCodeCell.execute(cell, sessionContext, metadata);
-    // }
   }
 }
 
