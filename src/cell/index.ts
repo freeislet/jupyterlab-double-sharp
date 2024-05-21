@@ -12,7 +12,7 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
 }
 
-export function setupCellExecution() {
+export function setupCellActions() {
   ExecutionActions.beforeExecution.connect(
     (_, args: ExecutionActions.IParams) => {
       // console.log('beforeExecution', args);
@@ -28,11 +28,10 @@ export function setupCellExecution() {
     // console.log('cell contentChanged', args);
 
     const { model } = args;
+    CellMetadata.ConfigOverride.setDirty(model);
     CellMetadata.Code.setDirty(model);
   });
-}
 
-export function setupCellStyles() {
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
       console.log(args);
@@ -48,5 +47,6 @@ export function setupCellStyles() {
   );
 }
 
-export { CellExecution, CellContext, CellMetadata, CellActions };
+export { CellExecution, CellContext, CellActions };
+export { CellConfig } from './config';
 export { CodeContext } from './code';

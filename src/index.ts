@@ -5,11 +5,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
-import {
-  setupCellExtensions,
-  setupCellExecution,
-  setupCellStyles
-} from './cell';
+import { setupCellExtensions, setupCellActions } from './cell';
 import { setupEditor } from './editor';
 import { setupExecution } from './execution';
 import { setupVariableExtensions } from './variable';
@@ -31,8 +27,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     setupVariableExtensions(app);
     setupCellExtensions(app);
-    setupCellExecution();
-    setupCellStyles();
+    setupCellActions();
     setupExecution();
 
     settingRegistry

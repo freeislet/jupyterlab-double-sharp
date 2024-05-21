@@ -1,6 +1,8 @@
+// 제거 예정
+
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import { CellMetadata } from '../cell';
+import { CellMetadata } from '../cell/metadata';
 import { VariableTracker } from '../variable';
 import { isCodeCell } from '../utils/cell';
 
