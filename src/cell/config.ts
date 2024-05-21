@@ -1,11 +1,18 @@
-import { ICellModel } from '@jupyterlab/cells';
+import { Cell, ICellModel } from '@jupyterlab/cells';
 
 import { CellMetadata } from './metadata';
+import { CSMagicExecutor } from '../cs-magic';
 
 export namespace CellConfig {
   export type IConfig = CellMetadata.IConfig;
 
-  export function get(model: ICellModel): Required<CellMetadata.IConfig> {
+  export function get(cell: Cell): Required<IConfig> {
+    const model = cell.model;
+
+    if (CellMetadata.ConfigOverride.isDirty(model)) {
+      CSMagicExecutor.executeConfig(cell); // TODO: executeConfig 인자로 ICellModel 검토 (ICellModel로 Cell 찾기 구현)
+    }
+
     const config = CellMetadata.Config.getCoalesced(model);
     const override = CellMetadata.ConfigOverride.get(model);
 
@@ -13,10 +20,6 @@ export namespace CellConfig {
     const coalesced = { cache: defaultCache, ...config, ...override };
     // console.log('cell config', coalesced);
     return coalesced;
-  }
-
-  export function isOverrideDirty(model: ICellModel): boolean {
-    return CellMetadata.ConfigOverride.isDirty(model);
   }
 
   export function updateOverride(model: ICellModel, value: Partial<IConfig>) {
