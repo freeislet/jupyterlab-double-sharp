@@ -46,8 +46,8 @@ export class CodeContext {
     const cachedMetadata = CellMetadata.Code.get(this.cell.model);
     if (cachedMetadata) return cachedMetadata;
 
-    const vars = await this.variableTracker.getCellVariables(this.cell);
-    const metadata = CellMetadata.Code.getCoalescedValue(vars);
+    const cellVars = await this.variableTracker.getCellVariables(this.cell);
+    const metadata = CellMetadata.Code.getCoalescedValue(cellVars);
     CellMetadata.Code.set(this.cell.model, metadata);
     return metadata;
   }
@@ -56,13 +56,9 @@ export class CodeContext {
    * Cell variables cached 여부 리턴
    */
   async isVariablesCached(): Promise<boolean> {
-    const code = await this.getMetadata();
-    const variables = code.variables;
-    const noVariables = !variables?.length;
-    if (noVariables) return true;
-
-    // TODO: VariableContext 구현
-
-    return this.variableTracker.isVariablesCached(variables);
+    const metadata = await this.getMetadata();
+    const vars = metadata.variables;
+    const uncachedVars = this.variableTracker.getUncachedVariables(vars);
+    return !uncachedVars.length;
   }
 }

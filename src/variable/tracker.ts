@@ -134,12 +134,9 @@ export class VariableTracker implements IDisposable {
   //   return { variables, unboundVariables };
   // }
 
-  isVariablesCached(variables: string[]): boolean {
-    for (const variable of variables) {
-      const cached = this._kernelVars.has(variable);
-      if (!cached) return false;
-    }
-    return true;
+  getUncachedVariables(variables: string[]): string[] {
+    const uncachedVars = variables.filter(v => !this._kernelVars.has(v));
+    return uncachedVars;
   }
 }
 
