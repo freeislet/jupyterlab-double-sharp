@@ -9,7 +9,7 @@ export function getAboveCells(cell: Cell): Cell[] {
   const notebook = cell.parent as Notebook;
   if (!notebook) return [];
 
-  const index = notebook.widgets.findIndex(c => c === cell);
+  const index = notebook.widgets.indexOf(cell);
   if (index < 0) return [];
 
   const aboves = notebook.widgets.slice(0, index);
