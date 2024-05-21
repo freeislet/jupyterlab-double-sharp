@@ -18,4 +18,8 @@ export namespace CellConfig {
   export function isOverrideDirty(model: ICellModel): boolean {
     return CellMetadata.ConfigOverride.isDirty(model);
   }
+
+  export function updateOverride(model: ICellModel, value: Partial<IConfig>) {
+    CellMetadata.ConfigOverride.update(model, value);
+  }
 }
