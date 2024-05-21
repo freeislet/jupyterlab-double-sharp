@@ -1,57 +1,68 @@
-import { CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { CellMetadata } from './metadata';
 import { VariableTracker } from '../variable';
+import { isCodeCell } from '../utils/cell';
+import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 
 export class CodeContext {
-  private _variableTracker?: VariableTracker;
+  static fromCell(
+    cell: Cell,
+    variableTracker?: VariableTracker
+  ): CodeContext | undefined {
+    if (isCodeCell(cell)) {
+      return new CodeContext(cell, variableTracker);
+    }
+  }
+
+  //----
+
+  private _variableTrackerCache: Cache<VariableTracker>;
 
   get variableTracker(): VariableTracker {
-    if (!this._variableTracker) {
+    return this._variableTrackerCache.value;
+  }
+
+  //----
+
+  constructor(
+    public readonly cell: CodeCell,
+    variableTracker?: VariableTracker
+  ) {
+    this._variableTrackerCache = new Cache<VariableTracker>(() => {
       const variableTracker = VariableTracker.getByCell(this.cell);
       if (!variableTracker) {
         throw new CellError(this.cell, 'cannot find VariableTracker');
       }
-      this._variableTracker = variableTracker;
-    }
-    return this._variableTracker;
+      return variableTracker;
+    }, variableTracker);
   }
 
-  //
-
-  constructor(public readonly cell: CodeCell) {}
-
+  /**
+   * ##Code metadata에 variables 정보 저장 및 리턴 (또는, 기존 metadata 조회))
+   */
   async getMetadata(): Promise<CellMetadata.ICode> {
-    return CodeContext.getMetadata(this.cell, this.variableTracker);
-  }
-}
+    const cachedMetadata = CellMetadata.Code.get(this.cell.model);
+    if (cachedMetadata) return cachedMetadata;
 
-export namespace CodeContext {
-  export async function getMetadata(
-    cell: CodeCell,
-    variableTracker: VariableTracker
-  ): Promise<CellMetadata.ICode> {
-    const cachedCode = CellMetadata.Code.get(cell.model);
-    if (cachedCode) return cachedCode;
-
-    const vars = await variableTracker.getCellVariables(cell);
-    const code = { ...vars };
-    CellMetadata.Code.set(cell.model, code);
-    return code;
+    const vars = await this.variableTracker.getCellVariables(this.cell);
+    const metadata = { ...vars };
+    CellMetadata.Code.set(this.cell.model, metadata);
+    return metadata;
   }
 
-  export async function isCellCached(
-    cell: CodeCell,
-    variableTracker: VariableTracker
-  ): Promise<boolean> {
-    const code = await getMetadata(cell, variableTracker);
+  /**
+   * Cell variables cached 여부 리턴
+   */
+  async isVariablesCached(): Promise<boolean> {
+    const code = await this.getMetadata();
     const variables = code.variables;
     const noVariables = !variables?.length;
     if (noVariables) return true;
 
     // TODO: VariableContext 구현
 
-    return variableTracker.isVariablesCached(variables);
+    return this.variableTracker.isVariablesCached(variables);
   }
 }
