@@ -15,3 +15,7 @@ export function getAboveCells(cell: Cell): Cell[] {
   const aboves = notebook.widgets.slice(0, index);
   return aboves;
 }
+
+export function getAboveCodeCells(cell: Cell): CodeCell[] {
+  return getAboveCells(cell).filter(c => isCodeCell(c)) as CodeCell[];
+}
