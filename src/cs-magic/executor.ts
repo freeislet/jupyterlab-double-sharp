@@ -16,11 +16,11 @@ export class CSMagicExecutor {
   }
 
   static executeGeneral(cell: Cell) {
-    this.execute(cell, cell => cell.type === 'general');
+    this.execute(cell, command => command.type === 'general');
   }
 
   static executeConfig(cell: Cell) {
-    this.execute(cell, cell => cell.type === 'config');
+    this.execute(cell, command => command.type === 'config');
   }
 
   static execute(
@@ -38,7 +38,6 @@ export class CSMagicExecutor {
     const matches = matchAllStatements(source);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
-        // console.log(command.statement);
         this._executeStatement(cell, match.statement, predicate);
       }
     }
@@ -49,6 +48,8 @@ export class CSMagicExecutor {
     statement: string,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
+    console.log(statement);
+
     const tokens = tokenize(statement);
     if (!tokens.length) return;
 
