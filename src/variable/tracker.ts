@@ -87,13 +87,13 @@ export class VariableTracker implements IDisposable {
     return this._kernelVars;
   }
 
-  async getCellVariables(cell: CodeCell): Promise<ICellVariables | void> {
+  async getCellVariables(cell: CodeCell): Promise<ICellVariables | undefined> {
     return await this.getCellVariablesFromKernel(cell.model);
   }
 
   private async getCellVariablesFromKernel(
     model: ICodeCellModel
-  ): Promise<ICellVariables | void> {
+  ): Promise<ICellVariables | undefined> {
     const source = model.sharedModel.getSource();
     const inspectResult = await this.kernelExecutor.inspect(source);
     if (!inspectResult) return;

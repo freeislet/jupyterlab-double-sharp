@@ -170,7 +170,9 @@ export class KernelExecutor {
     return retVars;
   }
 
-  async inspect(source: string): Promise<KernelExecutor.IInspectResult | void> {
+  async inspect(
+    source: string
+  ): Promise<KernelExecutor.IInspectResult | undefined> {
     const escaped = source.replace(/"""/g, '\\"""');
     const code = `DoubleSharpKernel.inspect("""${escaped}""")`;
     // console.log(code);
