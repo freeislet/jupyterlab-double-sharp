@@ -12,7 +12,12 @@ export class MetadataGroup<T> {
   }
 
   getCoalesced(model: ICellModel): T {
-    return { ...this.defaultValue, ...this.get(model) };
+    const value = this.get(model);
+    return this.getCoalescedValue(value);
+  }
+
+  getCoalescedValue(value?: T): T {
+    return { ...this.defaultValue, ...value };
   }
 
   set(model: ICellModel, value: T, deleteIfEqual = false) {
