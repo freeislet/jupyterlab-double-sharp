@@ -3,7 +3,7 @@
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { CellMetadata } from '../cell/metadata';
-import { VariableTracker } from '../variable';
+import { CodeInspector } from '../code';
 import { isCodeCell } from '../utils/cell';
 
 export namespace ExecutionPlan {
@@ -80,8 +80,8 @@ export class ExecutionCells {
 
     // 셀 변수 테스트
     if (isCodeCell(cell)) {
-      // VariableTracker.getByCell(cell)?.isCellCached(cell);
-      await VariableTracker.getByCell(cell)?.getCellVariables(cell);
+      // CodeInspector.getByCell(cell)?.isCellCached(cell);
+      await CodeInspector.getByCell(cell)?.getCodeVariables(cell);
     }
 
     if (metadata.skip) {
@@ -114,7 +114,7 @@ export class ExecutionCells {
 
   cached(cell: Cell): boolean {
     if (isCodeCell(cell) && cell.model.isDirty) {
-      // const varTracker = VariableTracker.getByCell(cell);
+      // const varTracker = CodeInspector.getByCell(cell);
       // return Boolean(varTracker?.isCellCached(cell));
     }
     return false;

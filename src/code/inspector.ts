@@ -10,7 +10,7 @@ import { KernelExecutor } from './kernel';
 import { ExecutionActions } from '../execution';
 import { In, notIn } from '../utils/array';
 
-export interface ICellVariables {
+export interface ICodeVariables {
   /**
    * 셀에서 정의하는 변수 목록
    */
@@ -23,21 +23,21 @@ export interface ICellVariables {
 }
 
 /**
- * VariableTracker
+ * CodeInspector
  */
-export class VariableTracker implements IDisposable {
-  private static _trackers = new Map<NotebookPanel, VariableTracker>();
+export class CodeInspector implements IDisposable {
+  private static _trackers = new Map<NotebookPanel, CodeInspector>();
 
-  static get(panel: NotebookPanel): VariableTracker | undefined {
+  static get(panel: NotebookPanel): CodeInspector | undefined {
     return this._trackers.get(panel);
   }
 
-  static getByCell(cell: Cell): VariableTracker | undefined {
+  static getByCell(cell: Cell): CodeInspector | undefined {
     const panel = cell.parent?.parent;
     if (panel) return this.get(panel as NotebookPanel);
   }
 
-  static getByCells(cells: readonly Cell[]): VariableTracker | undefined {
+  static getByCells(cells: readonly Cell[]): CodeInspector | undefined {
     if (cells.length) return this.getByCell(cells[0]);
   }
 
@@ -55,7 +55,7 @@ export class VariableTracker implements IDisposable {
   private _isDisposed = false;
 
   constructor(public readonly panel: NotebookPanel) {
-    VariableTracker._trackers.set(panel, this);
+    CodeInspector._trackers.set(panel, this);
 
     this.kernelExecutor = new KernelExecutor(panel.sessionContext);
     this.kernelExecutor.ready.then(() => {
@@ -74,7 +74,7 @@ export class VariableTracker implements IDisposable {
     this._kernelVars.clear();
 
     Signal.clearData(this);
-    VariableTracker._trackers.delete(this.panel);
+    CodeInspector._trackers.delete(this.panel);
   }
 
   get kernelVariables(): Set<string> {
@@ -96,18 +96,18 @@ export class VariableTracker implements IDisposable {
     return variables.filter(notIn(this._kernelVars));
   }
 
-  async getCellVariables(cell: CodeCell): Promise<ICellVariables | undefined> {
-    return await this.getCellVariablesFromKernel(cell.model);
+  async getCodeVariables(cell: CodeCell): Promise<ICodeVariables | undefined> {
+    return await this.getCodeVariablesFromKernel(cell.model);
   }
 
-  private async getCellVariablesFromKernel(
+  private async getCodeVariablesFromKernel(
     model: ICodeCellModel
-  ): Promise<ICellVariables | undefined> {
+  ): Promise<ICodeVariables | undefined> {
     const source = model.sharedModel.getSource();
     const inspectResult = await this.kernelExecutor.inspect(source);
     if (!inspectResult) return;
 
-    const vars: ICellVariables = {
+    const vars: ICodeVariables = {
       variables: inspectResult.co_varnames,
       unboundVariables: inspectResult.unbound
     };
@@ -116,7 +116,7 @@ export class VariableTracker implements IDisposable {
   }
 
   // deprecated
-  // private getCellVariablesFromAst(cell: CodeCell): ICellVariables {
+  // private getCodeVariablesFromAst(cell: CodeCell): ICodeVariables {
   //   const variables: string[] = [];
   //   const unboundVariables: string[] = [];
 
@@ -145,12 +145,14 @@ export class VariableTracker implements IDisposable {
 }
 
 /**
- * VariableExtension
+ * CodeInspectorExtension
  */
-export class VariableExtension implements DocumentRegistry.WidgetExtension {
+export class CodeInspectorExtension
+  implements DocumentRegistry.WidgetExtension
+{
   constructor() {}
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new VariableTracker(panel);
+    return new CodeInspector(panel);
   }
 }

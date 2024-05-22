@@ -29,8 +29,7 @@ export function setupCellActions() {
     }
   );
 
-  // TODO: VariableTracker -> CellTracker 안에 CodeInspector로 포함
-  //       afterExecution에서 kernel vars 수집
+  // TODO: afterExecution에서 CodeInspector kernel vars 수집
 
   CellActions.contentChanged.connect((_, args: CellActions.IParams) => {
     // console.log('cell contentChanged', args);

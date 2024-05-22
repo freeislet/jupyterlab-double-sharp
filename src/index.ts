@@ -6,9 +6,9 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
 import { setupCellExtensions, setupCellActions } from './cell';
-import { setupEditor } from './editor';
+import { setupCodeExtensions } from './code';
 import { setupExecution } from './execution';
-import { setupVariableExtensions } from './variable';
+import { setupEditor } from './editor';
 
 /**
  * Initialization data for the jupyterlab-double-sharp extension.
@@ -25,7 +25,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
 
-    setupVariableExtensions(app);
+    setupCodeExtensions(app);
     setupCellExtensions(app);
     setupCellActions();
     setupExecution();

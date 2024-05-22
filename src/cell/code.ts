@@ -2,14 +2,14 @@ import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { CellMetadata } from './metadata';
 import { CellConfig } from './config';
-import { VariableTracker, ICellVariables } from '../variable';
+import { CodeInspector, ICodeVariables } from '../code';
 import { isCodeCell, getAboveCodeCells } from '../utils/cell';
 import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 import { notIn } from '../utils/array';
 
 export namespace CodeContext {
-  export type IExecutionVariables = ICellVariables & {
+  export type IExecutionVariables = ICodeVariables & {
     /**
      * unboundVariables에서 kernel variables 제외한 변수들
      */
@@ -43,34 +43,34 @@ export namespace CodeContext {
 export class CodeContext {
   static fromCell(
     cell: Cell,
-    variableTracker?: VariableTracker
+    inspector?: CodeInspector
   ): CodeContext | undefined {
     if (isCodeCell(cell)) {
-      return new CodeContext(cell, variableTracker);
+      return new CodeContext(cell, inspector);
     }
   }
 
   //----
 
-  private _variableTrackerCache: Cache<VariableTracker>;
+  private _inspectorCache: Cache<CodeInspector>;
 
-  get variableTracker(): VariableTracker {
-    return this._variableTrackerCache.value;
+  get inspector(): CodeInspector {
+    return this._inspectorCache.value;
   }
 
   //----
 
   constructor(
     public readonly cell: CodeCell,
-    variableTracker?: VariableTracker
+    inspector?: CodeInspector
   ) {
-    this._variableTrackerCache = new Cache<VariableTracker>(() => {
-      const variableTracker = VariableTracker.getByCell(this.cell);
-      if (!variableTracker) {
-        throw new CellError(this.cell, 'cannot find VariableTracker');
+    this._inspectorCache = new Cache<CodeInspector>(() => {
+      const inspector = CodeInspector.getByCell(this.cell);
+      if (!inspector) {
+        throw new CellError(this.cell, 'cannot find CodeInspector');
       }
-      return variableTracker;
-    }, variableTracker);
+      return inspector;
+    }, inspector);
   }
 
   /**
@@ -80,8 +80,8 @@ export class CodeContext {
     const cachedMetadata = CellMetadata.Code.get(this.cell.model);
     if (cachedMetadata) return cachedMetadata;
 
-    const cellVars = await this.variableTracker.getCellVariables(this.cell);
-    const metadata = CellMetadata.Code.getCoalescedValue(cellVars);
+    const codeVars = await this.inspector.getCodeVariables(this.cell);
+    const metadata = CellMetadata.Code.getCoalescedValue(codeVars);
     CellMetadata.Code.set(this.cell.model, metadata);
     return metadata;
   }
@@ -92,7 +92,7 @@ export class CodeContext {
   async isVariablesCached(): Promise<boolean> {
     const metadata = await this.getMetadata();
     const vars = metadata.variables;
-    const uncachedVars = this.variableTracker.filterNonKernelVariables(vars);
+    const uncachedVars = this.inspector.filterNonKernelVariables(vars);
     return !uncachedVars.length;
   }
 
@@ -130,9 +130,10 @@ export class CodeContext {
     if (!scanCells.length) return;
 
     const scanContexts = scanCells.map(
-      cell => new CodeContext(cell, this.variableTracker)
+      cell => new CodeContext(cell, this.inspector)
     );
     const dependency = this._buildDependency(this, scanContexts, unboundVars);
+    dependency;
     const dependentCells: CodeCell[] = []; // collectDependencyCells, ##Execution 기록 w/ targetCell id
     return dependentCells;
   }
@@ -192,10 +193,10 @@ export class CodeContext {
     const resolvedVars = targetVariables.filter(notIn(metadata.variables));
     if (!resolvedVars.length) return;
 
-    // const variableTracker = context.variableTracker;
+    // const inspector = context.inspector;
     // const uncachedTargetVars =
-    //   variableTracker.getUncachedVariables(targetVariables);
-    // const uncachedUnboundVars = variableTracker.getUncachedVariables(
+    //   inspector.getUncachedVariables(targetVariables);
+    // const uncachedUnboundVars = inspector.getUncachedVariables(
     //   metadata.unboundVariables
     // );
     // const unresolvedVariables = [...uncachedTargetVars, ...uncachedUnboundVars];
@@ -211,8 +212,8 @@ export class CodeContext {
   //   const metadata = await this.getMetadata();
   //   // const varsSet = new Set(metadata.variables);
   //   const uncachedTargetVars =
-  //     this.variableTracker.getUncachedVariables(targetVariables);
-  //   const uncachedUnboundVars = this.variableTracker.getUncachedVariables(
+  //     this.inspector.getUncachedVariables(targetVariables);
+  //   const uncachedUnboundVars = this.inspector.getUncachedVariables(
   //     metadata.unboundVariables
   //   );
   //   const unresolvedVariables = [...uncachedTargetVars, ...uncachedUnboundVars];
@@ -237,10 +238,10 @@ export class CodeContext {
 //     const resolvedVars = targetVariables.filter(v => varsSet.has(v));
 //     if (!resolvedVars.length) return;
 
-//     const variableTracker = context.variableTracker;
+//     const inspector = context.inspector;
 //     const uncachedTargetVars =
-//       variableTracker.getUncachedVariables(targetVariables);
-//     const uncachedUnboundVars = variableTracker.getUncachedVariables(
+//       inspector.getUncachedVariables(targetVariables);
+//     const uncachedUnboundVars = inspector.getUncachedVariables(
 //       metadata.unboundVariables
 //     );
 //     const unresolvedVariables = [...uncachedTargetVars, ...uncachedUnboundVars];

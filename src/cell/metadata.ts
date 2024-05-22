@@ -1,5 +1,5 @@
 import { MetadataGroup, MetadataGroupDirtyable } from '../utils/metadata';
-import { ICellVariables } from '../variable';
+import { ICodeVariables } from '../code';
 
 export namespace CellMetadata {
   export interface ICell {
@@ -15,7 +15,7 @@ export namespace CellMetadata {
 
   export type IConfigOverride = Partial<IConfig>;
 
-  export type ICode = ICellVariables;
+  export type ICode = ICodeVariables;
 
   // export interface IExecution {
   //   skip: boolean;
