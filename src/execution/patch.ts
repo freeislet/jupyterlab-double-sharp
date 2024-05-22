@@ -8,7 +8,7 @@ import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
 import { ExecutionActions } from './actions';
-import { CellExecution } from '../cell';
+import { CellContext } from '../cell';
 
 namespace OrgNotebookActions {
   export const run = NotebookActions.run;
@@ -121,10 +121,15 @@ namespace NewCodeCell {
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
 
-    const cells = await CellExecution.getCellsToExecute(cell);
-    for (const codeCell of cells) {
-      ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
-      // console.log('CodeCell.execute ret:', ret);
+    // 실행 셀 목록 조회 (dependent cells 수집 포함)
+    const cellContext = new CellContext(cell);
+    const cells = await cellContext.codeContext?.getCellsToExecute();
+    if (cells) {
+      for (const codeCell of cells) {
+        // 기존 실행 함수
+        ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
+        // console.log('CodeCell.execute ret:', ret);
+      }
     }
 
     return ret;

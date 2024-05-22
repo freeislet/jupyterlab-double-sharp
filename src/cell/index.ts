@@ -1,12 +1,12 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { CellExtension } from './tracker';
-import { CellExecution } from './execution';
 import { CellContext } from './context';
 import { CellMetadata } from './metadata';
 import { CellStyle } from './style';
 import { CellActions } from './actions';
 import { ExecutionActions } from '../execution';
+import { CSMagicExecutor } from '../cs-magic';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
@@ -17,7 +17,15 @@ export function setupCellActions() {
     (_, args: ExecutionActions.IParams) => {
       // console.log('beforeExecution', args);
 
-      args.cells.forEach(cell => CellExecution.prepare(cell));
+      // 셀 실행 준비
+      for (const cell of args.cells) {
+        /**
+         * ##% client-side magic command 실행
+         * - ##ConfigOverride metadata 업데이트 (skip, cache, ...)
+         * - load -> 셀 추가
+         */
+        CSMagicExecutor.execute(cell);
+      }
     }
   );
 
@@ -47,6 +55,6 @@ export function setupCellActions() {
   );
 }
 
-export { CellExecution, CellContext, CellActions };
+export { CellContext, CellActions };
 export { CellConfig } from './config';
 export { CodeContext } from './code';
