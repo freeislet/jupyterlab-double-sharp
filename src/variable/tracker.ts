@@ -8,6 +8,7 @@ import { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 
 import { KernelExecutor } from './kernel';
 import { ExecutionActions } from '../execution';
+import { In, notIn } from '../utils/array';
 
 export interface ICellVariables {
   /**
@@ -87,6 +88,14 @@ export class VariableTracker implements IDisposable {
     return this._kernelVars;
   }
 
+  filterKernelVariables(variables: string[]): string[] {
+    return variables.filter(In(this._kernelVars));
+  }
+
+  filterNonKernelVariables(variables: string[]): string[] {
+    return variables.filter(notIn(this._kernelVars));
+  }
+
   async getCellVariables(cell: CodeCell): Promise<ICellVariables | undefined> {
     return await this.getCellVariablesFromKernel(cell.model);
   }
@@ -133,11 +142,6 @@ export class VariableTracker implements IDisposable {
 
   //   return { variables, unboundVariables };
   // }
-
-  getUncachedVariables(variables: string[]): string[] {
-    const uncachedVars = variables.filter(v => !this._kernelVars.has(v));
-    return uncachedVars;
-  }
 }
 
 /**
