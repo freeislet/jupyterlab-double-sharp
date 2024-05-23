@@ -7,6 +7,7 @@ import { isCodeCell, getAboveCodeCells } from '../utils/cell';
 import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 import { In, notIn } from '../utils/array';
+import { ReorderSet } from '../utils/set';
 
 export namespace CellCode {
   export type IExecutionVariables = ICodeVariables & {
@@ -130,24 +131,20 @@ export class CodeContext {
       if (cached) return;
     }
 
-    const dependentCells = await this._getDependentCells();
+    const dependency = await this._buildDependency();
+    const dependencyResolved = dependency?.unresolvedVariables.length === 0;
+    const dependentCells = dependencyResolved
+      ? this._collectDependentCells(dependency)
+      : [];
     const cellsToExecute = [...dependentCells, this.cell];
     console.log('cellsToExecute', cellsToExecute);
+    // TODO: ##Execution 기록 w/ targetCell id
     return cellsToExecute;
   }
 
   /**
-   * unresolved variables resolve 위한 dependent cells 수집
+   * 현재 셀 코드의 dependency 수집
    */
-  private async _getDependentCells(): Promise<CodeCell[]> {
-    const dependency = this._buildDependency();
-    if (!dependency) return [];
-
-    // TODO: dependency로부터 dependent cells 수집
-    const dependentCells: CodeCell[] = []; // collectDependencyCells, ##Execution 기록 w/ targetCell id
-    return dependentCells;
-  }
-
   private async _buildDependency(): Promise<CellCode.IDependency | void> {
     const execVars = await this.getExecutionVariables();
     const unresolvedVars = execVars.unresolvedVariables;
@@ -227,6 +224,9 @@ export class CodeContext {
     targetVariables: string[],
     rescanContexts: CodeContext[]
   ): Promise<CellCode.IDependency | void> {
+    const config = CellConfig.get(scanContext.cell);
+    if (config.skip) return;
+
     const execVars = await scanContext.getExecutionVariables();
     const resolvedVars = targetVariables.filter(In(execVars.variables));
     if (!resolvedVars.length) return;
@@ -244,6 +244,26 @@ export class CodeContext {
 
     console.log('dependency item', dependency);
     return dependency;
+  }
+
+  private _collectDependentCells(dependency: CellCode.IDependency): CodeCell[] {
+    const cells = new ReorderSet<CodeCell>();
+
+    function collect(dependencies?: CellCode.IDependency[]) {
+      if (!dependencies) return;
+
+      for (const dep of dependencies) {
+        const resolved = !dep.unresolvedVariables.length; // dep.resolvedVariables.length 확인 생략
+        if (resolved) {
+          cells.add(dep.context.cell);
+        }
+
+        collect(dep.dependencies);
+      }
+    }
+
+    collect(dependency.dependencies);
+    return Array.from(cells);
   }
 
   /**
