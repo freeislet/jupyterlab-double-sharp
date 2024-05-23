@@ -56,4 +56,4 @@ export function setupCellActions() {
 
 export { CellContext, CellActions };
 export { CellConfig } from './config';
-export { CodeContext } from './code';
+export { CellCode, CodeContext } from './code';
