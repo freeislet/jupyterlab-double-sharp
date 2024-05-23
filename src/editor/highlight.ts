@@ -68,6 +68,7 @@ class HighlightPlugin implements PluginValue {
           builder.add(node.from, node.from, deco);
         }
       }
+      // TODO: topLevel = node.parent?.parent !이면 return false -> 함수 안 주석 확인
     }
 
     const builder = new RangeSetBuilder<Decoration>();
