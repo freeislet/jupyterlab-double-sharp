@@ -1,5 +1,6 @@
 import { MetadataGroup, MetadataGroupDirtyable } from '../utils/metadata';
 import { ICodeVariables } from '../code';
+import { CellCode } from './code';
 
 export namespace CellMetadata {
   export interface ICell {
@@ -10,19 +11,28 @@ export namespace CellMetadata {
 
   export interface IConfig {
     skip: boolean;
-    cache?: boolean;
+    cache?: boolean; // TODO: | useSetting 타입 적용
   }
 
   export type IConfigOverride = Partial<IConfig>;
 
   export type ICode = ICodeVariables;
 
-  // export interface IExecution {
-  //   skip: boolean;
-  //   skipMessage?: string;
-  //   cache: boolean;
-  //   // dependencies?: string[]; // TODO
-  // }
+  export interface IExecutionCell {
+    modelId: string;
+  }
+
+  export type IExecutionDependency = {
+    cell: IExecutionCell;
+    dependencies?: IExecutionDependency[];
+  } & Omit<CellCode.IDependency, 'context' | 'dependencies'>;
+
+  export interface IExecution {
+    skipped?: boolean;
+    cached?: boolean;
+    cells?: IExecutionCell[];
+    dependency?: IExecutionDependency;
+  }
 }
 
 export class CellMetadata {
@@ -42,9 +52,9 @@ export class CellMetadata {
     return Private.code;
   }
 
-  // static get execution(): MetadataGroup<CellMetadata.IExecution> {
-  //   return Private.execution;
-  // }
+  static get execution(): MetadataGroup<CellMetadata.IExecution> {
+    return Private.execution;
+  }
 
   private constructor() {}
 }
@@ -57,22 +67,14 @@ namespace Private {
   export const configOverride =
     new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
       '##ConfigOverride',
-      '##ConfigOverride-dirty',
       {}
     );
-  export const code = new MetadataGroupDirtyable<CellMetadata.ICode>(
-    '##Code',
-    '##Code-dirty',
-    {
-      variables: [],
-      unboundVariables: []
-    }
+  export const code = new MetadataGroupDirtyable<CellMetadata.ICode>('##Code', {
+    variables: [],
+    unboundVariables: []
+  });
+  export const execution = new MetadataGroup<CellMetadata.IExecution>(
+    '##Execution',
+    {}
   );
-  // export const execution = new MetadataGroup<CellMetadata.IExecution>(
-  //   '##Execution',
-  //   {
-  //     skip: false,
-  //     cache: false
-  //   }
-  // );
 }

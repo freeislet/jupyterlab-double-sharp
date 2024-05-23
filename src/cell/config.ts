@@ -18,7 +18,7 @@ export namespace CellConfig {
 
     const defaultCache = false; // TODO: settings cache 설정 적용
     const coalesced = { cache: defaultCache, ...config, ...override };
-    // console.log('cell config', coalesced);
+    console.log('cell config', coalesced);
     return coalesced;
   }
 

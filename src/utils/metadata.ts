@@ -1,36 +1,15 @@
 import { ICellModel } from '@jupyterlab/cells';
 import equal from 'fast-deep-equal';
 
-export class MetadataGroup<T> {
-  constructor(
-    public readonly name: string,
-    public readonly defaultValue: T
-  ) {}
+export class Metadata<T> {
+  constructor(public readonly name: string) {}
 
   get(model: ICellModel): T | undefined {
     return model.getMetadata(this.name);
   }
 
-  getCoalesced(model: ICellModel): T {
-    const value = this.get(model);
-    return this.getCoalescedValue(value);
-  }
-
-  getCoalescedValue(value?: T): T {
-    return { ...this.defaultValue, ...value };
-  }
-
-  set(model: ICellModel, value: T, deleteIfEqual = false) {
-    if (deleteIfEqual && equal(value, this.defaultValue)) {
-      this.delete(model);
-    } else {
-      model.setMetadata(this.name, value);
-    }
-  }
-
-  update(model: ICellModel, value: Partial<T>, deleteIfEqual = false) {
-    const coalescedValue = { ...this.getCoalesced(model), ...value };
-    this.set(model, coalescedValue, deleteIfEqual);
+  set(model: ICellModel, value: T) {
+    model.setMetadata(this.name, value);
   }
 
   delete(model: ICellModel) {
@@ -38,13 +17,48 @@ export class MetadataGroup<T> {
   }
 }
 
-export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
+export class MetadataGroup<T> extends Metadata<T> {
   constructor(
     public readonly name: string,
-    public readonly dirtyFlagName: string,
     public readonly defaultValue: T
   ) {
+    super(name);
+  }
+
+  getCoalesced(model: ICellModel): T {
+    const value = this.get(model);
+    return this.getCoalescedValue(value);
+  }
+
+  getCoalescedValue(value?: Partial<T>): T {
+    return { ...this.defaultValue, ...value };
+  }
+
+  set(model: ICellModel, value: T, deleteIfEqualDefault = false) {
+    if (deleteIfEqualDefault && equal(value, this.defaultValue)) {
+      this.delete(model);
+    } else {
+      model.setMetadata(this.name, value);
+    }
+  }
+
+  update(model: ICellModel, value: Partial<T>, deleteIfEqualDefault = false) {
+    const coalesced = this.getCoalesced(model);
+    const newValue = { ...coalesced, ...value };
+    this.set(model, newValue, deleteIfEqualDefault);
+  }
+}
+
+export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
+  public readonly dirtyFlagName: string;
+
+  constructor(
+    public readonly name: string,
+    public readonly defaultValue: T,
+    dirtyFlagName?: string
+  ) {
     super(name, defaultValue);
+    this.dirtyFlagName = dirtyFlagName ?? name + '-dirty';
   }
 
   isDirty(model: ICellModel): boolean {
@@ -61,17 +75,17 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     return super.get(model);
   }
 
-  set(model: ICellModel, value: T, deleteIfEqual = false) {
+  set(model: ICellModel, value: T, deleteIfEqualDefault = false) {
     this.setDirty(model, false);
-    super.set(model, value, deleteIfEqual);
+    super.set(model, value, deleteIfEqualDefault);
   }
 
-  update(model: ICellModel, value: Partial<T>, deleteIfEqual = false) {
+  update(model: ICellModel, value: Partial<T>, deleteIfEqualDefault = false) {
     if (this.isDirty(model)) {
-      const coalescedValue = { ...this.defaultValue, ...value };
-      this.set(model, coalescedValue, deleteIfEqual);
+      const coalescedValue = this.getCoalescedValue(value);
+      this.set(model, coalescedValue, deleteIfEqualDefault);
     } else {
-      super.update(model, value, deleteIfEqual);
+      super.update(model, value, deleteIfEqualDefault);
     }
   }
 
