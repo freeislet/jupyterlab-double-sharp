@@ -26,41 +26,41 @@ export namespace CellMetadata {
 }
 
 export class CellMetadata {
-  static get Cell(): MetadataGroup<CellMetadata.ICell> {
-    return Private.Cell;
+  static get cell(): MetadataGroup<CellMetadata.ICell> {
+    return Private.cell;
   }
 
-  static get Config(): MetadataGroup<CellMetadata.IConfig> {
-    return Private.Config;
+  static get config(): MetadataGroup<CellMetadata.IConfig> {
+    return Private.config;
   }
 
-  static get ConfigOverride(): MetadataGroupDirtyable<CellMetadata.IConfigOverride> {
-    return Private.ConfigOverride;
+  static get configOverride(): MetadataGroupDirtyable<CellMetadata.IConfigOverride> {
+    return Private.configOverride;
   }
 
-  static get Code(): MetadataGroupDirtyable<CellMetadata.ICode> {
-    return Private.Code;
+  static get code(): MetadataGroupDirtyable<CellMetadata.ICode> {
+    return Private.code;
   }
 
-  // static get Execution(): MetadataGroup<CellMetadata.IExecution> {
-  //   return Private.Execution;
+  // static get execution(): MetadataGroup<CellMetadata.IExecution> {
+  //   return Private.execution;
   // }
 
   private constructor() {}
 }
 
 namespace Private {
-  export const Cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
-  export const Config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
+  export const cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
+  export const config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
     skip: false
   });
-  export const ConfigOverride =
+  export const configOverride =
     new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
       '##ConfigOverride',
       '##ConfigOverride-dirty',
       {}
     );
-  export const Code = new MetadataGroupDirtyable<CellMetadata.ICode>(
+  export const code = new MetadataGroupDirtyable<CellMetadata.ICode>(
     '##Code',
     '##Code-dirty',
     {
@@ -68,7 +68,7 @@ namespace Private {
       unboundVariables: []
     }
   );
-  // export const Execution = new MetadataGroup<CellMetadata.IExecution>(
+  // export const execution = new MetadataGroup<CellMetadata.IExecution>(
   //   '##Execution',
   //   {
   //     skip: false,

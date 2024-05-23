@@ -86,12 +86,12 @@ export class CodeContext {
    * ##Code metadata에 variables 정보 저장 및 리턴 (또는, 기존 metadata 조회))
    */
   async getMetadata(): Promise<CellMetadata.ICode> {
-    const cachedMetadata = CellMetadata.Code.get(this.cell.model);
+    const cachedMetadata = CellMetadata.code.get(this.cell.model);
     if (cachedMetadata) return cachedMetadata;
 
     const codeVars = await this.inspector.getCodeVariables(this.cell);
-    const metadata = CellMetadata.Code.getCoalescedValue(codeVars);
-    CellMetadata.Code.set(this.cell.model, metadata);
+    const metadata = CellMetadata.code.getCoalescedValue(codeVars);
+    CellMetadata.code.set(this.cell.model, metadata);
     return metadata;
   }
 

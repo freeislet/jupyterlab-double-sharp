@@ -9,12 +9,12 @@ export namespace CellConfig {
   export function get(cell: Cell): Required<IConfig> {
     const model = cell.model;
 
-    if (CellMetadata.ConfigOverride.isDirty(model)) {
+    if (CellMetadata.configOverride.isDirty(model)) {
       CSMagicExecutor.executeConfig(cell); // TODO: executeConfig 인자로 ICellModel 검토 (ICellModel로 Cell 찾기 구현)
     }
 
-    const config = CellMetadata.Config.getCoalesced(model);
-    const override = CellMetadata.ConfigOverride.get(model);
+    const config = CellMetadata.config.getCoalesced(model);
+    const override = CellMetadata.configOverride.get(model);
 
     const defaultCache = false; // TODO: settings cache 설정 적용
     const coalesced = { cache: defaultCache, ...config, ...override };
@@ -23,6 +23,6 @@ export namespace CellConfig {
   }
 
   export function updateOverride(model: ICellModel, value: Partial<IConfig>) {
-    CellMetadata.ConfigOverride.update(model, value);
+    CellMetadata.configOverride.update(model, value);
   }
 }

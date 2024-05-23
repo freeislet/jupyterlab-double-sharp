@@ -35,8 +35,8 @@ export function setupCellActions() {
     // console.log('cell contentChanged', args);
 
     const { model } = args;
-    CellMetadata.ConfigOverride.setDirty(model);
-    CellMetadata.Code.setDirty(model);
+    CellMetadata.configOverride.setDirty(model);
+    CellMetadata.code.setDirty(model);
   });
 
   CellActions.metadataChanged.connect(

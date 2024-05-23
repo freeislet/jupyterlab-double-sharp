@@ -75,7 +75,7 @@ export class ExecutionCells {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
-    const metadata = CellMetadata.Config.getCoalesced(cell.model);
+    const metadata = CellMetadata.config.getCoalesced(cell.model);
     // console.log(metadata);
 
     // 셀 변수 테스트
