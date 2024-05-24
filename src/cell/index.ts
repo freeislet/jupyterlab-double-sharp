@@ -7,6 +7,7 @@ import { CellStyle } from './style';
 import { CellActions } from './actions';
 import { ExecutionActions } from '../execution';
 import { CSMagicExecutor } from '../cs-magic';
+import { CodeInspector } from '../code';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
@@ -29,7 +30,15 @@ export function setupCellActions() {
     }
   );
 
-  // TODO: afterExecution에서 CodeInspector kernel vars 수집
+  ExecutionActions.afterExecution.connect(
+    (_, args: ExecutionActions.IParams) => {
+      // console.log('afterExecution', args);
+
+      // kernel variables 업데이트
+      const inspector = CodeInspector.getByCells(args.cells);
+      inspector?.updateKernelVariables();
+    }
+  );
 
   CellActions.contentChanged.connect((_, args: CellActions.IParams) => {
     // console.log('cell contentChanged', args);
@@ -44,10 +53,7 @@ export function setupCellActions() {
       console.log(args);
 
       const { cell, change } = args;
-
-      if (!cell) return;
-
-      if (change.key.startsWith('##Config')) {
+      if (cell && change.key.startsWith('##Config')) {
         CellStyle.update(cell);
       }
     }

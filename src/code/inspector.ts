@@ -7,7 +7,6 @@ import { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 // import { syntaxTree } from '@codemirror/language';
 
 import { KernelExecutor } from './kernel';
-import { ExecutionActions } from '../execution';
 import { In, notIn } from '../utils/array';
 
 export interface ICodeVariables {
@@ -39,13 +38,6 @@ export class CodeInspector implements IDisposable {
 
   static getByCells(cells: readonly Cell[]): CodeInspector | undefined {
     if (cells.length) return this.getByCell(cells[0]);
-  }
-
-  static {
-    ExecutionActions.afterExecution.connect((_, args) => {
-      const tracker = this.getByCells(args.cells);
-      tracker?.updateKernelVariables();
-    });
   }
 
   //
