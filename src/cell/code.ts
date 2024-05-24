@@ -124,6 +124,8 @@ export class CodeContext {
    * - unbound variables resolve 위한 dependent cells 수집
    */
   async getCellsToExecute(): Promise<CodeCell[] | void> {
+    console.log('cellsToExecute {', this.cell);
+
     const config = CellConfig.get(this.cell);
     if (config.skip) return;
     if (config.cache) {
@@ -137,7 +139,7 @@ export class CodeContext {
       ? this._collectDependentCells(dependency)
       : [];
     const cellsToExecute = [...dependentCells, this.cell];
-    console.log('cellsToExecute', cellsToExecute);
+    console.log('} cellsToExecute', cellsToExecute);
     // TODO: ##Execution 기록 w/ targetCell id
     return cellsToExecute;
   }
@@ -146,7 +148,10 @@ export class CodeContext {
    * 현재 셀 코드의 dependency 수집
    */
   private async _buildDependency(): Promise<CellCode.IDependency | void> {
+    console.log('_buildDependency {', this.cell);
+
     const execVars = await this.getExecutionVariables();
+    console.log('execution variables', execVars);
     const unresolvedVars = execVars.unresolvedVariables;
     if (!unresolvedVars.length) return;
 
@@ -166,6 +171,7 @@ export class CodeContext {
     };
 
     await this._buildDependencies(dependency, scanContexts);
+    console.log('} _buildDependency', this.cell);
     return dependency;
   }
 

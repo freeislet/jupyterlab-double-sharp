@@ -103,7 +103,7 @@ export class CodeInspector implements IDisposable {
       variables: inspectResult.co_varnames,
       unboundVariables: inspectResult.unbound
     };
-    console.log(vars);
+    console.log('code variables', vars);
     return vars;
   }
 

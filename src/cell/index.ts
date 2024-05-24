@@ -41,7 +41,7 @@ export function setupCellActions() {
   );
 
   CellActions.contentChanged.connect((_, args: CellActions.IParams) => {
-    // console.log('cell contentChanged', args);
+    console.log('cell contentChanged', args);
 
     const { model } = args;
     CellMetadata.configOverride.setDirty(model);
@@ -50,7 +50,7 @@ export function setupCellActions() {
 
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
-      console.log(args);
+      console.log('cell metadataChanged', args);
 
       const { cell, change } = args;
       if (cell && change.key.startsWith('##Config')) {
