@@ -1,38 +1,32 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { NotebookPanel, CellList } from '@jupyterlab/notebook';
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 import { IObservableList } from '@jupyterlab/observables';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 import { CellActionConnector } from './actions';
 import { CellStyle } from './style';
+import { NotebookExt } from '../utils/notebook';
 
 /**
  * CellTracker
  */
-export class CellTracker implements IDisposable {
-  private _isDisposed = false;
+export class CellTracker extends NotebookExt {
   private _actionConnector = new CellActionConnector();
-  readonly panel: NotebookPanel;
 
   constructor(panel: NotebookPanel) {
-    this.panel = panel;
+    super(panel);
 
     panel.context.ready.then(() => this.updateCells());
     panel.context.model.cells.changed.connect(this._onCellsChanged, this);
   }
 
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
   dispose() {
     if (this.isDisposed) return;
 
-    this._isDisposed = true;
+    super.dispose();
     this._actionConnector.dispose();
-
     Signal.clearData(this);
   }
 
@@ -52,7 +46,7 @@ export class CellTracker implements IDisposable {
     // console.log('_onCellsChanged', cells, changed);
 
     changed.newValues.forEach(model =>
-      this._actionConnector.add(model, this._getCell(model))
+      this._actionConnector.add(model, this.findCellByModel(model))
     );
 
     // changed.oldValues.forEach(model => this._actionConnector.remove(model));
@@ -65,10 +59,6 @@ export class CellTracker implements IDisposable {
         }
       }
     }
-  }
-
-  private _getCell(model: ICellModel): Cell | undefined {
-    return this.panel.content.widgets.find(widget => widget.model === model);
   }
 }
 

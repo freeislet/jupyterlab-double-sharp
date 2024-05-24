@@ -7,6 +7,7 @@ import { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 // import { syntaxTree } from '@codemirror/language';
 
 import { KernelExecutor } from './kernel';
+import { NotebookExt, NotebookExtDictionary } from '../utils/notebook';
 import { In, notIn } from '../utils/array';
 
 export interface ICodeVariables {
@@ -24,30 +25,29 @@ export interface ICodeVariables {
 /**
  * CodeInspector
  */
-export class CodeInspector implements IDisposable {
-  private static _trackers = new Map<NotebookPanel, CodeInspector>();
+export class CodeInspector extends NotebookExt {
+  private static _dictionary: NotebookExtDictionary<CodeInspector>;
 
   static get(panel: NotebookPanel): CodeInspector | undefined {
-    return this._trackers.get(panel);
+    return this._dictionary.get(panel);
   }
 
   static getByCell(cell: Cell): CodeInspector | undefined {
-    const panel = cell.parent?.parent;
-    if (panel) return this.get(panel as NotebookPanel);
+    return this._dictionary.getByCell(cell);
   }
 
   static getByCells(cells: readonly Cell[]): CodeInspector | undefined {
-    if (cells.length) return this.getByCell(cells[0]);
+    return this._dictionary.getByCells(cells);
   }
 
-  //
+  //----
 
   readonly kernelExecutor: KernelExecutor;
   private _kernelVars = new Set<string>();
-  private _isDisposed = false;
 
-  constructor(public readonly panel: NotebookPanel) {
-    CodeInspector._trackers.set(panel, this);
+  constructor(panel: NotebookPanel) {
+    super(panel);
+    CodeInspector._dictionary.set(panel, this);
 
     this.kernelExecutor = new KernelExecutor(panel.sessionContext);
     this.kernelExecutor.ready.then(() => {
@@ -55,18 +55,13 @@ export class CodeInspector implements IDisposable {
     });
   }
 
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
   dispose() {
     if (this.isDisposed) return;
 
-    this._isDisposed = true;
+    super.dispose();
+    CodeInspector._dictionary.delete(this.panel);
     this._kernelVars.clear();
-
     Signal.clearData(this);
-    CodeInspector._trackers.delete(this.panel);
   }
 
   get kernelVariables(): Set<string> {
