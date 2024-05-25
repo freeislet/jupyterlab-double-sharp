@@ -2,19 +2,33 @@ import { SetMultimap } from '@teppeis/multimaps';
 
 export class MultiMap<K, V> extends SetMultimap<K, V> {
   /**
-   * clone 없이 value Set 조회
+   * map value Set 직접 조회 (없으면 undefined 리턴)
    */
   getRef(key: K): Set<V> | undefined {
     return this['map'].get(key);
   }
 
   /**
-   * value를 array 타입으로 조회
-   * key가 없어도 새로운 map entry를 만들지 않음
+   * get: clone 없이 value Set 조회하도록 변경
+   */
+  get(key: K): Set<V> {
+    const values = this.getRef(key);
+    return values ?? super.get(key);
+  }
+
+  /**
+   * cloned value Set 조회
+   */
+  getCloned(key: K): Set<V> {
+    return super.get(key);
+  }
+
+  /**
+   * value Set을 array 타입으로 조회
    */
   getAsArray(key: K): V[] {
-    const current = this.getRef(key);
-    return current ? Array.from(current) : [];
+    const values = this.getRef(key);
+    return values ? Array.from(values) : [];
   }
 
   /**
@@ -22,13 +36,14 @@ export class MultiMap<K, V> extends SetMultimap<K, V> {
    */
   deleteEntry(key: K, value: V): boolean {
     const current = this.getRef(key);
-    if (!current) return false;
-    if (!current.has(value)) return false;
+    if (!current?.has(value)) return false;
+
     if (current.size === 1) {
-      this['size_'] = this.size - 1;
-      return this['map'].delete(key);
+      this['map'].delete(key);
     } else {
-      return super.deleteEntry(key, value);
+      current.delete(value);
     }
+    this['size_'] = this.size - 1;
+    return true;
   }
 }

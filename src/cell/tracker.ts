@@ -5,6 +5,7 @@ import { IObservableList } from '@jupyterlab/observables';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
+import { CellDictionary } from './dictionary';
 import { CellActionConnector } from './actions';
 import { CellStyle } from './style';
 import { NotebookExt } from '../utils/notebook';
@@ -45,17 +46,23 @@ export class CellTracker extends NotebookExt {
   ) {
     // console.log('_onCellsChanged', cells, changed);
 
-    changed.newValues.forEach(model =>
-      this._actionConnector.add(model, this.findCellByModel(model))
-    );
+    changed.newValues.forEach(model => {
+      const cell = this.findCellByModel(model);
+      if (cell) {
+        CellDictionary.global.add(cell);
+      }
+      this._actionConnector.add(model, cell);
+    });
 
     // changed.oldValues.forEach(model => this._actionConnector.remove(model));
     // NOTE: CellList.changed.oldValues 목록이 undefined로 오는 문제로 전체 목록 참고하여 remove
     if (changed.oldValues.length) {
-      const newCellMap = new Set(cells);
-      for (const model of this._actionConnector.cellMap.keys()) {
-        if (!newCellMap.has(model)) {
-          this._actionConnector.remove(model);
+      const curModels = new Set(cells);
+      const panelCells = CellDictionary.global.getCellsByPanel(this.panel);
+      for (const cell of panelCells) {
+        const removed = !curModels.has(cell.model);
+        if (removed) {
+          this._actionConnector.remove(cell.model);
         }
       }
     }
