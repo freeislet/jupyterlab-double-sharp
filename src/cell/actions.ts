@@ -1,46 +1,62 @@
-import { ICellModel, Cell } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { IMapChange } from '@jupyter/ydoc';
-import { IDisposable } from '@lumino/disposable';
-
-import { CellDictionary } from './dictionary';
+import {
+  IMapChange,
+  ISharedCell,
+  CellChange,
+  SourceChange
+} from '@jupyter/ydoc';
 
 export namespace CellActions {
   export interface IParams {
     model: ICellModel;
-    cell?: Cell;
   }
 
-  export interface IChangedParams extends IParams {
+  export interface IChangedParams {
+    model: ICellModel;
     change: IChangedArgs<boolean, boolean, any>;
   }
 
-  export interface IMapChangeParams extends IParams {
+  export interface IMapChangeParams {
+    model: ICellModel;
     change: IMapChange;
+  }
+
+  export interface ISourceChangeParams {
+    model: ICellModel;
+    change: SourceChange;
   }
 }
 
 export class CellActions {
   /**
-   * 모든 셀의 ICellModel.contentChanged 시그널을 Cell 타입과 함께 emit
+   * 모든 셀 Cell.model의 ICellModel.contentChanged 시그널 emit
    */
   static get contentChanged(): ISignal<any, CellActions.IParams> {
     return Private.contentChanged;
   }
 
   /**
-   * 모든 셀의 ICellModel.stateChanged 시그널을 Cell 타입과 함께 emit
+   * 모든 셀 Cell.model의 ICellModel.stateChanged 시그널 emit
    */
   static get stateChanged(): ISignal<any, CellActions.IChangedParams> {
     return Private.stateChanged;
   }
 
   /**
-   * 모든 셀의 ICellModel.metadataChanged 시그널을 Cell 타입과 함께 emit
+   * 모든 셀 Cell.model의 ICellModel.metadataChanged 시그널 emit
    */
   static get metadataChanged(): ISignal<any, CellActions.IMapChangeParams> {
     return Private.metadataChanged;
+  }
+
+  /**
+   * 모든 셀 Cell.model.sharedModel의 ISharedBaseCell.changed 시그널 중
+   * CellChange.sourceChange 변경사항 emit
+   */
+  static get sourceChanged(): ISignal<any, CellActions.ISourceChangeParams> {
+    return Private.sourceChanged;
   }
 
   // TODO: mimetype, syntax tree
@@ -55,17 +71,6 @@ namespace Private {
   export const sourceChanged = new Signal<any, CellActions.ISourceChangeParams>(
     {}
   );
-
-  export function params<T extends CellActions.IParams>(
-    model: ICellModel,
-    args: Omit<T, keyof CellActions.IParams>
-  ): T {
-    return {
-      model,
-      cell: CellDictionary.global.getByModel(model), // TODO: ChangeContext property로 대체
-      ...args
-    } as T;
-  }
 }
 
 export class CellActionConnector {
@@ -75,13 +80,12 @@ export class CellActionConnector {
     model.contentChanged.connect(this._onContentChanged, this.slotContext);
     model.stateChanged.connect(this._onStateChanged, this.slotContext);
     model.metadataChanged.connect(this._onMetadataChanged, this.slotContext);
+    // model.sharedModel.changed.connect(this._onTextChanged, this.slotContext);
 
     // console.log('CellActionConnector.add', model);
   }
 
   remove(model: ICellModel) {
-    if (!model) return;
-
     model.contentChanged.disconnect(this._onContentChanged, this.slotContext);
     model.stateChanged.disconnect(this._onStateChanged, this.slotContext);
     model.metadataChanged.disconnect(this._onMetadataChanged, this.slotContext);
@@ -90,17 +94,26 @@ export class CellActionConnector {
   }
 
   protected _onContentChanged(model: ICellModel) {
-    Private.contentChanged.emit(Private.params(model, {}));
+    Private.contentChanged.emit({ model });
   }
 
   protected _onStateChanged(
     model: ICellModel,
     change: IChangedArgs<boolean, boolean, any>
   ) {
-    Private.stateChanged.emit(Private.params(model, { change }));
+    Private.stateChanged.emit({ model, change });
   }
 
   protected _onMetadataChanged(model: ICellModel, change: IMapChange) {
-    Private.metadataChanged.emit(Private.params(model, { change }));
+    Private.metadataChanged.emit({ model, change });
+  }
+
+  protected _onSharedModelChanged(
+    sharedModel: ISharedCell,
+    change: CellChange
+  ) {
+    if (change.sourceChange) {
+      // Private.sourceChanged.emit(Private.params(model, { change }));
+    }
   }
 }

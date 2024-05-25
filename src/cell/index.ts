@@ -5,6 +5,7 @@ import { CellContext } from './context';
 import { CellMetadata } from './metadata';
 import { CellStyle } from './style';
 import { CellActions } from './actions';
+import { CellDictionary } from './dictionary';
 import { ExecutionActions } from '../execution';
 import { CSMagicExecutor } from '../cs-magic';
 import { CodeInspector } from '../code';
@@ -44,6 +45,7 @@ export function setupCellActions() {
     console.log('cell contentChanged', args);
 
     const { model } = args;
+
     CellMetadata.configOverride.setDirty(model);
     CellMetadata.code.setDirty(model);
   });
@@ -52,14 +54,19 @@ export function setupCellActions() {
     (_, args: CellActions.IMapChangeParams) => {
       console.log('cell metadataChanged', args);
 
-      const { cell, change } = args;
-      if (cell && change.key.startsWith('##Config')) {
-        CellStyle.update(cell);
+      const { model, change } = args;
+
+      // ##Config, ##ConfigOverride 변경 시 cell style 업데이트
+      if (change.key.startsWith('##Config')) {
+        const cell = CellDictionary.global.getByModel(model);
+        if (cell) {
+          CellStyle.update(cell);
+        }
       }
     }
   );
 }
 
-export { CellContext, CellActions };
+export { CellContext, CellActions, CellDictionary };
 export { CellConfig } from './config';
 export { CellCode, CodeContext } from './code';
