@@ -1,12 +1,7 @@
 import { ICellModel } from '@jupyterlab/cells';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import {
-  IMapChange,
-  ISharedCell,
-  CellChange,
-  SourceChange
-} from '@jupyter/ydoc';
+import { IMapChange, ISharedCell, CellChange, Delta } from '@jupyter/ydoc';
 
 export namespace CellActions {
   export interface IParams {
@@ -24,8 +19,8 @@ export namespace CellActions {
   }
 
   export interface ISourceChangeParams {
-    model: ICellModel;
-    change: SourceChange;
+    sharedModel: ISharedCell;
+    change: Delta<string>;
   }
 }
 
@@ -80,7 +75,10 @@ export class CellActionConnector {
     model.contentChanged.connect(this._onContentChanged, this.slotContext);
     model.stateChanged.connect(this._onStateChanged, this.slotContext);
     model.metadataChanged.connect(this._onMetadataChanged, this.slotContext);
-    // model.sharedModel.changed.connect(this._onTextChanged, this.slotContext);
+    model.sharedModel.changed.connect(
+      this._onSharedModelChanged,
+      this.slotContext
+    );
 
     // console.log('CellActionConnector.add', model);
   }
@@ -89,6 +87,10 @@ export class CellActionConnector {
     model.contentChanged.disconnect(this._onContentChanged, this.slotContext);
     model.stateChanged.disconnect(this._onStateChanged, this.slotContext);
     model.metadataChanged.disconnect(this._onMetadataChanged, this.slotContext);
+    model.sharedModel.changed.disconnect(
+      this._onSharedModelChanged,
+      this.slotContext
+    );
 
     // console.log('CellActionConnector.remove', model);
   }
@@ -113,7 +115,7 @@ export class CellActionConnector {
     change: CellChange
   ) {
     if (change.sourceChange) {
-      // Private.sourceChanged.emit(Private.params(model, { change }));
+      Private.sourceChanged.emit({ sharedModel, change: change.sourceChange });
     }
   }
 }

@@ -41,27 +41,29 @@ export function setupCellActions() {
     }
   );
 
-  CellActions.contentChanged.connect((_, args: CellActions.IParams) => {
-    console.log('cell contentChanged', args);
+  CellActions.sourceChanged.connect(
+    (_, args: CellActions.ISourceChangeParams) => {
+      console.log('cell sourceChanged', args);
 
-    const { model } = args;
-
-    CellMetadata.configOverride.setDirty(model);
-    CellMetadata.code.setDirty(model);
-  });
+      const { sharedModel } = args;
+      const cell = CellDictionary.global.getBySharedModel(sharedModel);
+      const model = cell?.model;
+      if (model) {
+        CellMetadata.configOverride.setDirty(model);
+        CellMetadata.code.setDirty(model);
+      }
+    }
+  );
 
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
       console.log('cell metadataChanged', args);
 
       const { model, change } = args;
-
-      // ##Config, ##ConfigOverride 변경 시 cell style 업데이트
-      if (change.key.startsWith('##Config')) {
-        const cell = CellDictionary.global.getByModel(model);
-        if (cell) {
-          CellStyle.update(cell);
-        }
+      const cell = CellDictionary.global.getByModel(model);
+      if (cell && change.key.startsWith('##Config')) {
+        // ##Config, ##ConfigOverride 변경 시 cell style 업데이트
+        CellStyle.update(cell);
       }
     }
   );
