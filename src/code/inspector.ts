@@ -26,7 +26,7 @@ export interface ICodeVariables {
  * CodeInspector
  */
 export class CodeInspector extends NotebookExt {
-  private static _dictionary: NotebookExtDictionary<CodeInspector>;
+  private static _dictionary = new NotebookExtDictionary<CodeInspector>();
 
   static get(panel: NotebookPanel): CodeInspector | undefined {
     return this._dictionary.get(panel);
