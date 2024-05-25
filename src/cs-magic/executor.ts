@@ -1,4 +1,4 @@
-import { Cell } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 
 import { CSMagic } from './commands';
 import { matchAllStatements, tokenize } from '../utils/statement';
@@ -15,16 +15,16 @@ export class CSMagicExecutor {
     this.commands.set('%' + command.name, command);
   }
 
-  static executeGeneral(cell: Cell) {
-    this.execute(cell, command => command.type === 'general');
+  static executeGeneral(model: ICellModel) {
+    this.execute(model, command => command.type === 'general');
   }
 
-  static executeConfig(cell: Cell) {
-    this.execute(cell, command => command.type === 'config');
+  static executeConfig(model: ICellModel) {
+    this.execute(model, command => command.type === 'config');
   }
 
   static execute(
-    cell: Cell,
+    model: ICellModel,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
     // syntax 테스트 코드
@@ -34,17 +34,17 @@ export class CSMagicExecutor {
     // const commentNodes = tree.topNode.getChildren('Comment');
     // console.log(commentNodes, tree.topNode);
 
-    const source = cell.model.sharedModel.getSource();
+    const source = model.sharedModel.getSource();
     const matches = matchAllStatements(source);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
-        this._executeStatement(cell, match.statement, predicate);
+        this._executeStatement(model, match.statement, predicate);
       }
     }
   }
 
   private static _executeStatement(
-    cell: Cell,
+    model: ICellModel,
     statement: string,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
@@ -58,6 +58,6 @@ export class CSMagicExecutor {
     if (!command) return;
     if (predicate && !predicate(command)) return;
 
-    command.execute(cell, ...tokens.slice(1));
+    command.execute(model, ...tokens.slice(1));
   }
 }

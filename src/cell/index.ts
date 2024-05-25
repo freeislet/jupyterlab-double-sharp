@@ -25,7 +25,7 @@ export function setupCellActions() {
          * - ##ConfigOverride metadata 업데이트 (skip, cache, ...)
          * - load -> 셀 추가
          */
-        CSMagicExecutor.execute(cell);
+        CSMagicExecutor.execute(cell.model);
       }
     }
   );

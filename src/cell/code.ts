@@ -126,7 +126,7 @@ export class CodeContext {
   async getCellsToExecute(): Promise<CodeCell[] | void> {
     console.log('cellsToExecute {', this.cell);
 
-    const config = CellConfig.get(this.cell);
+    const config = CellConfig.get(this.cell.model);
     if (config.skip) return;
     if (config.cache) {
       const cached = await this.isVariablesCached();
@@ -230,7 +230,7 @@ export class CodeContext {
     targetVariables: string[],
     rescanContexts: CodeContext[]
   ): Promise<CellCode.IDependency | void> {
-    const config = CellConfig.get(scanContext.cell);
+    const config = CellConfig.get(scanContext.cell.model);
     if (config.skip) return;
 
     const execVars = await scanContext.getExecutionVariables();

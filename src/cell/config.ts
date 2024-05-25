@@ -1,4 +1,4 @@
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 
 import { CellMetadata } from './metadata';
 import { CSMagicExecutor } from '../cs-magic';
@@ -6,11 +6,9 @@ import { CSMagicExecutor } from '../cs-magic';
 export namespace CellConfig {
   export type IConfig = CellMetadata.IConfig;
 
-  export function get(cell: Cell): Required<IConfig> {
-    const model = cell.model;
-
+  export function get(model: ICellModel): Required<IConfig> {
     if (CellMetadata.configOverride.isDirty(model)) {
-      CSMagicExecutor.executeConfig(cell); // TODO: executeConfig 인자로 ICellModel 검토 (ICellModel로 Cell 찾기 구현)
+      CSMagicExecutor.executeConfig(model); // TODO: executeConfig 인자로 ICellModel 검토 (ICellModel로 Cell 찾기 구현)
     }
 
     const config = CellMetadata.config.getCoalesced(model);

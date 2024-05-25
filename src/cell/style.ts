@@ -4,7 +4,7 @@ import { CellConfig } from './config';
 
 export namespace CellStyle {
   export function update(cell: Cell) {
-    const config = CellConfig.get(cell);
+    const config = CellConfig.get(cell.model);
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
       'jp-DoubleSharp-cache': config.cache

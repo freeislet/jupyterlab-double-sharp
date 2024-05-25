@@ -1,4 +1,4 @@
-import { Cell } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 
 import { CellConfig } from '../cell';
 import { paramAsBoolean } from '../utils/statement';
@@ -9,13 +9,13 @@ export namespace CSMagic {
   export interface ICommand {
     readonly type: CommandType;
     readonly name: string;
-    execute(cell: Cell, ...args: string[]): void;
+    execute(model: ICellModel, ...args: string[]): void;
   }
 
   abstract class Command implements ICommand {
     abstract get type(): CommandType;
     abstract get name(): string;
-    abstract execute(cell: Cell, ...args: string[]): void;
+    abstract execute(model: ICellModel, ...args: string[]): void;
   }
 
   abstract class GeneralCommand extends Command {
@@ -37,8 +37,8 @@ export namespace CSMagic {
       return 'skip';
     }
 
-    execute(cell: Cell) {
-      CellConfig.updateOverride(cell.model, { skip: true });
+    execute(model: ICellModel) {
+      CellConfig.updateOverride(model, { skip: true });
     }
   }
 
@@ -47,9 +47,9 @@ export namespace CSMagic {
       return 'cache';
     }
 
-    execute(cell: Cell, flag?: string) {
+    execute(model: ICellModel, flag?: string) {
       const cache = !flag || paramAsBoolean(flag);
-      CellConfig.updateOverride(cell.model, { cache });
+      CellConfig.updateOverride(model, { cache });
     }
   }
 
@@ -58,7 +58,7 @@ export namespace CSMagic {
       return 'dummy';
     }
 
-    execute(cell: Cell) {}
+    execute(model: ICellModel) {}
   }
 
   // TODO: depend
