@@ -14,7 +14,7 @@ import { NotebookExt } from '../utils/notebook';
  * CellTracker
  */
 export class CellTracker extends NotebookExt {
-  private _actionConnector = new CellActionConnector();
+  private _actionConnector = new CellActionConnector(this);
 
   constructor(panel: NotebookPanel) {
     super(panel);
@@ -27,7 +27,6 @@ export class CellTracker extends NotebookExt {
     if (this.isDisposed) return;
 
     super.dispose();
-    this._actionConnector.dispose();
     Signal.clearData(this);
   }
 
@@ -51,7 +50,7 @@ export class CellTracker extends NotebookExt {
       if (cell) {
         CellDictionary.global.add(cell);
       }
-      this._actionConnector.add(model, cell);
+      this._actionConnector.add(model);
     });
 
     // changed.oldValues.forEach(model => this._actionConnector.remove(model));

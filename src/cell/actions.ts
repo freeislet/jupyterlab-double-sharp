@@ -68,38 +68,25 @@ namespace Private {
   }
 }
 
-export class CellActionConnector implements IDisposable {
-  private _isDisposed = false;
+export class CellActionConnector {
+  constructor(public readonly slotContext: any) {}
 
-  constructor() {}
+  add(model: ICellModel) {
+    model.contentChanged.connect(this._onContentChanged, this.slotContext);
+    model.stateChanged.connect(this._onStateChanged, this.slotContext);
+    model.metadataChanged.connect(this._onMetadataChanged, this.slotContext);
 
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  dispose() {
-    if (this.isDisposed) return;
-
-    this._isDisposed = true;
-    Signal.clearData(this);
-  }
-
-  add(model: ICellModel, cell?: Cell) {
-    model.contentChanged.connect(this._onContentChanged, this);
-    model.stateChanged.connect(this._onStateChanged, this);
-    model.metadataChanged.connect(this._onMetadataChanged, this);
-
-    // console.log('CellActionConnector.add', model, this.cellMap);
+    // console.log('CellActionConnector.add', model);
   }
 
   remove(model: ICellModel) {
     if (!model) return;
 
-    model.contentChanged.disconnect(this._onContentChanged, this);
-    model.stateChanged.disconnect(this._onStateChanged, this);
-    model.metadataChanged.disconnect(this._onMetadataChanged, this);
+    model.contentChanged.disconnect(this._onContentChanged, this.slotContext);
+    model.stateChanged.disconnect(this._onStateChanged, this.slotContext);
+    model.metadataChanged.disconnect(this._onMetadataChanged, this.slotContext);
 
-    // console.log('CellActionConnector.remove', model, this.cellMap);
+    // console.log('CellActionConnector.remove', model);
   }
 
   protected _onContentChanged(model: ICellModel) {
