@@ -50,7 +50,7 @@ export class CodeInspector extends NotebookExt {
     CodeInspector._dictionary.set(panel, this);
 
     this.kernelExecutor = new KernelExecutor(panel.sessionContext);
-    this.kernelExecutor.ready.then(() => {
+    this.kernelExecutor.initialized.connect(() => {
       this.updateKernelVariables();
     });
   }
@@ -80,6 +80,7 @@ export class CodeInspector extends NotebookExt {
   }
 
   filterNonKernelVariables(variables: string[]): string[] {
+    console.log('filterNonKernelVariables', variables, this._kernelVars);
     return variables.filter(notIn(this._kernelVars));
   }
 
