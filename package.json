@@ -20,7 +20,8 @@
         "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
         "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
         "src/**/*.{ts,tsx}",
-        "schema/*.json"
+        "schema/*.json",
+        "script/*"
     ],
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -107,7 +108,8 @@
     "jupyterlab": {
         "extension": true,
         "outputDir": "jupyterlab_double_sharp/labextension",
-        "schemaDir": "schema"
+        "schemaDir": "schema",
+        "webpackConfig": "./webpack.config.js"
     },
     "eslintIgnore": [
         "node_modules",
