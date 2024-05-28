@@ -27,21 +27,31 @@ class DoubleSharpKernel:
   
   @classmethod
   def inspect(cls, source):
-    source = cls.transformer.transform_cell(source)
-    # code = compile(source, '<string>', 'exec')
-    source = cls.make_temp_function(source)
-    exec(source, cls.temp_module.__dict__)
-    temp_function = cls.temp_module._temp
-    code = temp_function.__code__
-
     from inspect import getclosurevars
-    closurevars = getclosurevars(temp_function)
 
-    print(cls.dumps({
-      # 'co_names': code.co_names,  # builtins 포함
-      'co_varnames': code.co_varnames,
-      'unbound': list(closurevars.unbound),
-    }))
+    try:
+      source = cls.transformer.transform_cell(source)
+      code = compile(source, '<string>', 'exec')
+
+      fn_source = cls.make_temp_function(source)
+      exec(fn_source, cls.temp_module.__dict__)
+      fn_temp_function = cls.temp_module._temp_function
+      fn_code = fn_temp_function.__code__
+      fn_closurevars = getclosurevars(fn_temp_function)
+
+      print(cls.dumps({
+        # 'co_names': fn_code.co_names,  # builtins 포함
+        'co_varnames': fn_code.co_varnames,
+        'unbound': list(fn_closurevars.unbound),
+      }))
+
+    except Exception as e:
+      cls.eprint_obj(e)
+
+  @staticmethod
+  def make_temp_function(source):
+    import re
+    return 'def _temp_function():\n    ' + re.sub(r'\n', '\n    ', source)
   
   @staticmethod
   def dumps(obj):
@@ -50,9 +60,16 @@ class DoubleSharpKernel:
     return json.dumps(obj, ensure_ascii=False)
 
   @staticmethod
-  def make_temp_function(source):
-    import re
-    return 'def _temp():\n    ' + re.sub(r'\n', '\n    ', source)
+  def print_obj(obj, **kwargs):
+
+    for attr in dir(obj):
+      print(f'{attr}: {getattr(obj, attr)}', **kwargs)
+
+  @classmethod
+  def eprint_obj(cls, obj, **kwargs):
+    import sys
+
+    cls.print_obj(obj, file=sys.stderr, **kwargs)
 
 DoubleSharpKernel.init()
 `;
@@ -128,7 +145,7 @@ export class KernelExecutor {
       const resultAsJson = options?.resultAsJson ?? true;
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        // console.log(msg);
+        console.log(msg);
 
         switch (msg.header.msg_type) {
           case 'execute_result':
@@ -173,7 +190,7 @@ export class KernelExecutor {
   async inspect(
     source: string
   ): Promise<KernelExecutor.IInspectResult | undefined> {
-    const escaped = source.replace(/"""/g, '\\"""');
+    const escaped = source.replace(/"""/g, '\\"\\"\\"');
     const code = `DoubleSharpKernel.inspect("""${escaped}""")`;
     // console.log(code);
 
@@ -182,7 +199,7 @@ export class KernelExecutor {
     await this.execute(code, {
       onResult: (result: KernelExecutor.IInspectResult) => {
         ret = result;
-        // console.log('inspect result:', result);
+        console.log('inspect result:', result);
       }
     });
     return ret;
