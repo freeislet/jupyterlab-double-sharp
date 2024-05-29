@@ -185,8 +185,12 @@ namespace Private {
    */
   //
   export function parseJSON(json: string): any {
-    json = unescapeQuotes(json);
-    return JSON.parse(json);
+    try {
+      json = unescapeQuotes(json);
+      return JSON.parse(json);
+    } catch {
+      return json;
+    }
   }
 
   /**
@@ -194,10 +198,14 @@ namespace Private {
    * 한 JSON 덩어리가 여러 줄로 이루어진 경우도 고려해서 처리
    * (stream으로 여러 개의 JSON을 보낼 때 사용)
    */
-  export function parseJSONL(jsonl: string): any[] {
-    jsonl = unescapeQuotes(jsonl);
-    const json = '[' + jsonl.replace(/(?<=[}\]])\n*(?=[{\[])/g, ',') + ']';
-    return JSON.parse(json);
+  export function parseJSONL(jsonl: string): any {
+    try {
+      jsonl = unescapeQuotes(jsonl);
+      const json = '[' + jsonl.replace(/(?<=[}\]])\n*(?=[{\[])/g, ',') + ']';
+      return JSON.parse(json);
+    } catch {
+      return jsonl;
+    }
   }
 
   function unescapeQuotes(text: string): string {
