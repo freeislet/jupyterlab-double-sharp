@@ -130,9 +130,12 @@ export class KernelExecutor {
     let ret: KernelExecutor.IInspectResult | undefined;
 
     await this.execute(code, {
-      onResult: (result: KernelExecutor.IInspectResult) => {
+      onExecuteResult(result: KernelExecutor.IInspectResult) {
         ret = result;
         console.log('inspect result:', result);
+      },
+      onStream(result) {
+        console.log('inspect log:', result);
       }
     });
     return ret;
@@ -153,6 +156,11 @@ export namespace KernelExecutor {
   }
 
   export interface IInspectResult {
+    functions: IFunctionReport[];
+  }
+
+  export interface IFunctionReport {
+    name: string;
     co_varnames: string[];
     unbound: string[];
   }

@@ -92,12 +92,18 @@ export class CodeInspector extends NotebookExt {
     model: ICodeCellModel
   ): Promise<ICodeVariables | undefined> {
     const source = model.sharedModel.getSource();
-    const inspectResult = await this.kernelExecutor.inspect(source);
-    if (!inspectResult) return;
+    const result = await this.kernelExecutor.inspect(source);
+    if (!result) return;
+
+    // TODO: function reports에서 variables, unboundVariables 수집
+    const func = result.functions[0] ?? {
+      co_varnames: [],
+      unbound: []
+    };
 
     const vars: ICodeVariables = {
-      variables: inspectResult.co_varnames,
-      unboundVariables: inspectResult.unbound
+      variables: func.co_varnames,
+      unboundVariables: func.unbound
     };
     console.log('code variables', vars);
     return vars;

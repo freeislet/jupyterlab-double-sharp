@@ -9,7 +9,7 @@ class DoubleSharpKernel:
         cls.magics = NamespaceMagics()
         cls.magics.shell = get_ipython().kernel.shell
         cls.transformer = TransformerManager()
-        cls.temp_module = ModuleType("temp_module")
+        cls.internal_module = ModuleType("internal_module")
 
     @classmethod
     def who(cls):
@@ -18,36 +18,76 @@ class DoubleSharpKernel:
 
     @classmethod
     def inspect(cls, source):
-        from inspect import getclosurevars
-
         try:
             source = cls.transformer.transform_cell(source)
-            # code = compile(source, "<string>", "exec")
+            # debug
+            code = compile(source, "<string>", "exec")
+            cls.print_code(code)
 
-            fn_source = cls.make_temp_function(source)
-            exec(fn_source, cls.temp_module.__dict__)
-            fn_temp_function = cls.temp_module._temp_function
-            fn_code = fn_temp_function.__code__
-            fn_closurevars = getclosurevars(fn_temp_function)
+            fn_source = cls.make_source_function(source)
+            exec(fn_source, cls.internal_module.__dict__)
+            fn_function = cls.internal_module._source_
+            fn_reports = cls.inspect_function(fn_function)
 
-            print(
-                cls.dumps(
-                    {
-                        # 'co_names': fn_code.co_names,  # builtins 포함
-                        "co_varnames": fn_code.co_varnames,
-                        "unbound": list(fn_closurevars.unbound),
-                    }
-                )
-            )
+            result = cls.dumps({"functions": fn_reports})
+            return result
 
         except Exception as e:
-            cls.eprint_obj(e)
+            print(e)
+
+    @classmethod
+    def inspect_function(cls, function):
+        import inspect
+
+        reports = []
+        fns = [function]
+
+        for fn in fns:
+            code = fn.__code__
+            closurevars = inspect.getclosurevars(fn)
+
+            # debug
+            cls.print_code(code, closurevars)
+
+            report = {
+                "name": code.co_name,
+                # co_varnames -> ICodeVariables.variables
+                "co_varnames": code.co_varnames,
+                # unbound -> ICodeVariables.unboundVariables
+                "unbound": list(closurevars.unbound),
+            }
+            reports.append(report)
+
+            fn_consts = filter(lambda const: inspect.isfunction(const), code.co_consts)
+            fns.extend(fn_consts)
+
+            # for block in codeworklist:
+            #     for k, v in [
+            #         interesting(inst)
+            #         for inst in Bytecode(block)
+            #         if interesting(inst)
+            #     ]:
+            #         if k == "modules":
+            #             newmods = [
+            #                 mod.__name__ for mod in v if hasattr(mod, "__name__")
+            #             ]
+            #             mods.update(set(newmods))
+            #         elif k == "code" and id(v) not in seen:
+            #             seen.add(id(v))
+            #             if hasattr(v, "__module__"):
+            #                 mods.add(v.__module__)
+            #         if inspect.isfunction(v):
+            #             worklist.append(v)
+            #         elif inspect.iscode(v):
+            #             codeworklist.append(v)
+
+        return reports
 
     @staticmethod
-    def make_temp_function(source):
+    def make_source_function(source):
         import re
 
-        return "def _temp_function():\n    " + re.sub(r"\n", "\n    ", source)
+        return "def _source_():\n    " + re.sub(r"\n", "\n    ", source)
 
     @staticmethod
     def dumps(obj):
@@ -55,17 +95,38 @@ class DoubleSharpKernel:
 
         return json.dumps(obj, ensure_ascii=False)
 
-    @staticmethod
-    def print_obj(obj, **kwargs):
-
-        for attr in dir(obj):
-            print(f"{attr}: {getattr(obj, attr)}", **kwargs)
+    @classmethod
+    def print_obj(cls, obj, **kwargs):
+        # for attr in dir(obj):
+        #     print(f"{attr}: {getattr(obj, attr)}", **kwargs)
+        print(cls.dumps(obj))
 
     @classmethod
-    def eprint_obj(cls, obj, **kwargs):
-        import sys
+    def print_code(cls, code, closurevars=None):
+        def list_(lst):
+            return [str(e) for e in lst]
 
-        cls.print_obj(obj, file=sys.stderr, **kwargs)
+        def mapping(map):
+            return {str(k): str(v) for k, v in map.items()}
+
+        obj = {
+            "co_name": code.co_name,
+            "co_flags": code.co_flags,
+            "co_names": code.co_names,  # builtins 포함
+            "co_varnames": code.co_varnames,  # arguments, function locals
+            "co_consts": list_(code.co_consts),
+        }
+
+        if closurevars:
+            cv = {
+                "builtins": mapping(closurevars.builtins),
+                "nonlocals": mapping(closurevars.nonlocals),
+                "globals": mapping(closurevars.globals),
+                "unbound": list(closurevars.unbound),
+            }
+            obj.update(cv)
+
+        cls.print_obj(obj)
 
 
 DoubleSharpKernel.init()
