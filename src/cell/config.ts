@@ -8,7 +8,7 @@ export namespace CellConfig {
 
   export function get(model: ICellModel): Required<IConfig> {
     if (CellMetadata.configOverride.isDirty(model)) {
-      CSMagicExecutor.executeConfig(model); // TODO: executeConfig 인자로 ICellModel 검토 (ICellModel로 Cell 찾기 구현)
+      CSMagicExecutor.executeConfig(model);
     }
 
     const config = CellMetadata.config.getCoalesced(model);
