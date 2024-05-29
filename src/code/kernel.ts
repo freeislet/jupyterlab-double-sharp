@@ -76,6 +76,7 @@ export class KernelExecutor {
 
     if (useResult) {
       const resultAsJson = options?.resultAsJson ?? true;
+      const streamAsJsonl = options?.streamAsJsonl ?? true;
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
         console.log(msg);
@@ -96,7 +97,11 @@ export class KernelExecutor {
               const content = msg.content as IStream;
               if (content.name === 'stdout') {
                 const text = joinMultiline(content.text);
-                const result = resultAsJson ? Private.parseJSON(text) : text;
+                const result = streamAsJsonl
+                  ? Private.parseJSONL(text)
+                  : resultAsJson
+                    ? Private.parseJSON(text)
+                    : text;
                 onResult?.(result);
                 onStream?.(result);
               }
@@ -153,6 +158,12 @@ export namespace KernelExecutor {
      * default: true
      */
     resultAsJson?: boolean;
+
+    /**
+     * stream msg_type을 JSON Lines 배열로 파싱
+     * default: true
+     */
+    streamAsJsonl?: boolean;
   }
 
   export interface IInspectResult {
@@ -167,11 +178,31 @@ export namespace KernelExecutor {
 }
 
 namespace Private {
+  /**
+   * JSON 파싱
+   * JSON 문자열이 따옴표(', ")로 싸인 경우도 처리
+   * (python 리턴값을 execute_result msg_type으로 받을 때 사용)
+   */
+  //
   export function parseJSON(json: string): any {
-    if (json.startsWith("'") || json.startsWith('"')) {
-      json = json.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'");
-    }
-
+    json = unescapeQuotes(json);
     return JSON.parse(json);
+  }
+
+  /**
+   * JSON Lines 파싱
+   * 한 JSON 덩어리가 여러 줄로 이루어진 경우도 고려해서 처리
+   * (stream으로 여러 개의 JSON을 보낼 때 사용)
+   */
+  export function parseJSONL(jsonl: string): any[] {
+    jsonl = unescapeQuotes(jsonl);
+    const json = '[' + jsonl.replace(/(?<=[}\]])\n*(?=[{\[])/g, ',') + ']';
+    return JSON.parse(json);
+  }
+
+  function unescapeQuotes(text: string): string {
+    return text.startsWith("'") || text.startsWith('"')
+      ? text.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'")
+      : text;
   }
 }
