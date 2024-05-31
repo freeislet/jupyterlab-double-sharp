@@ -76,7 +76,7 @@ export class KernelExecutor {
 
     if (useResult) {
       const resultAsJson = options?.resultAsJson ?? true;
-      const streamAsJsonl = options?.streamAsJsonl ?? true;
+      const streamAsJsonl = options?.streamAsJsonl ?? Boolean(onStream);
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
         // console.debug(msg);
@@ -167,7 +167,7 @@ export namespace KernelExecutor {
 
     /**
      * stream msg_type을 JSON Lines 배열로 파싱
-     * default: true
+     * default: onStream 있으면 true, 없으면 false
      */
     streamAsJsonl?: boolean;
   }
