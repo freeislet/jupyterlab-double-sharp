@@ -202,7 +202,7 @@ namespace Private {
   export function parseJSONL(jsonl: string): any {
     try {
       jsonl = unescapeQuotes(jsonl);
-      const json = '[' + jsonl.replace(/(?<=[}\]])\n*(?=[{\[])/g, ',') + ']';
+      const json = '[' + jsonl.replace(/(?<=[}\]])\n*(?=[{[])/g, ',') + ']';
       return JSON.parse(json);
     } catch {
       return jsonl;
