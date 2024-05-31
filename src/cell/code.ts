@@ -104,7 +104,9 @@ export class CodeContext {
     const unresolvedVariables = this.inspector.filterNonKernelVariables(
       metadata.unboundVariables
     );
-    return { ...metadata, unresolvedVariables };
+    const execVars = { ...metadata, unresolvedVariables };
+    console.log('execution variables', execVars);
+    return execVars;
   }
 
   /**
@@ -151,7 +153,6 @@ export class CodeContext {
     console.log('_buildDependency {', this.cell);
 
     const execVars = await this.getExecutionVariables();
-    console.log('execution variables', execVars);
     const unresolvedVars = execVars.unresolvedVariables;
     if (!unresolvedVars.length) return;
 

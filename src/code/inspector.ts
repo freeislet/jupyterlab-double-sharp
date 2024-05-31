@@ -80,8 +80,14 @@ export class CodeInspector extends NotebookExt {
   }
 
   filterNonKernelVariables(variables: string[]): string[] {
-    console.debug('filterNonKernelVariables', variables, this._kernelVars);
-    return variables.filter(notIn(this._kernelVars));
+    const nonKernelVars = variables.filter(notIn(this._kernelVars));
+    // console.debug(
+    //   'filterNonKernelVariables',
+    //   nonKernelVariables,
+    //   variables,
+    //   this._kernelVars
+    // );
+    return nonKernelVars;
   }
 
   async getCodeVariables(cell: CodeCell): Promise<ICodeVariables | undefined> {
@@ -99,7 +105,7 @@ export class CodeInspector extends NotebookExt {
       variables: result.stored_names,
       unboundVariables: result.unbound_names
     };
-    console.debug('code variables', vars);
+    // console.debug('code variables', vars);
     return vars;
   }
 
