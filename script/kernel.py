@@ -1,4 +1,4 @@
-class DoubleSharpKernel:
+class DoubleSharp:
     @classmethod
     def init(cls):
         from IPython import get_ipython
@@ -11,10 +11,68 @@ class DoubleSharpKernel:
         cls.transformer = TransformerManager()
         cls.internal_module = ModuleType("internal_module")
 
+        # util class (json dumps, debug용 log)
+        def list_(lst):
+            return [str(e) for e in lst]
+
+        def pairs(pairs):
+            return {str(k): str(v) for k, v in pairs}
+
+        def mapping(map):
+            return pairs(map.items())
+
+        class Util:
+            @staticmethod
+            def dumps(obj):
+                import json
+
+                return json.dumps(obj, ensure_ascii=False)
+
+            def print_closurevars(self, closurevars, fn_members=None):
+                log = {
+                    "builtins": mapping(closurevars.builtins),
+                    "nonlocals": mapping(closurevars.nonlocals),
+                    "globals": mapping(closurevars.globals),
+                    "unbound": list(closurevars.unbound),
+                }
+
+                if fn_members:
+                    # log["members"] = pairs(fn_members)
+                    members_dict = {k: v for k, v in fn_members}
+                    log["__name__"] = members_dict.get("__name__", "<unknown>")
+                    # log["__builtins__"] = mapping(members_dict.get("__builtins__", {}))
+                    # log["__globals__"] = mapping(members_dict.get("__globals__", {}))
+                    log["__globals__"] = list(members_dict.get("__globals__", {}))
+
+                self.print_obj(log)
+
+            def print_code(self, code, members=None):
+                log = {
+                    "co_name": code.co_name,
+                    "co_flags": code.co_flags,
+                    "co_names": code.co_names,  # builtins 포함
+                    "co_varnames": code.co_varnames,  # arguments, function locals
+                    "co_freevars": code.co_freevars,  # 함수 closure를 통해 참조되는 변수들
+                    "co_cellvars": code.co_cellvars,  # 내부 scope에서 참조하는 변수들
+                    "co_consts": list_(code.co_consts),
+                }
+
+                if members:
+                    log["members"] = pairs(members)
+
+                self.print_obj(log)
+
+            def print_obj(self, obj, **kwargs):
+                # for attr in dir(obj):
+                #     print(f"{attr}: {getattr(obj, attr)}", **kwargs)
+                print(self.dumps(obj))
+
+        cls.util = Util()
+
     @classmethod
     def who(cls):
         vars = cls.magics.who_ls()
-        print(cls.dumps(vars))
+        print(cls.util.dumps(vars))
 
     @classmethod
     def inspect(cls, source):
@@ -22,14 +80,12 @@ class DoubleSharpKernel:
             source = cls.transformer.transform_cell(source)
             # debug
             code = compile(source, "<string>", "exec")
-            cls.print_code(code)
+            cls.util.print_code(code)
 
             fn_source = cls.make_source_function(source)
-            exec(fn_source, cls.internal_module.__dict__)
-            fn_function = cls.internal_module._source_
-            fn_reports = cls.inspect_function(fn_function)
+            fn_reports = cls.inspect_function(fn_source)
 
-            result = cls.dumps({"functions": fn_reports})
+            result = cls.util.dumps({"functions": fn_reports})
             return result
 
         except Exception as e:
@@ -38,48 +94,71 @@ class DoubleSharpKernel:
     @classmethod
     def inspect_function(cls, function):
         import inspect
+        import dis
+
+        if isinstance(function, str):
+            exec(function, cls.internal_module.__dict__)
+            function = cls.internal_module._source_
 
         reports = []
         fns = [function]
 
         for fn in fns:
-            code = fn.__code__
+            fn_code = fn.__code__
             closurevars = inspect.getclosurevars(fn)
 
             # debug
-            cls.print_code(code, closurevars)
+            cls.util.print_closurevars(closurevars, inspect.getmembers(fn))
 
-            report = {
-                "name": code.co_name,
-                # co_varnames -> ICodeVariables.variables
-                "co_varnames": code.co_varnames,
-                # unbound -> ICodeVariables.unboundVariables
-                "unbound": list(closurevars.unbound),
-            }
-            reports.append(report)
+            # inspect할 functions 추가
+            # NOTE: module을 function화하면 globals 안 생기는 듯? -> 확실하면 아래 코드 제거
+            global_fns = [
+                var for var in closurevars.globals.values() if inspect.isfunction(var)
+            ]
+            fns.extend(global_fns)
 
-            fn_consts = filter(lambda const: inspect.isfunction(const), code.co_consts)
-            fns.extend(fn_consts)
+            # variables 결과 보정을 위해 code 및 inner code 검사 (nested function, lambda 등)
+            # NOTE: instructions 수집해서 전달만 하고, 실제 variables 보정 작업은 client에서 처리
+            relevant_instructions = [
+                "IMPORT_NAME",
+                "LOAD_NAME",
+                "LOAD_ATTR",
+                "STORE_NAME",
+                "STORE_FAST",
+            ]
 
-            # for block in codeworklist:
-            #     for k, v in [
-            #         interesting(inst)
-            #         for inst in Bytecode(block)
-            #         if interesting(inst)
-            #     ]:
-            #         if k == "modules":
-            #             newmods = [
-            #                 mod.__name__ for mod in v if hasattr(mod, "__name__")
-            #             ]
-            #             mods.update(set(newmods))
-            #         elif k == "code" and id(v) not in seen:
-            #             seen.add(id(v))
-            #             if hasattr(v, "__module__"):
-            #                 mods.add(v.__module__)
-            #         if inspect.isfunction(v):
-            #             worklist.append(v)
-            #         elif inspect.iscode(v):
-            #             codeworklist.append(v)
+            codes = [fn_code]
+            for code in codes:
+                instruction_args = {opname: [] for opname in relevant_instructions}
+
+                # debug
+                cls.util.print_code(code)
+
+                bytecode = dis.Bytecode(code)
+                for inst in bytecode:
+                    if inst.opname in relevant_instructions:
+                        instruction_args[inst.opname].append(
+                            inst.argval
+                        )  # argval 항상 str?
+
+                    if inst.opname in ["LOAD_CONST"]:  # 다른 op 확인?
+                        if inspect.isfunction(inst.argval):
+                            # const가 function인 경우는 없는 듯? -> 확실하면 코드 제거
+                            fns.append(inst.argval)
+                        elif inspect.iscode(inst.argval):
+                            codes.append(inst.argval)
+
+                # function 정보 추가
+                report = {
+                    "name": code.co_name,
+                    # co_varnames -> ICodeVariables.variables
+                    "co_varnames": code.co_varnames,
+                    # unbound -> ICodeVariables.unboundVariables
+                    "unbound": list(closurevars.unbound),
+                    # variables 결과 보정을 위한 instruction-args list
+                    "instructionArgs": instruction_args,
+                }
+                reports.append(report)
 
         return reports
 
@@ -89,44 +168,5 @@ class DoubleSharpKernel:
 
         return "def _source_():\n    " + re.sub(r"\n", "\n    ", source)
 
-    @staticmethod
-    def dumps(obj):
-        import json
 
-        return json.dumps(obj, ensure_ascii=False)
-
-    @classmethod
-    def print_obj(cls, obj, **kwargs):
-        # for attr in dir(obj):
-        #     print(f"{attr}: {getattr(obj, attr)}", **kwargs)
-        print(cls.dumps(obj))
-
-    @classmethod
-    def print_code(cls, code, closurevars=None):
-        def list_(lst):
-            return [str(e) for e in lst]
-
-        def mapping(map):
-            return {str(k): str(v) for k, v in map.items()}
-
-        obj = {
-            "co_name": code.co_name,
-            "co_flags": code.co_flags,
-            "co_names": code.co_names,  # builtins 포함
-            "co_varnames": code.co_varnames,  # arguments, function locals
-            "co_consts": list_(code.co_consts),
-        }
-
-        if closurevars:
-            cv = {
-                "builtins": mapping(closurevars.builtins),
-                "nonlocals": mapping(closurevars.nonlocals),
-                "globals": mapping(closurevars.globals),
-                "unbound": list(closurevars.unbound),
-            }
-            obj.update(cv)
-
-        cls.print_obj(obj)
-
-
-DoubleSharpKernel.init()
+DoubleSharp.init()

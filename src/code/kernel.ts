@@ -1,6 +1,6 @@
 import { ISessionContext } from '@jupyterlab/apputils';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
-import { IExecuteResult, IStream } from '@jupyterlab/nbformat';
+import { IExecuteResult, IStream, StreamType } from '@jupyterlab/nbformat';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PromiseDelegate } from '@lumino/coreutils';
 
@@ -79,13 +79,16 @@ export class KernelExecutor {
       const streamAsJsonl = options?.streamAsJsonl ?? true;
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        console.log(msg);
+        // console.log(msg);
 
-        switch (msg.header.msg_type) {
+        const msgType = msg.header.msg_type;
+        switch (msgType) {
           case 'execute_result':
             if (onResult || onExecuteResult) {
               const executeResult = msg.content as IExecuteResult;
               const text = executeResult.data['text/plain'] as string;
+              console.log(msgType, { text });
+
               const result = resultAsJson ? Private.parseJSON(text) : text;
               onResult?.(result);
               onExecuteResult?.(result);
@@ -95,16 +98,19 @@ export class KernelExecutor {
           case 'stream':
             if (onResult || onStream) {
               const content = msg.content as IStream;
-              if (content.name === 'stdout') {
-                const text = joinMultiline(content.text);
-                const result = streamAsJsonl
-                  ? Private.parseJSONL(text)
-                  : resultAsJson
-                    ? Private.parseJSON(text)
-                    : text;
+              const streamType = content.name;
+              const text = joinMultiline(content.text);
+              console.log(msgType, streamType, { text });
+
+              const result = streamAsJsonl
+                ? Private.parseJSONL(text)
+                : resultAsJson
+                  ? Private.parseJSON(text)
+                  : text;
+              if (streamType === 'stdout') {
                 onResult?.(result);
-                onStream?.(result);
               }
+              onStream?.(result, streamType);
             }
             break;
         }
@@ -117,7 +123,7 @@ export class KernelExecutor {
   async getInteractiveVariables(): Promise<string[]> {
     const retVars: string[] = [];
 
-    await this.execute('DoubleSharpKernel.who()', {
+    await this.execute('DoubleSharp.who()', {
       onResult: (vars: string[]) => {
         retVars.push(...vars);
       }
@@ -129,7 +135,7 @@ export class KernelExecutor {
     source: string
   ): Promise<KernelExecutor.IInspectResult | undefined> {
     const escaped = source.replace(/"""/g, '\\"\\"\\"');
-    const code = `DoubleSharpKernel.inspect("""${escaped}""")`;
+    const code = `DoubleSharp.inspect("""${escaped}""")`;
     // console.log(code);
 
     let ret: KernelExecutor.IInspectResult | undefined;
@@ -151,7 +157,7 @@ export namespace KernelExecutor {
   export interface IExecuteOptions {
     onResult?: (result: any) => void;
     onExecuteResult?: (result: any) => void;
-    onStream?: (result: any) => void;
+    onStream?: (result: any, type: StreamType) => void;
 
     /**
      * (따옴표로 둘러싸였을 수 있는) result 문자열을 json object로 파싱
@@ -174,6 +180,14 @@ export namespace KernelExecutor {
     name: string;
     co_varnames: string[];
     unbound: string[];
+    instructionArgs: IInstructionArgs;
+  }
+
+  export interface IInstructionArgs {
+    IMPORT_NAME: string[];
+    LOAD_ATTR: string[];
+    STORE_NAME: string[];
+    STORE_FAST: string[];
   }
 }
 
