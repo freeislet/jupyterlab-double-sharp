@@ -105,7 +105,7 @@ export class CodeContext {
       metadata.unboundVariables
     );
     const execVars = { ...metadata, unresolvedVariables };
-    console.log('execution variables', execVars);
+    // console.debug('execution variables', execVars);
     return execVars;
   }
 
@@ -126,7 +126,7 @@ export class CodeContext {
    * - unbound variables resolve 위한 dependent cells 수집
    */
   async getCellsToExecute(): Promise<CodeCell[] | void> {
-    console.log('cellsToExecute {', this.cell);
+    console.debug('cellsToExecute {', this.cell);
 
     const config = CellConfig.get(this.cell.model);
     if (config.skip) return;
@@ -141,7 +141,7 @@ export class CodeContext {
       ? this._collectDependentCells(dependency)
       : [];
     const cellsToExecute = [...dependentCells, this.cell];
-    console.log('} cellsToExecute', cellsToExecute);
+    console.debug('} cellsToExecute', cellsToExecute);
     // TODO: ##Execution 기록 w/ targetCell id
     return cellsToExecute;
   }
@@ -150,7 +150,7 @@ export class CodeContext {
    * 현재 셀 코드의 dependency 수집
    */
   private async _buildDependency(): Promise<CellCode.IDependency | void> {
-    console.log('_buildDependency {', this.cell);
+    // console.debug('_buildDependency {', this.cell);
 
     const execVars = await this.getExecutionVariables();
     const unresolvedVars = execVars.unresolvedVariables;
@@ -160,7 +160,7 @@ export class CodeContext {
     const scanContexts = scanCells.map(
       cell => new CodeContext(cell, this.inspector)
     );
-    console.log('scan contexts', scanContexts);
+    // console.debug('scan contexts', scanContexts);
     if (!scanContexts.length) return;
 
     const dependency: CellCode.IDependency = {
@@ -172,7 +172,7 @@ export class CodeContext {
     };
 
     await this._buildDependencies(dependency, scanContexts);
-    console.log('} _buildDependency', this.cell);
+    // console.debug('} _buildDependency', this.cell);
     return dependency;
   }
 
