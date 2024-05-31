@@ -121,11 +121,12 @@ namespace NewCodeCell {
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
 
-    // 실행 셀 목록 조회 (dependent cells 수집 포함)
+    // 셀 실행 계획 조회 (dependent cells 포함)
     const cellContext = new CellContext(cell);
-    const cells = await cellContext.codeContext?.getCellsToExecute();
-    if (cells) {
-      for (const codeCell of cells) {
+    const executionPlan = await cellContext.codeContext?.buildExecutionPlan();
+    const cellsToExecute = executionPlan?.cellsToExecute;
+    if (cellsToExecute) {
+      for (const codeCell of cellsToExecute) {
         // 기존 실행 함수
         ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
         // console.log('CodeCell.execute ret:', ret);

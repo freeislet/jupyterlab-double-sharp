@@ -48,6 +48,14 @@ export namespace CellCode {
      */
     unresolvedVariables: string[];
   }
+
+  export interface IExecutionPlan {
+    skipped?: boolean;
+    cached?: boolean;
+    cellsToExecute?: CodeCell[];
+    dependentCells?: CodeCell[];
+    dependency?: IDependency;
+  }
 }
 
 export class CodeContext {
@@ -121,18 +129,26 @@ export class CodeContext {
   }
 
   /**
-   * 실행 셀 목록 수집 (dependent cells 포함)
+   * 셀 실행 계획 수집 (dependent cells 포함)
    * - skip, cache 처리 (실행 여부 판단)
    * - unbound variables resolve 위한 dependent cells 수집
    */
-  async getCellsToExecute(): Promise<CodeCell[] | void> {
-    console.debug('cellsToExecute {', this.cell);
+  async buildExecutionPlan(): Promise<CellCode.IExecutionPlan> {
+    console.debug(`cell execution plan { (${this.cell.model.id})`);
 
+    const plan = await this._buildExecutionPlan();
+    this._saveExecutionPlan(plan);
+
+    console.debug(`} cell execution plan (${this.cell.model.id})`, plan);
+    return plan;
+  }
+
+  private async _buildExecutionPlan(): Promise<CellCode.IExecutionPlan> {
     const config = CellConfig.get(this.cell.model);
-    if (config.skip) return;
+    if (config.skip) return { skipped: true };
     if (config.cache) {
       const cached = await this.isVariablesCached();
-      if (cached) return;
+      if (cached) return { cached: true };
     }
 
     const dependency = await this._buildDependency();
@@ -141,15 +157,13 @@ export class CodeContext {
       ? this._collectDependentCells(dependency)
       : [];
     const cellsToExecute = [...dependentCells, this.cell];
-    console.debug('} cellsToExecute', cellsToExecute);
-    // TODO: ##Execution 기록 w/ targetCell id
-    return cellsToExecute;
+    return { cellsToExecute, dependentCells, dependency };
   }
 
   /**
    * 현재 셀 코드의 dependency 수집
    */
-  private async _buildDependency(): Promise<CellCode.IDependency | void> {
+  private async _buildDependency(): Promise<CellCode.IDependency | undefined> {
     // console.debug('_buildDependency {', this.cell);
 
     const execVars = await this.getExecutionVariables();
@@ -230,7 +244,7 @@ export class CodeContext {
     scanContext: CodeContext,
     targetVariables: string[],
     rescanContexts: CodeContext[]
-  ): Promise<CellCode.IDependency | void> {
+  ): Promise<CellCode.IDependency | undefined> {
     const config = CellConfig.get(scanContext.cell.model);
     if (config.skip) return;
 
@@ -270,51 +284,11 @@ export class CodeContext {
     }
 
     collect(dependency.dependencies);
-    return Array.from(cells);
+    return Array.from(cells).reverse();
   }
 
-  /**
-   * target variables에 대한 variables context (unresolved variables)
-   */
-  // async getVariableContext(
-  //   targetVariables: string[]
-  // ): Promise<CodeContext.IVariableContext> {
-  //   const metadata = await this.getMetadata();
-  //   // const varsSet = new Set(metadata.variables);
-  //   const uncachedTargetVars =
-  //     this.inspector.getUncachedVariables(targetVariables);
-  //   const uncachedUnboundVars = this.inspector.getUncachedVariables(
-  //     metadata.unboundVariables
-  //   );
-  //   const unresolvedVariables = [...uncachedTargetVars, ...uncachedUnboundVars];
-  //   Private;
-  //   return {
-  //     codeContext: this,
-  //     targetVariables,
-  //     resolvedVariables: [],
-  //     unresolvedVariables
-  //   };
-  // }
+  private _saveExecutionPlan(plan: CellCode.IExecutionPlan) {
+    // TBD
+    // TODO: ##Execution 기록 w/ targetCell id
+  }
 }
-
-// namespace Private {
-//   export async function buildDependency(
-//     context: CodeContext,
-//     scanCells: CodeCell[],
-//     targetVariables: string[]
-//   ): Promise<CodeContext.IVariableContext | void> {
-//     const metadata = await context.getMetadata();
-//     const varsSet = new Set(metadata.variables);
-//     const resolvedVars = targetVariables.filter(v => varsSet.has(v));
-//     if (!resolvedVars.length) return;
-
-//     const inspector = context.inspector;
-//     const uncachedTargetVars =
-//       inspector.getUncachedVariables(targetVariables);
-//     const uncachedUnboundVars = inspector.getUncachedVariables(
-//       metadata.unboundVariables
-//     );
-//     const unresolvedVariables = [...uncachedTargetVars, ...uncachedUnboundVars];
-//     unresolvedVariables;
-//   }
-// }
