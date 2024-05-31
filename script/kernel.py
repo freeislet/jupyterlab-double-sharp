@@ -9,6 +9,8 @@ class DoubleSharp:
         cls.magics = NamespaceMagics()
         cls.magics.shell = get_ipython().kernel.shell
         cls.transformer = TransformerManager()
+        cls.builtins = set(dir(__builtins__))
+        # @deprecated
         cls.internal_module = ModuleType("internal_module")
 
         # util class (json dumps, debug용 log)
@@ -28,6 +30,22 @@ class DoubleSharp:
 
                 return json.dumps(obj, ensure_ascii=False)
 
+            def print_code(self, code, members=None):
+                log = {
+                    "co_name": code.co_name,
+                    "co_flags": code.co_flags,
+                    "co_names": code.co_names,  # builtins 포함
+                    "co_varnames": code.co_varnames,  # arguments, function locals
+                    "co_freevars": code.co_freevars,  # 함수 closure를 통해 참조되는 변수들
+                    "co_cellvars": code.co_cellvars,  # 내부 scope에서 참조하는 변수들
+                    "co_consts": list_(code.co_consts),
+                }
+
+                if members:
+                    log["members"] = pairs(members)
+
+                self.print_obj(log)
+
             def print_closurevars(self, closurevars, fn_members=None):
                 log = {
                     "builtins": mapping(closurevars.builtins),
@@ -43,22 +61,6 @@ class DoubleSharp:
                     # log["__builtins__"] = mapping(members_dict.get("__builtins__", {}))
                     # log["__globals__"] = mapping(members_dict.get("__globals__", {}))
                     log["__globals__"] = list(members_dict.get("__globals__", {}))
-
-                self.print_obj(log)
-
-            def print_code(self, code, members=None):
-                log = {
-                    "co_name": code.co_name,
-                    "co_flags": code.co_flags,
-                    "co_names": code.co_names,  # builtins 포함
-                    "co_varnames": code.co_varnames,  # arguments, function locals
-                    "co_freevars": code.co_freevars,  # 함수 closure를 통해 참조되는 변수들
-                    "co_cellvars": code.co_cellvars,  # 내부 scope에서 참조하는 변수들
-                    "co_consts": list_(code.co_consts),
-                }
-
-                if members:
-                    log["members"] = pairs(members)
 
                 self.print_obj(log)
 
@@ -78,19 +80,67 @@ class DoubleSharp:
     def inspect(cls, source):
         try:
             source = cls.transformer.transform_cell(source)
-            # debug
             code = compile(source, "<string>", "exec")
-            cls.util.print_code(code)
 
-            fn_source = cls.make_source_function(source)
-            fn_reports = cls.inspect_function(fn_source)
+            # NOTE: getclosurevars 대신 bytecode로부터 직접 variables 정보 수집하도록 함 (아래 코드 삭제 예정)
+            # fn_source = cls.make_source_function(source)
+            # fn_reports = cls.inspect_function(fn_source)
+            # result = cls.util.dumps({"functions": fn_reports})
 
-            result = cls.util.dumps({"functions": fn_reports})
-            return result
+            result = cls.inspect_code(code)
+            return cls.util.dumps(result)
 
         except Exception as e:
             print(e)
 
+    @classmethod
+    def inspect_code(cls, code):
+        import inspect
+        import dis
+
+        # NOTE: bytecode 구조 (추가 검토 필요)
+        # * <module>
+        #   - STORE_NAME으로 변수, 모듈 등 할당 (import한 모듈 포함)
+        #   - LOAD_NAME으로 변수, 모듈 등 참조 (builtins 포함))
+        #   - LOAD_CONST로 function, lambda 등의 코드 로드
+        # * nested code
+        #   - STORE_FAST로 로컬 변수 할당
+        #   - LOAD_DEREF로 free variables 로드
+        #   - LOAD_GLOBAL로 global variables 로드
+
+        # STORE_NAME에서 할당하는 variables, modules, ...
+        stored_names = set()
+        # LOAD_NAME, LOAD_GLOBAL argval 중 stored_names, builtins에 없는 이름
+        unbound_names = set()
+
+        codes = [code]
+        for code in codes:
+            # debug
+            cls.util.print_code(code)
+
+            bytecode = dis.Bytecode(code)
+            for inst in bytecode:
+                opname = inst.opname
+                argval = inst.argval
+
+                if opname == "STORE_NAME":
+                    stored_names.add(argval)
+                elif opname in ["LOAD_NAME", "LOAD_GLOBAL"]:
+                    unbound = argval not in stored_names and argval not in cls.builtins
+                    if unbound:
+                        unbound_names.add(argval)
+                elif opname == "LOAD_CONST":
+                    if inspect.iscode(argval):
+                        codes.append(argval)
+
+        return {
+            # stored_names -> ICodeVariables.variables
+            "stored_names": list(stored_names),
+            # unbound_names -> ICodeVariables.unboundVariables
+            "unbound_names": list(unbound_names),
+        }
+
+    # @deprecated
     @classmethod
     def inspect_function(cls, function):
         import inspect
@@ -104,7 +154,7 @@ class DoubleSharp:
         fns = [function]
 
         for fn in fns:
-            fn_code = fn.__code__
+            code = fn.__code__
             closurevars = inspect.getclosurevars(fn)
 
             # debug
@@ -117,51 +167,19 @@ class DoubleSharp:
             ]
             fns.extend(global_fns)
 
-            # variables 결과 보정을 위해 code 및 inner code 검사 (nested function, lambda 등)
-            # NOTE: instructions 수집해서 전달만 하고, 실제 variables 보정 작업은 client에서 처리
-            relevant_instructions = [
-                "IMPORT_NAME",
-                "LOAD_NAME",
-                "LOAD_ATTR",
-                "STORE_NAME",
-                "STORE_FAST",
-            ]
-
-            codes = [fn_code]
-            for code in codes:
-                instruction_args = {opname: [] for opname in relevant_instructions}
-
-                # debug
-                cls.util.print_code(code)
-
-                bytecode = dis.Bytecode(code)
-                for inst in bytecode:
-                    if inst.opname in relevant_instructions:
-                        instruction_args[inst.opname].append(
-                            inst.argval
-                        )  # argval 항상 str?
-
-                    if inst.opname in ["LOAD_CONST"]:  # 다른 op 확인?
-                        if inspect.isfunction(inst.argval):
-                            # const가 function인 경우는 없는 듯? -> 확실하면 코드 제거
-                            fns.append(inst.argval)
-                        elif inspect.iscode(inst.argval):
-                            codes.append(inst.argval)
-
-                # function 정보 추가
-                report = {
-                    "name": code.co_name,
-                    # co_varnames -> ICodeVariables.variables
-                    "co_varnames": code.co_varnames,
-                    # unbound -> ICodeVariables.unboundVariables
-                    "unbound": list(closurevars.unbound),
-                    # variables 결과 보정을 위한 instruction-args list
-                    "instructionArgs": instruction_args,
-                }
-                reports.append(report)
+            # function 정보 추가
+            report = {
+                "name": code.co_name,
+                # co_varnames -> ICodeVariables.variables
+                "co_varnames": code.co_varnames,
+                # unbound -> ICodeVariables.unboundVariables
+                "unbound": list(closurevars.unbound),
+            }
+            reports.append(report)
 
         return reports
 
+    # @deprecated
     @staticmethod
     def make_source_function(source):
         import re

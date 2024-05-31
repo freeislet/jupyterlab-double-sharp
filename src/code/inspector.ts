@@ -71,7 +71,7 @@ export class CodeInspector extends NotebookExt {
   async updateKernelVariables(): Promise<Set<string>> {
     const vars = await this.kernelExecutor.getInteractiveVariables();
     this._kernelVars = new Set(vars);
-    console.log('kernel vars:', this._kernelVars);
+    console.debug('kernel vars:', this._kernelVars);
     return this._kernelVars;
   }
 
@@ -80,7 +80,7 @@ export class CodeInspector extends NotebookExt {
   }
 
   filterNonKernelVariables(variables: string[]): string[] {
-    console.log('filterNonKernelVariables', variables, this._kernelVars);
+    console.debug('filterNonKernelVariables', variables, this._kernelVars);
     return variables.filter(notIn(this._kernelVars));
   }
 
@@ -95,17 +95,11 @@ export class CodeInspector extends NotebookExt {
     const result = await this.kernelExecutor.inspect(source);
     if (!result) return;
 
-    // TODO: function reports에서 variables, unboundVariables 수집
-    const func = result.functions[0] ?? {
-      co_varnames: [],
-      unbound: []
-    };
-
     const vars: ICodeVariables = {
-      variables: func.co_varnames,
-      unboundVariables: func.unbound
+      variables: result.stored_names,
+      unboundVariables: result.unbound_names
     };
-    console.log('code variables', vars);
+    console.debug('code variables', vars);
     return vars;
   }
 
@@ -131,8 +125,8 @@ export class CodeInspector extends NotebookExt {
   //     variables.push(...vars);
   //   }
 
-  //   console.log(tree.topNode, { variables, unboundVariables });
-  //   // console.log(tree.topNode.getChildren('Statement'));
+  //   console.debug(tree.topNode, { variables, unboundVariables });
+  //   // console.debug(tree.topNode.getChildren('Statement'));
 
   //   return { variables, unboundVariables };
   // }

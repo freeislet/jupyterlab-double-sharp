@@ -24,7 +24,7 @@ export class KernelExecutor {
 
   constructor(public readonly sessionContext: ISessionContext) {
     sessionContext.kernelChanged.connect((sender, args) => {
-      // console.log('sessionContext.kernelChanged', sender, args);
+      // console.debug('sessionContext.kernelChanged', sender, args);
 
       if (args.newValue) {
         this._initializeKernel();
@@ -37,7 +37,7 @@ export class KernelExecutor {
   private _initializeKernel() {
     this._requestExecute(INIT_SCRIPT).then(
       (msg: KernelMessage.IExecuteReplyMsg) => {
-        // console.log('kernel initialized', msg);
+        // console.debug('kernel initialized', msg);
 
         this._ready.resolve();
         this._initialized.emit(msg);
@@ -79,7 +79,7 @@ export class KernelExecutor {
       const streamAsJsonl = options?.streamAsJsonl ?? true;
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        // console.log(msg);
+        // console.debug(msg);
 
         const msgType = msg.header.msg_type;
         switch (msgType) {
@@ -87,7 +87,7 @@ export class KernelExecutor {
             if (onResult || onExecuteResult) {
               const executeResult = msg.content as IExecuteResult;
               const text = executeResult.data['text/plain'] as string;
-              console.log(msgType, { text });
+              // console.debug(msgType, { text });
 
               const result = resultAsJson ? Private.parseJSON(text) : text;
               onResult?.(result);
@@ -100,7 +100,7 @@ export class KernelExecutor {
               const content = msg.content as IStream;
               const streamType = content.name;
               const text = joinMultiline(content.text);
-              console.log(msgType, streamType, { text });
+              // console.debug(msgType, streamType, { text });
 
               const result = streamAsJsonl
                 ? Private.parseJSONL(text)
@@ -136,17 +136,17 @@ export class KernelExecutor {
   ): Promise<KernelExecutor.IInspectResult | undefined> {
     const escaped = source.replace(/"""/g, '\\"\\"\\"');
     const code = `DoubleSharp.inspect("""${escaped}""")`;
-    // console.log(code);
+    // console.debug(code);
 
     let ret: KernelExecutor.IInspectResult | undefined;
 
     await this.execute(code, {
       onExecuteResult(result: KernelExecutor.IInspectResult) {
         ret = result;
-        console.log('inspect result:', result);
+        // console.debug('inspect result:', result);
       },
-      onStream(result) {
-        console.log('inspect log:', result);
+      onStream(result, streamType) {
+        // console.debug('inspect log:', result);
       }
     });
     return ret;
@@ -173,21 +173,8 @@ export namespace KernelExecutor {
   }
 
   export interface IInspectResult {
-    functions: IFunctionReport[];
-  }
-
-  export interface IFunctionReport {
-    name: string;
-    co_varnames: string[];
-    unbound: string[];
-    instructionArgs: IInstructionArgs;
-  }
-
-  export interface IInstructionArgs {
-    IMPORT_NAME: string[];
-    LOAD_ATTR: string[];
-    STORE_NAME: string[];
-    STORE_FAST: string[];
+    stored_names: string[];
+    unbound_names: string[];
   }
 }
 
