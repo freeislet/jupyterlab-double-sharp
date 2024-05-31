@@ -288,7 +288,34 @@ export class CodeContext {
   }
 
   private _saveExecutionPlan(plan: CellCode.IExecutionPlan) {
-    // TBD
-    // TODO: ##Execution 기록 w/ targetCell id
+    const metadata: CellMetadata.IExecution = {
+      skipped: plan.skipped,
+      cached: plan.cached,
+      cells: plan.cellsToExecute?.map(Private.cellMetadata),
+      dependency: plan.dependency && Private.dependencyMetadata(plan.dependency)
+    };
+    // TODO: null item 제거
+    CellMetadata.execution.set(this.cell.model, metadata);
+  }
+}
+
+namespace Private {
+  export function cellMetadata(cell: Cell): CellMetadata.IExecutionCell {
+    return {
+      modelId: cell.model.id
+    };
+  }
+
+  export function dependencyMetadata(
+    dependency: CellCode.IDependency
+  ): CellMetadata.IExecutionDependency {
+    return {
+      cell: cellMetadata(dependency.context.cell),
+      dependencies: dependency.dependencies?.map(dependencyMetadata),
+      targetVariables: dependency.targetVariables,
+      resolvedVariables: dependency.resolvedVariables,
+      selfUnresolvedVariables: dependency.selfUnresolvedVariables,
+      unresolvedVariables: dependency.unresolvedVariables
+    };
   }
 }
