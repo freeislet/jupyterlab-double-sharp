@@ -43,7 +43,7 @@ export function setupCellActions() {
 
   CellActions.sourceChanged.connect(
     (_, args: CellActions.ISourceChangeParams) => {
-      console.log('cell sourceChanged', args);
+      // console.log('cell sourceChanged', args);
 
       const { sharedModel } = args;
       const cell = CellDictionary.global.getBySharedModel(sharedModel);

@@ -295,7 +295,6 @@ export class CodeContext {
       cells: plan.cellsToExecute?.map(Private.cellMetadata),
       dependency: plan.dependency && Private.dependencyMetadata(plan.dependency)
     };
-    // TODO: null item 제거
     CellMetadata.execution.set(this.cell.model, metadata);
   }
 }
