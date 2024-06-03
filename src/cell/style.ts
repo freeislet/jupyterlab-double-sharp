@@ -7,7 +7,7 @@ export namespace CellStyle {
     const config = CellConfig.get(cell.model);
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
-      'jp-DoubleSharp-cache': config.useCache
+      'jp-DoubleSharp-cache': config.useCache // TODO: cached, uncached 구분
     };
 
     // if (cellExecution.skip) {

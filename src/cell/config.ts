@@ -1,23 +1,35 @@
 import { ICellModel } from '@jupyterlab/cells';
+import merge from 'lodash.merge';
 
 import { CellMetadata } from './metadata';
 import { CSMagicExecutor } from '../cs-magic';
+import { Settings } from '../settings';
 
 export namespace CellConfig {
-  export type IConfig = CellMetadata.IConfig;
+  export type UseSettings = undefined;
 
-  export function get(model: ICellModel): Required<IConfig> {
+  export interface IConfig {
+    skip: boolean;
+    useCache: boolean | UseSettings;
+  }
+
+  export function get(model: ICellModel): NonNullableField<IConfig> {
     if (CellMetadata.configOverride.isDirty(model)) {
       CSMagicExecutor.executeConfig(model);
     }
 
+    const settings: PickNullish<IConfig> = {
+      useCache: Settings.settings.execution.useCache
+    };
+    const forcedSettings: Partial<IConfig> = {
+      useCache: Settings.settings.execution.disableCache ? false : undefined
+    };
     const config = CellMetadata.config.getCoalesced(model);
     const override = CellMetadata.configOverride.get(model);
+    const coalesced = merge(settings, config, override, forcedSettings);
 
-    const defaultCache = false; // TODO: settings cache 설정 적용
-    const coalesced = { useCache: defaultCache, ...config, ...override };
     // console.log('cell config', coalesced);
-    return coalesced;
+    return coalesced as NonNullableField<IConfig>;
   }
 
   export function updateOverride(model: ICellModel, value: Partial<IConfig>) {

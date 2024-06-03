@@ -1,20 +1,16 @@
-import { MetadataGroup, MetadataGroupDirtyable } from '../utils/metadata';
-import { ICodeVariables } from '../code';
+import { CellConfig } from './config';
 import { CellCode } from './code';
+import { ICodeVariables } from '../code';
+import { MetadataGroup, MetadataGroupDirtyable } from '../utils/metadata';
 
 export namespace CellMetadata {
-  export type UseSettings = undefined;
-
   export interface ICell {
     subIds?: string[];
     parentId?: string;
     generated?: boolean;
   }
 
-  export interface IConfig {
-    skip: boolean;
-    useCache?: boolean; // TODO: | useSetting 타입 적용
-  }
+  export type IConfig = CellConfig.IConfig;
 
   export type IConfigOverride = Partial<IConfig>;
 
@@ -28,6 +24,7 @@ export namespace CellMetadata {
     cell: IExecutionCell;
     dependencies?: IExecutionDependency[];
   } & Omit<CellCode.IDependency, 'context' | 'dependencies'>;
+
   export type IExecutionDependencyRoot = Omit<
     IExecutionDependency,
     'targetVariables' | 'resolvedVariables'
@@ -68,7 +65,8 @@ export class CellMetadata {
 namespace Private {
   export const cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
   export const config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
-    skip: false
+    skip: false,
+    useCache: undefined
   });
   export const configOverride =
     new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
