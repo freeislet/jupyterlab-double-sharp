@@ -11,6 +11,7 @@ export namespace CellConfig {
   export interface IConfig {
     skip: boolean;
     useCache: boolean | UseSettings;
+    autoDependency: boolean | UseSettings;
   }
 
   export function get(model: ICellModel): NonNullableField<IConfig> {
@@ -18,18 +19,21 @@ export namespace CellConfig {
       CSMagicExecutor.executeConfig(model);
     }
 
-    const settings: PickNullish<IConfig> = {
-      useCache: Settings.settings.execution.useCache
+    const execSettings = Settings.settings.execution;
+    const settings: NonNullableField<PickNullish<IConfig>> = {
+      useCache: execSettings.useCache,
+      autoDependency: execSettings.autoDependency
     };
     const forcedSettings: Partial<IConfig> = {
-      useCache: Settings.settings.execution.disableCache ? false : undefined
+      useCache: execSettings.disableCache ? false : undefined,
+      autoDependency: execSettings.disableAutoDependency ? false : undefined
     };
+
     const config = CellMetadata.config.getCoalesced(model);
     const override = CellMetadata.configOverride.get(model);
     const coalesced = merge(settings, config, override, forcedSettings);
-
     // console.log('cell config', coalesced);
-    return coalesced as NonNullableField<IConfig>;
+    return coalesced;
   }
 
   export function updateOverride(model: ICellModel, value: Partial<IConfig>) {

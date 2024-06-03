@@ -66,7 +66,8 @@ namespace Private {
   export const cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
   export const config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
     skip: false,
-    useCache: undefined
+    useCache: undefined,
+    autoDependency: undefined
   });
   export const configOverride =
     new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
