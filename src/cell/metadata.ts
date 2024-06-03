@@ -3,6 +3,8 @@ import { ICodeVariables } from '../code';
 import { CellCode } from './code';
 
 export namespace CellMetadata {
+  export type UseSettings = undefined;
+
   export interface ICell {
     subIds?: string[];
     parentId?: string;
@@ -11,7 +13,7 @@ export namespace CellMetadata {
 
   export interface IConfig {
     skip: boolean;
-    cache?: boolean; // TODO: | useSetting 타입 적용
+    useCache?: boolean; // TODO: | useSetting 타입 적용
   }
 
   export type IConfigOverride = Partial<IConfig>;

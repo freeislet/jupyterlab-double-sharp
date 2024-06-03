@@ -15,7 +15,7 @@ export namespace CellConfig {
     const override = CellMetadata.configOverride.get(model);
 
     const defaultCache = false; // TODO: settings cache 설정 적용
-    const coalesced = { cache: defaultCache, ...config, ...override };
+    const coalesced = { useCache: defaultCache, ...config, ...override };
     // console.log('cell config', coalesced);
     return coalesced;
   }

@@ -49,7 +49,7 @@ export namespace CSMagic {
 
     execute(model: ICellModel, flag?: string) {
       const cache = !flag || paramAsBoolean(flag);
-      CellConfig.updateOverride(model, { cache });
+      CellConfig.updateOverride(model, { useCache: cache });
     }
   }
 

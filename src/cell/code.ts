@@ -147,7 +147,7 @@ export class CodeContext {
   private async _buildExecutionPlan(): Promise<CellCode.IExecutionPlan> {
     const config = CellConfig.get(this.cell.model);
     if (config.skip) return { skipped: true };
-    if (config.cache) {
+    if (config.useCache) {
       const cached = await this.isVariablesCached();
       if (cached) return { cached: true };
     }
