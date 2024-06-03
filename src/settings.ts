@@ -1,6 +1,6 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ISignal, Signal } from '@lumino/signaling';
-import merge from 'deepmerge';
+import merge from 'lodash.merge';
 import equal from 'fast-deep-equal';
 
 export class Settings {
