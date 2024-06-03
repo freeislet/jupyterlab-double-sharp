@@ -1,6 +1,7 @@
 import { ICellModel } from '@jupyterlab/cells';
 
 import { CSMagic } from './commands';
+import { Settings } from '../settings';
 import { matchAllStatements, tokenize } from '../utils/statement';
 
 export class CSMagicExecutor {
@@ -27,6 +28,8 @@ export class CSMagicExecutor {
     model: ICellModel,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
+    if (!Settings.settings.enableCSMagic) return;
+
     // syntax 테스트 코드
     // const editorView = (cell.editor as CodeMirrorEditor).editor;
     // const tree = syntaxTree(editorView.state);
