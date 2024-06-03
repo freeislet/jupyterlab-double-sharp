@@ -5,9 +5,9 @@ type NonNullableField<T extends object> = {
 type RequiredNonNullable<T extends object> = Required<NonNullableField<T>>;
 
 type OmitNullish<T> = {
-  [P in keyof T as T[P] extends null | undefined ? never : P]: T[P];
+  [P in keyof T as T[P] extends {} ? P : never]: T[P];
 };
 
 type PickNullish<T> = {
-  [P in keyof T as T[P] extends null | undefined ? P : never]: T[P];
+  [P in keyof T as T[P] extends {} ? never : P]: T[P];
 };
