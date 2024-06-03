@@ -6,29 +6,79 @@
   "description": "Double Sharp settings.",
   "type": "object",
   "properties": {
+    "execution": {
+      "title": "Execution",
+      "type": "object",
+      "properties": {
+        "useCache": {
+          "title": "Use Execution Result Cache",
+          "type": "boolean",
+          "description": "Skip execution if the outputs of the cell, such as assigned variables and imported modules, already exist.\nThis parameter can be overridden by property panel setting or '##%cache' command (TODO: manual link).\nThis behavior can be disabled by checking 'Disable Execution Result Cache'.",
+          "default": true
+        },
+        "autoDependency": {
+          "title": "Auto Dependency",
+          "type": "boolean",
+          "description": "Execute dependent cells if unresolved variables or modules in the cell are assigned in the cells above.\nThis parameter can be overridden in the property panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
+          "default": true
+        },
+        "forceExecutionOnSingleCell": {
+          "title": "Force Execution on Single Cell",
+          "type": "boolean",
+          "description": "When running only one cell, cache or skip configurations are ignored.",
+          "default": true
+        },
+        "disableCache": {
+          "title": "Disable Execution Result Cache",
+          "type": "boolean",
+          "default": true
+        },
+        "disableAutoDependency": {
+          "title": "Disable Auto Dependency",
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
     "editor": {
-      "title": "Editor Options",
+      "title": "Editor",
       "type": "object",
       "properties": {
         "highlight": {
           "title": "Highlight ## lines",
           "type": "boolean",
-          "highlight": true
+          "default": true
         }
       },
       "additionalProperties": false
     },
-    "flag": {
-      "title": "Simple flag",
+    "showToolbar": {
+      "title": "Show Toolbar",
       "type": "boolean",
-      "description": "This is an example of a boolean setting.",
-      "default": false
+      "default": true
     },
-    "limit": {
-      "title": "Limit",
-      "type": "integer",
-      "description": "This is an example of an integer setting.",
-      "default": 25
+    "enableCSMagic": {
+      "title": "Enable Client-side Magic Command",
+      "type": "boolean",
+      "default": true
+    },
+    "verbose": {
+      "title": "Verbose (for debug)",
+      "type": "object",
+      "properties": {
+        "log": {
+          "title": "Log",
+          "type": "boolean",
+          "default": false
+        },
+        "metadata": {
+          "title": "Metadata",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

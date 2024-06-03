@@ -15,9 +15,9 @@ import {
 import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ConfigFacet } from './utils';
+import { Settings } from '../settings';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-highlight';
 
@@ -85,19 +85,12 @@ const highlightPlugin = ViewPlugin.fromClass(HighlightPlugin, {
 
 // settings
 
-function loadAndApplySettings(
-  settings: ISettingRegistry.ISettings,
-  registry: IEditorExtensionRegistry
+function applySettings(
+  registry: IEditorExtensionRegistry,
+  editorSettings: Settings.IEditor
 ) {
-  // Read the settings and convert to the correct type
-  const limit = settings.get('limit').composite as number;
-  const flag = settings.get('flag').composite as boolean;
+  console.log('editor settings:', editorSettings);
 
-  console.log(
-    `Settings Example extension: Limit is set to '${limit}' and flag to '${flag}'`
-  );
-
-  const editorSettings = settings.get('editor').composite as object;
   const handlers = (registry as EditorExtensionRegistry)['handlers'];
   for (const handler of handlers) {
     handler.setOption(FACTORY_NAME, editorSettings);
@@ -123,9 +116,10 @@ function loadAndApplySettings(
 //   }
 // };
 
-interface IHighlightParams {
-  highlight?: boolean;
-}
+// interface IHighlightParams {
+//   highlight?: boolean;
+// }
+type IHighlightParams = Settings.IEditor;
 
 function createEditorExtension(
   options: IEditorExtensionFactory.IOptions
@@ -152,16 +146,14 @@ const factory: IEditorExtensionFactory<IHighlightParams> = Object.freeze({
   // schema // NOTE: CodeMirror 세팅 화면이 아닌 Double Sharp 세팅에 표시하기 위해 schema 주석 처리
 });
 
-export function setupHighlightExtension(
-  registry: IEditorExtensionRegistry,
-  settings: ISettingRegistry.ISettings
-) {
-  function updateSettings(settings: ISettingRegistry.ISettings) {
-    loadAndApplySettings(settings, registry);
-  }
+export function setupHighlightExtension(registry: IEditorExtensionRegistry) {
+  // applySettings(Settings.settings.editor, registry);
 
-  updateSettings(settings);
-  settings.changed.connect(updateSettings);
+  Settings.editorChanged.connect(
+    (settings: Settings, change: Settings.IChangeParams<Settings.IEditor>) => {
+      applySettings(registry, change.newValue);
+    }
+  );
 
   registry.addExtension(factory);
 }

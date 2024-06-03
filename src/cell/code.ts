@@ -3,6 +3,7 @@ import { Cell, CodeCell } from '@jupyterlab/cells';
 import { CellMetadata } from './metadata';
 import { CellConfig } from './config';
 import { CodeInspector, ICodeVariables } from '../code';
+import { Settings } from '../settings';
 import { isCodeCell, getAboveCodeCells } from '../utils/cell';
 import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
@@ -219,7 +220,7 @@ export class CodeContext {
           );
         }
 
-        const saveUnresolvedDependencies = true; // TODO: settings 추가
+        const saveUnresolvedDependencies = Settings.settings.verbose.metadata;
         if (dependencyResolved || saveUnresolvedDependencies) {
           dependencies.push(dependency);
         }
