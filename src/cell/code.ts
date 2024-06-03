@@ -42,10 +42,10 @@ export namespace CellCode {
     /**
      * 현재 code context의 unbound & uncached variables (IExecutionVariables.unresolvedVariables)
      */
-    selfUnresolvedVariables: string[];
+    unresolvedCellVariables: string[];
 
     /**
-     * selfUnresolvedVariables 중 하위 dependencies에서 resolve하지 못 한 최종 unresolved variables
+     * unresolvedCellVariables 중 하위 dependencies에서 resolve하지 못 한 최종 unresolved variables
      */
     unresolvedVariables: string[];
   }
@@ -182,7 +182,7 @@ export class CodeContext {
       context: this,
       targetVariables: [],
       resolvedVariables: [],
-      selfUnresolvedVariables: unresolvedVars,
+      unresolvedCellVariables: unresolvedVars,
       unresolvedVariables: unresolvedVars
     };
 
@@ -253,13 +253,13 @@ export class CodeContext {
     const resolvedVars = targetVariables.filter(In(execVars.variables));
     if (!resolvedVars.length) return;
 
-    const selfUnresolvedVars = execVars.unresolvedVariables;
+    const unresolvedCellVars = execVars.unresolvedVariables;
     const dependency: CellCode.IDependency = {
       context: scanContext,
       targetVariables,
       resolvedVariables: resolvedVars,
-      selfUnresolvedVariables: selfUnresolvedVars,
-      unresolvedVariables: selfUnresolvedVars
+      unresolvedCellVariables: unresolvedCellVars,
+      unresolvedVariables: unresolvedCellVars
     };
 
     await this._buildDependencies(dependency, rescanContexts);
@@ -293,7 +293,7 @@ export class CodeContext {
       skipped: plan.skipped,
       cached: plan.cached,
       cells: plan.cellsToExecute?.map(Private.cellMetadata),
-      dependency: plan.dependency && Private.dependencyMetadata(plan.dependency)
+      dependency: Private.dependencyRootMetadata(plan.dependency)
     };
     CellMetadata.execution.set(this.cell.model, metadata);
   }
@@ -306,6 +306,18 @@ namespace Private {
     };
   }
 
+  export function dependencyRootMetadata(
+    dependency?: CellCode.IDependency
+  ): CellMetadata.IExecutionDependencyRoot | undefined {
+    if (!dependency) return;
+    return {
+      cell: cellMetadata(dependency.context.cell),
+      dependencies: dependency.dependencies?.map(dependencyMetadata),
+      unresolvedCellVariables: dependency.unresolvedCellVariables,
+      unresolvedVariables: dependency.unresolvedVariables
+    };
+  }
+
   export function dependencyMetadata(
     dependency: CellCode.IDependency
   ): CellMetadata.IExecutionDependency {
@@ -314,7 +326,7 @@ namespace Private {
       dependencies: dependency.dependencies?.map(dependencyMetadata),
       targetVariables: dependency.targetVariables,
       resolvedVariables: dependency.resolvedVariables,
-      selfUnresolvedVariables: dependency.selfUnresolvedVariables,
+      unresolvedCellVariables: dependency.unresolvedCellVariables,
       unresolvedVariables: dependency.unresolvedVariables
     };
   }

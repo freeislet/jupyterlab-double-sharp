@@ -26,12 +26,16 @@ export namespace CellMetadata {
     cell: IExecutionCell;
     dependencies?: IExecutionDependency[];
   } & Omit<CellCode.IDependency, 'context' | 'dependencies'>;
+  export type IExecutionDependencyRoot = Omit<
+    IExecutionDependency,
+    'targetVariables' | 'resolvedVariables'
+  >;
 
   export interface IExecution {
     skipped?: boolean;
     cached?: boolean;
     cells?: IExecutionCell[];
-    dependency?: IExecutionDependency;
+    dependency?: IExecutionDependencyRoot;
   }
 }
 
