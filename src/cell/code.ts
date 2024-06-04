@@ -53,6 +53,7 @@ export namespace CellCode {
   export interface IExecutionPlan {
     skipped?: boolean;
     cached?: boolean;
+    autoDependency?: boolean;
     cellsToExecute?: CodeCell[];
     dependentCells?: CodeCell[];
     dependency?: IDependency;
@@ -145,20 +146,31 @@ export class CodeContext {
   }
 
   private async _buildExecutionPlan(): Promise<CellCode.IExecutionPlan> {
+    let cached: boolean | undefined;
+
     const config = CellConfig.get(this.cell.model);
     if (config.skip) return { skipped: true };
     if (config.useCache) {
-      const cached = await this.isVariablesCached();
-      if (cached) return { cached: true };
+      cached = await this.isVariablesCached();
+      if (cached) return { cached };
     }
 
-    const dependency = await this._buildDependency();
-    const dependencyResolved = dependency?.unresolvedVariables.length === 0;
-    const dependentCells = dependencyResolved
-      ? this._collectDependentCells(dependency)
-      : [];
-    const cellsToExecute = [...dependentCells, this.cell];
-    return { cellsToExecute, dependentCells, dependency };
+    if (config.autoDependency) {
+      const dependency = await this._buildDependency();
+      const dependencyResolved = dependency?.unresolvedVariables.length === 0;
+      const dependentCells = dependencyResolved
+        ? this._collectDependentCells(dependency)
+        : [];
+      return {
+        cached,
+        autoDependency: true,
+        cellsToExecute: [...dependentCells, this.cell],
+        dependentCells,
+        dependency
+      };
+    } else {
+      return { cached, autoDependency: false, cellsToExecute: [this.cell] };
+    }
   }
 
   /**
