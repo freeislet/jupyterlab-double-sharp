@@ -87,6 +87,7 @@ export namespace Settings {
     forceExecutionOnSingleCell: boolean;
     disableCache: boolean;
     disableAutoDependency: boolean;
+    disableSkip: boolean;
   }
 
   export interface IEditor {
@@ -112,7 +113,8 @@ export namespace Settings {
       autoDependency: true,
       forceExecutionOnSingleCell: true,
       disableCache: false,
-      disableAutoDependency: false
+      disableAutoDependency: false,
+      disableSkip: false
     },
     editor: {
       highlight: true

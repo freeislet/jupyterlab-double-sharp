@@ -25,6 +25,7 @@ export namespace CellConfig {
       autoDependency: execSettings.autoDependency
     };
     const forcedSettings: Partial<IConfig> = {
+      skip: execSettings.disableSkip ? false : undefined,
       useCache: execSettings.disableCache ? false : undefined,
       autoDependency: execSettings.disableAutoDependency ? false : undefined
     };

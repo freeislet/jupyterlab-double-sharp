@@ -31,12 +31,17 @@
         "disableCache": {
           "title": "Disable Execution Result Cache",
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "disableAutoDependency": {
           "title": "Disable Auto Dependency",
           "type": "boolean",
-          "default": true
+          "default": false
+        },
+        "disableSkip": {
+          "title": "Disable Cell Execution Skip",
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false
