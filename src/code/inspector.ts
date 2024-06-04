@@ -9,6 +9,7 @@ import { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 import { KernelExecutor } from './kernel';
 import { NotebookExt, NotebookExtDictionary } from '../utils/notebook';
 import { In, notIn } from '../utils/array';
+import { Log } from '../log';
 
 export interface ICodeVariables {
   /**
@@ -71,7 +72,7 @@ export class CodeInspector extends NotebookExt {
   async updateKernelVariables(): Promise<Set<string>> {
     const vars = await this.kernelExecutor.getInteractiveVariables();
     this._kernelVars = new Set(vars);
-    console.debug('kernel vars:', this._kernelVars);
+    Log.debug('kernel vars:', this._kernelVars);
     return this._kernelVars;
   }
 

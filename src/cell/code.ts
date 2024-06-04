@@ -9,6 +9,7 @@ import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 import { In, notIn } from '../utils/array';
 import { ReorderSet } from '../utils/set';
+import { Log } from '../log';
 
 export namespace CellCode {
   export type IExecutionVariables = ICodeVariables & {
@@ -136,12 +137,12 @@ export class CodeContext {
    * - unbound variables resolve 위한 dependent cells 수집
    */
   async buildExecutionPlan(): Promise<CellCode.IExecutionPlan> {
-    console.debug(`cell execution plan { (${this.cell.model.id})`);
+    Log.debug(`cell execution plan { (${this.cell.model.id})`);
 
     const plan = await this._buildExecutionPlan();
     this._saveExecutionPlan(plan);
 
-    console.debug(`} cell execution plan (${this.cell.model.id})`, plan);
+    Log.debug(`} cell execution plan (${this.cell.model.id})`, plan);
     return plan;
   }
 
@@ -276,7 +277,7 @@ export class CodeContext {
 
     await this._buildDependencies(dependency, rescanContexts);
 
-    console.log('dependency item', dependency);
+    Log.debug('dependency item', dependency);
     return dependency;
   }
 

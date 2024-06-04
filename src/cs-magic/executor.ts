@@ -3,6 +3,7 @@ import { ICellModel } from '@jupyterlab/cells';
 import { CSMagic } from './commands';
 import { Settings } from '../settings';
 import { matchAllStatements, tokenize } from '../utils/statement';
+import { Log } from '../log';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
@@ -51,7 +52,7 @@ export class CSMagicExecutor {
     statement: string,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
-    console.log(statement);
+    Log.debug(statement);
 
     const tokens = tokenize(statement);
     if (!tokens.length) return;

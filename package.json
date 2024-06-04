@@ -62,6 +62,7 @@
         "@jupyterlab/apputils": "^4.2.6",
         "@jupyterlab/coreutils": "^6.2.1",
         "@jupyterlab/docregistry": "^4.1.8",
+        "@jupyterlab/logconsole": "^4.2.1",
         "@jupyterlab/notebook": "^4.1.6",
         "@jupyterlab/settingregistry": "^4.0.0",
         "@jupyterlab/ui-components": "^4.1.6",

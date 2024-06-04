@@ -4,6 +4,7 @@ import merge from 'lodash.merge';
 import { CellMetadata } from './metadata';
 import { CSMagicExecutor } from '../cs-magic';
 import { Settings } from '../settings';
+import { Log } from '../log';
 
 export namespace CellConfig {
   export type UseSettings = undefined;
@@ -33,7 +34,7 @@ export namespace CellConfig {
     const config = CellMetadata.config.getCoalesced(model);
     const override = CellMetadata.configOverride.get(model);
     const coalesced = merge(settings, config, override, forcedSettings);
-    // console.log('cell config', coalesced);
+    Log.debug('cell config', coalesced);
     return coalesced;
   }
 
