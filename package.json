@@ -179,7 +179,8 @@
             ],
             "eqeqeq": "error",
             "prefer-arrow-callback": "error",
-            "no-inner-declarations": "off"
+            "no-inner-declarations": "off",
+            "no-empty": "off"
         }
     },
     "prettier": {
