@@ -2428,6 +2428,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jupyterlab/coreutils@npm:^6.2.1":
+  version: 6.2.1
+  resolution: "@jupyterlab/coreutils@npm:6.2.1"
+  dependencies:
+    "@lumino/coreutils": ^2.1.2
+    "@lumino/disposable": ^2.1.2
+    "@lumino/signaling": ^2.1.2
+    minimist: ~1.2.0
+    path-browserify: ^1.0.0
+    url-parse: ~1.5.4
+  checksum: c8167bd8d4472471297e5669d6b3ee7c9d5c1246e8413680713b15f8a81926d2c97bc6a3c0b26c16603b197b412e01b443cc74b02a3676adea5690aac41964be
+  languageName: node
+  linkType: hard
+
 "@jupyterlab/debugger@npm:^4.1.6":
   version: 4.1.6
   resolution: "@jupyterlab/debugger@npm:4.1.6"
@@ -8360,13 +8374,16 @@ __metadata:
     "@jupyterlab/application": ^4.1.6
     "@jupyterlab/apputils": ^4.2.6
     "@jupyterlab/builder": ^4.0.0
+    "@jupyterlab/coreutils": ^6.2.1
     "@jupyterlab/docregistry": ^4.1.8
     "@jupyterlab/galata": ^5.1.6
     "@jupyterlab/notebook": ^4.1.6
     "@jupyterlab/settingregistry": ^4.0.0
     "@jupyterlab/testutils": ^4.0.0
     "@jupyterlab/ui-components": ^4.1.6
+    "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
+    "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.2
     "@teppeis/multimaps": ^3.0.0
     "@types/jest": ^29.2.0
@@ -8385,6 +8402,7 @@ __metadata:
     lodash.merge: ^4.6.2
     npm-run-all: ^4.1.5
     prettier: ^3.0.0
+    react: ^18.3.1
     rimraf: ^5.0.1
     source-map-loader: ^1.0.2
     style-loader: ^3.3.1
@@ -9695,6 +9713,15 @@ __metadata:
   dependencies:
     loose-envify: ^1.1.0
   checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
+  languageName: node
+  linkType: hard
+
+"react@npm:^18.3.1":
+  version: 18.3.1
+  resolution: "react@npm:18.3.1"
+  dependencies:
+    loose-envify: ^1.1.0
+  checksum: a27bcfa8ff7c15a1e50244ad0d0c1cb2ad4375eeffefd266a64889beea6f6b64c4966c9b37d14ee32d6c9fcd5aa6ba183b6988167ab4d127d13e7cb5b386a376
   languageName: node
   linkType: hard
 
