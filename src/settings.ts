@@ -71,6 +71,7 @@ export class Settings {
     newValue: V,
     signal: Signal<T, Settings.IChangeParams<V>>
   ) {
+    if (newValue === undefined) return;
     if (!equal(oldValue, newValue)) {
       signal.emit({
         oldValue,
