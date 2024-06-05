@@ -2,7 +2,6 @@ import { ICellModel } from '@jupyterlab/cells';
 import merge from 'lodash.merge';
 
 import { CellMetadata } from './metadata';
-import { CSMagicExecutor } from '../cs-magic';
 import { Settings } from '../settings';
 import { Log } from '../log';
 
@@ -16,10 +15,6 @@ export namespace CellConfig {
   }
 
   export function get(model: ICellModel): NonNullableField<IConfig> {
-    if (CellMetadata.configOverride.isDirty(model)) {
-      CSMagicExecutor.executeConfig(model);
-    }
-
     const execSettings = Settings.settings.execution;
     const settings: NonNullableField<PickNullish<IConfig>> = {
       useCache: execSettings.useCache,

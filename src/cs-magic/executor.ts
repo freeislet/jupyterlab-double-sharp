@@ -1,9 +1,10 @@
 import { ICellModel } from '@jupyterlab/cells';
 
 import { CSMagic } from './commands';
+import { CellMetadata } from '../cell/metadata';
 import { Settings } from '../settings';
 import { matchAllStatements, tokenize } from '../utils/statement';
-import { Log } from '../log';
+// import { Log } from '../log';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
@@ -11,6 +12,11 @@ export class CSMagicExecutor {
   static {
     this.register(new CSMagic.Skip());
     this.register(new CSMagic.Cache());
+
+    CellMetadata.configOverride.setDirtyResolver((model: ICellModel) => {
+      CSMagicExecutor.executeConfig(model);
+      return true;
+    });
   }
 
   static register(command: CSMagic.ICommand) {
@@ -39,6 +45,7 @@ export class CSMagicExecutor {
     // console.log(commentNodes, tree.topNode);
 
     const source = model.sharedModel.getSource();
+    // Log.debug(model, source);
     const matches = matchAllStatements(source);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
@@ -52,7 +59,7 @@ export class CSMagicExecutor {
     statement: string,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
-    Log.debug(statement);
+    // Log.debug(statement);
 
     const tokens = tokenize(statement);
     if (!tokens.length) return;
