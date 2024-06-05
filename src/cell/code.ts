@@ -9,7 +9,6 @@ import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 import { In, notIn } from '../utils/array';
 import { ReorderSet } from '../utils/set';
-import { Log } from '../log';
 
 export namespace CellCode {
   export type IExecutionVariables = ICodeVariables & {

@@ -7,8 +7,8 @@ import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
-import { Settings } from './settings';
 import { Log } from './log';
+import { Settings } from './settings';
 import { setupCellExtensions, setupCellActions } from './cell';
 import { setupCodeExtensions } from './code';
 import { setupExecution } from './execution';
@@ -44,8 +44,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.composite
         );
 
-        Settings.setup(settings);
         Log.setup(loggerRegistry, nbtracker);
+        Settings.setup(settings);
         setupCellExtensions(app);
         setupCellActions();
         setupCodeExtensions(app);

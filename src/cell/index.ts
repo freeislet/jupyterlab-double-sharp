@@ -17,7 +17,7 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
 export function setupCellActions() {
   ExecutionActions.beforeExecution.connect(
     (_, args: ExecutionActions.IParams) => {
-      // console.log('beforeExecution', args);
+      // Log.debug('beforeExecution', args);
 
       // 셀 실행 준비
       for (const cell of args.cells) {
@@ -33,7 +33,7 @@ export function setupCellActions() {
 
   ExecutionActions.afterExecution.connect(
     (_, args: ExecutionActions.IParams) => {
-      // console.log('afterExecution', args);
+      // Log.debug('afterExecution', args);
 
       // kernel variables 업데이트
       const inspector = CodeInspector.getByCells(args.cells);
@@ -43,7 +43,7 @@ export function setupCellActions() {
 
   CellActions.sourceChanged.connect(
     (_, args: CellActions.ISourceChangeParams) => {
-      // console.log('cell sourceChanged', args);
+      // Log.debug('cell sourceChanged', args);
 
       const { sharedModel } = args;
       const cell = CellDictionary.global.getBySharedModel(sharedModel);
@@ -57,7 +57,7 @@ export function setupCellActions() {
 
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
-      console.log('cell metadataChanged', args);
+      Log.debug('cell metadataChanged', args);
 
       const { model, change } = args;
       const cell = CellDictionary.global.getByModel(model);

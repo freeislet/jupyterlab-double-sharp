@@ -4,7 +4,6 @@ import { CSMagic } from './commands';
 import { CellMetadata } from '../cell/metadata';
 import { Settings } from '../settings';
 import { matchAllStatements, tokenize } from '../utils/statement';
-// import { Log } from '../log';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();

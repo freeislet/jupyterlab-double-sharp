@@ -3,7 +3,6 @@ import merge from 'lodash.merge';
 
 import { CellMetadata } from './metadata';
 import { Settings } from '../settings';
-import { Log } from '../log';
 
 export namespace CellConfig {
   export type UseSettings = undefined;

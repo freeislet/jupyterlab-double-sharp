@@ -9,7 +9,6 @@ import { Cell, CodeCell, ICodeCellModel } from '@jupyterlab/cells';
 import { KernelExecutor } from './kernel';
 import { NotebookExt, NotebookExtDictionary } from '../utils/notebook';
 import { In, notIn } from '../utils/array';
-import { Log } from '../log';
 
 export interface ICodeVariables {
   /**
@@ -82,7 +81,7 @@ export class CodeInspector extends NotebookExt {
 
   filterNonKernelVariables(variables: string[]): string[] {
     const nonKernelVars = variables.filter(notIn(this._kernelVars));
-    // console.debug(
+    // Log.debug(
     //   'filterNonKernelVariables',
     //   nonKernelVariables,
     //   variables,
@@ -106,7 +105,7 @@ export class CodeInspector extends NotebookExt {
       variables: result.stored_names,
       unboundVariables: result.unbound_names
     };
-    // console.debug('code variables', vars);
+    // Log.debug('code variables', vars);
     return vars;
   }
 
