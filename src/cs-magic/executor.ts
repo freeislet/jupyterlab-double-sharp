@@ -15,7 +15,6 @@ export class CSMagicExecutor {
 
     CellMetadata.configOverride.setDirtyResolver((model: ICellModel) => {
       CSMagicExecutor.executeConfig(model);
-      return true;
     });
   }
 
@@ -44,14 +43,18 @@ export class CSMagicExecutor {
     // const commentNodes = tree.topNode.getChildren('Comment');
     // console.log(commentNodes, tree.topNode);
 
+    CellMetadata.configOverride.deferUpdate();
+
     const source = model.sharedModel.getSource();
-    // Log.debug(model, source);
+    // Log.debug('execute', model, source);
     const matches = matchAllStatements(source);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
         this._executeStatement(model, match.statement, predicate);
       }
     }
+
+    CellMetadata.configOverride.flushUpdate([model]);
   }
 
   private static _executeStatement(
