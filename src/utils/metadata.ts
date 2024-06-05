@@ -51,6 +51,7 @@ export class MetadataGroup<T> extends Metadata<T> {
 
 export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   public readonly dirtyFlagName: string;
+  private _dirtyResolver?: (model: ICellModel) => boolean;
 
   constructor(
     public readonly name: string,
@@ -59,6 +60,10 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   ) {
     super(name, defaultValue);
     this.dirtyFlagName = dirtyFlagName ?? name + '-dirty';
+  }
+
+  setDirtyResolver(resolver: (model: ICellModel) => boolean) {
+    this._dirtyResolver = resolver;
   }
 
   isDirty(model: ICellModel): boolean {
@@ -71,7 +76,12 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   }
 
   get(model: ICellModel): T | undefined {
-    if (this.isDirty(model)) return;
+    if (this.isDirty(model)) {
+      const resolved = this._dirtyResolver?.(model);
+      if (resolved) {
+        this.setDirty(model, false);
+      } else return;
+    }
     return super.get(model);
   }
 
