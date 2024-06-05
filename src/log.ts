@@ -5,7 +5,8 @@ import {
   LogLevel
 } from '@jupyterlab/logconsole';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { Widget } from '@lumino/widgets';
+
+import { toString } from './utils/object';
 
 export class Log {
   private static _instance?: Log;
@@ -122,24 +123,6 @@ export class Logger {
   }
 
   _stringify(data: any[], separator = ' '): string {
-    function toString(obj: any) {
-      let str = obj.toString();
-      if (str.startsWith('[object')) {
-        try {
-          str = JSON.stringify(obj, (key, value) => {
-            return value instanceof Set
-              ? [...value]
-              : value instanceof Map
-                ? Object.fromEntries(value)
-                : value instanceof Widget
-                  ? `<${typeof value}>${value.title} (${value.id})`
-                  : value;
-          });
-        } catch {}
-      }
-      return str;
-    }
-
-    return data.map(x => toString(x)).join(separator);
+    return data.map(toString).join(separator);
   }
 }
