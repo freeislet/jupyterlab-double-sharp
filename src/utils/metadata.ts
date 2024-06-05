@@ -51,7 +51,9 @@ export class MetadataGroup<T> extends Metadata<T> {
 
 export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   public readonly dirtyFlagName: string;
-  private _dirtyResolver?: (model: ICellModel) => boolean;
+  private _dirtyResolver?: (model: ICellModel) => void;
+  private _deferUpdate = false;
+  private _deferredUpdates = new Map<ICellModel, Partial<T>>();
 
   constructor(
     public readonly name: string,
@@ -62,7 +64,7 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     this.dirtyFlagName = dirtyFlagName ?? name + '-dirty';
   }
 
-  setDirtyResolver(resolver: (model: ICellModel) => boolean) {
+  setDirtyResolver(resolver: (model: ICellModel) => void) {
     this._dirtyResolver = resolver;
   }
 
@@ -77,9 +79,9 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
 
   get(model: ICellModel): T | undefined {
     if (this.isDirty(model)) {
-      const resolved = this._dirtyResolver?.(model);
-      if (resolved) {
-        this.setDirty(model, false);
+      if (this._dirtyResolver) {
+        this._dirtyResolver(model);
+        if (this.isDirty(model)) return;
       } else return;
     }
     return super.get(model);
@@ -91,6 +93,11 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   }
 
   update(model: ICellModel, value: Partial<T>, deleteIfEqualDefault = false) {
+    if (this._deferUpdate) {
+      this._accumulateUpdate(model, value);
+      return;
+    }
+
     if (this.isDirty(model)) {
       const coalescedValue = this.getCoalescedValue(value);
       this.set(model, coalescedValue, deleteIfEqualDefault);
@@ -99,8 +106,45 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     }
   }
 
+  deferUpdate() {
+    this._deferUpdate = true;
+    this._deferredUpdates.clear();
+  }
+
+  flushUpdate(resolveTargets?: Iterable<ICellModel>) {
+    this._deferUpdate = false;
+
+    for (const [model, update] of this._deferredUpdates.entries()) {
+      this.update(model, update);
+    }
+
+    if (resolveTargets) {
+      for (const model of resolveTargets) {
+        if (!this._deferredUpdates.has(model)) {
+          this.delete(model);
+        }
+      }
+    }
+
+    this._deferredUpdates.clear();
+  }
+
+  private _accumulateUpdate(model: ICellModel, value: Partial<T>) {
+    let modelUpdate = this._deferredUpdates.get(model);
+    if (!modelUpdate) {
+      modelUpdate = {};
+      this._deferredUpdates.set(model, modelUpdate);
+    }
+    Object.assign(modelUpdate, value);
+  }
+
+  delete(model: ICellModel) {
+    this.setDirty(model, false);
+    super.delete(model);
+  }
+
   clean(model: ICellModel) {
-    this.delete(model);
+    super.delete(model);
     model.deleteMetadata(this.dirtyFlagName);
   }
 }
