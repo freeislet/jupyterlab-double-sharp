@@ -69,6 +69,6 @@ export function setupCellActions() {
   );
 }
 
-export { CellContext, CellActions, CellDictionary };
+export { CellContext, CellMetadata, CellActions, CellDictionary };
 export { CellConfig } from './config';
 export { CellCode, CodeContext } from './code';

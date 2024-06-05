@@ -1,6 +1,6 @@
 import { ICellModel } from '@jupyterlab/cells';
 
-import { CellConfig } from '../cell';
+import { CellMetadata } from '../cell';
 import { paramAsBoolean } from '../utils/statement';
 
 export namespace CSMagic {
@@ -38,7 +38,7 @@ export namespace CSMagic {
     }
 
     execute(model: ICellModel) {
-      CellConfig.updateOverride(model, { skip: true });
+      CellMetadata.configOverride.update(model, { skip: true });
     }
   }
 
@@ -49,7 +49,7 @@ export namespace CSMagic {
 
     execute(model: ICellModel, flag?: string) {
       const cache = !flag || paramAsBoolean(flag);
-      CellConfig.updateOverride(model, { useCache: cache });
+      CellMetadata.configOverride.update(model, { useCache: cache });
     }
   }
 

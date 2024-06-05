@@ -32,8 +32,4 @@ export namespace CellConfig {
     Log.debug('cell config', coalesced);
     return coalesced;
   }
-
-  export function updateOverride(model: ICellModel, value: Partial<IConfig>) {
-    CellMetadata.configOverride.update(model, value);
-  }
 }
