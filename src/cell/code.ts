@@ -122,7 +122,7 @@ export class CodeContext {
   /**
    * Cell variables cached 여부 리턴
    */
-  async isVariablesCached(): Promise<boolean> {
+  async isCached(): Promise<boolean> {
     const metadata = await this.getMetadata();
     const uncachedVars = this.inspector.filterNonKernelVariables(
       metadata.variables
@@ -151,7 +151,7 @@ export class CodeContext {
     const config = CellConfig.get(this.cell.model);
     if (config.skip) return { skipped: true };
     if (config.useCache) {
-      cached = await this.isVariablesCached();
+      cached = await this.isCached();
       if (cached) return { cached };
     }
 
