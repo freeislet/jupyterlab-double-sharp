@@ -5,6 +5,7 @@ class DoubleSharp:
         from IPython.core.magics.namespace import NamespaceMagics
         from IPython.core.inputtransformer2 import TransformerManager
         from types import ModuleType
+        from builtins import set, str
 
         cls.magics = NamespaceMagics()
         cls.magics.shell = get_ipython().kernel.shell
@@ -97,6 +98,7 @@ class DoubleSharp:
     def inspect_code(cls, code):
         import inspect
         import dis
+        from builtins import set
 
         # NOTE: bytecode 구조 (추가 검토 필요)
         # * <module>
