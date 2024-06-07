@@ -6,6 +6,7 @@ import {
 } from '@jupyterlab/logconsole';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
+import { Settings } from './settings';
 import { stringFrom } from './utils/object';
 
 export namespace Log {
@@ -38,6 +39,8 @@ export class DefaultLogger implements Log.ILogger {
   }
 
   debug(...data: any[]) {
+    if (Private.skipLog('debug')) return;
+
     console.debug(...data);
   }
 }
@@ -46,41 +49,34 @@ export class Logger implements Log.ILogger {
   constructor(public readonly logger: ILogger) {}
 
   critical(...data: any[]) {
-    const text = Private.stringify(data);
-    this._log('critical', text);
-
+    this._log('critical', data);
     console.error(...data);
   }
 
   error(...data: any[]) {
-    const text = Private.stringify(data);
-    this._log('error', text);
-
+    this._log('error', data);
     console.error(...data);
   }
 
   warning(...data: any[]) {
-    const text = Private.stringify(data);
-    this._log('warning', text);
-
+    this._log('warning', data);
     console.warn(...data);
   }
 
   info(...data: any[]) {
-    const text = Private.stringify(data);
-    this._log('info', text);
-
+    this._log('info', data);
     console.log(...data);
   }
 
   debug(...data: any[]) {
-    const text = Private.stringify(data);
-    this._log('debug', text);
+    if (Private.skipLog('debug')) return;
 
+    this._log('debug', data);
     console.debug(...data);
   }
 
-  _log(level: LogLevel, text: string) {
+  _log(level: LogLevel, data: any[]) {
+    const text = Private.stringify(data);
     const msg: ITextLog = {
       type: 'text',
       level: level,
@@ -162,6 +158,10 @@ export class Log {
 }
 
 namespace Private {
+  export function skipLog(level: LogLevel): boolean {
+    return level === 'debug' && !Settings.settings.verbose.log;
+  }
+
   export function stringify(data: any[], separator = ' '): string {
     return data.map(stringFrom).join(separator);
   }
