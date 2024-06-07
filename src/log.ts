@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/logconsole';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { toString } from './utils/object';
+import { stringFrom } from './utils/object';
 
 export namespace Log {
   export interface ILogger {
@@ -163,7 +163,7 @@ export class Log {
 
 namespace Private {
   export function stringify(data: any[], separator = ' '): string {
-    return data.map(toString).join(separator);
+    return data.map(stringFrom).join(separator);
   }
 }
 
