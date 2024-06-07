@@ -48,7 +48,7 @@ export namespace CSMagic {
     }
 
     execute(model: ICellModel, flag?: string) {
-      const cache = !flag || paramAsBoolean(flag);
+      const cache = !flag || paramAsBoolean(flag, true);
       CellMetadata.configOverride.update(model, { useCache: cache });
     }
   }

@@ -41,12 +41,18 @@ export function tokenize(command: string): string[] {
 
 /**
  * boolean command 파라미터 파싱 (true/false, 1/0 지원)
- * true 또는 0이 아닌 숫자면 true, 아니면 false
+ * - true 또는 0이 아닌 숫자면 true
+ * - false 또는 0이면 false
+ * - 그 외 값이면 default_ 리턴
  */
-export function paramAsBoolean(param: string): boolean {
+export function paramAsBoolean(
+  param: string,
+  default_?: boolean
+): boolean | undefined {
   param = param.toLowerCase();
   if (param === 'true') return true;
+  if (param === 'false') return false;
 
   const paramAsNumber = +param;
-  return !isNaN(paramAsNumber) && paramAsNumber !== 0;
+  return !isNaN(paramAsNumber) ? paramAsNumber !== 0 : default_;
 }
