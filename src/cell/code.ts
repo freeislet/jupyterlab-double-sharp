@@ -1,4 +1,6 @@
 import { Cell, CodeCell } from '@jupyterlab/cells';
+import { StreamType, MultilineString } from '@jupyterlab/nbformat';
+import { IOutputAreaModel } from '@jupyterlab/outputarea';
 
 import { CellMetadata } from './metadata';
 import { CellConfig } from './config';
@@ -9,6 +11,7 @@ import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 import { In, notIn } from '../utils/array';
 import { ReorderSet } from '../utils/set';
+import { stringFrom } from '../utils/object';
 
 export namespace CellCode {
   export type IExecutionVariables = ICodeVariables & {
@@ -73,6 +76,7 @@ export class CodeContext {
   //----
 
   private _inspectorCache: Cache<CodeInspector>;
+  private _output = new CodeOutput(this);
 
   get inspector(): CodeInspector {
     return this._inspectorCache.value;
@@ -149,12 +153,18 @@ export class CodeContext {
     let cached: boolean | undefined;
 
     const config = CellConfig.get(this.cell.model);
-    if (config.skip) return { skipped: true };
+    if (config.skip) {
+      this._output.printSkipped();
+      return { skipped: true };
+    }
     if (config.useCache) {
       cached = await this.isCached();
-      if (cached) return { cached };
+      if (cached) {
+        const metadata = await this.getMetadata();
+        this._output.printCached(metadata);
+        return { cached };
+      }
     }
-
     if (config.autoDependency) {
       const dependency = await this._buildDependency();
       const dependencyResolved = dependency?.unresolvedVariables.length === 0;
@@ -308,6 +318,81 @@ export class CodeContext {
       dependency: Private.dependencyRootMetadata(plan.dependency)
     };
     CellMetadata.execution.set(this.cell.model, metadata);
+  }
+}
+
+export namespace CodeOutput {
+  export interface IOptions {
+    streamType: StreamType;
+    overwrite: boolean;
+  }
+}
+
+export class CodeOutput {
+  constructor(public readonly context: CodeContext) {}
+
+  get outputs(): IOutputAreaModel {
+    return this.context.cell.outputArea.model;
+  }
+
+  getLastIndex(): number | undefined {
+    for (let i = this.outputs.length - 1; i >= 0; --i) {
+      const output = this.outputs.get(i);
+      if (output.type === 'stream' && output.toJSON()['_##']) {
+        return i;
+      }
+    }
+  }
+
+  print(msg: MultilineString, options?: Partial<CodeOutput.IOptions>) {
+    const streamType = options?.streamType ?? 'stdout';
+    const overwrite = options?.overwrite ?? true;
+
+    const output = {
+      output_type: 'stream',
+      name: streamType,
+      text: msg,
+      '_##': true
+    };
+
+    const overwriteIndex = overwrite ? this.getLastIndex() : undefined;
+    if (overwriteIndex !== undefined) {
+      this.outputs.set(overwriteIndex, output);
+    } else {
+      this.outputs.add(output);
+    }
+    // Log.debug('outputs', this.outputs.toJSON(), overwriteIndex);
+  }
+
+  printSkipped() {
+    this.clearError();
+    this.print('## skipped\n', { streamType: 'stderr' });
+  }
+
+  printCached(metadata: CellMetadata.ICode) {
+    this.clearError();
+    this.print(`## cached: ${stringFrom(metadata.variables)}\n`, {
+      streamType: 'stderr'
+    });
+  }
+
+  clearError() {
+    let numCleared = 0;
+
+    for (let i = 0; i < this.outputs.length; ++i) {
+      const output = this.outputs.get(i);
+      if (
+        output.type === 'error' ||
+        (output.type === 'stream' && output.toJSON().name === 'stderr')
+      ) {
+        this.outputs.set(i, { output_type: 'null' });
+        ++numCleared;
+      }
+    }
+
+    if (numCleared === this.outputs.length) {
+      this.outputs.clear();
+    }
   }
 }
 
