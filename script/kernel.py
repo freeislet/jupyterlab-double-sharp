@@ -47,27 +47,7 @@ class DoubleSharp:
 
                 self.print_obj(log)
 
-            def print_closurevars(self, closurevars, fn_members=None):
-                log = {
-                    "builtins": mapping(closurevars.builtins),
-                    "nonlocals": mapping(closurevars.nonlocals),
-                    "globals": mapping(closurevars.globals),
-                    "unbound": list(closurevars.unbound),
-                }
-
-                if fn_members:
-                    # log["members"] = pairs(fn_members)
-                    members_dict = {k: v for k, v in fn_members}
-                    log["__name__"] = members_dict.get("__name__", "<unknown>")
-                    # log["__builtins__"] = mapping(members_dict.get("__builtins__", {}))
-                    # log["__globals__"] = mapping(members_dict.get("__globals__", {}))
-                    log["__globals__"] = list(members_dict.get("__globals__", {}))
-
-                self.print_obj(log)
-
             def print_obj(self, obj, **kwargs):
-                # for attr in dir(obj):
-                #     print(f"{attr}: {getattr(obj, attr)}", **kwargs)
                 print(self.dumps(obj))
 
         cls.util = Util()
@@ -82,12 +62,6 @@ class DoubleSharp:
         try:
             source = cls.transformer.transform_cell(source)
             code = compile(source, "<string>", "exec")
-
-            # NOTE: getclosurevars 대신 bytecode로부터 직접 variables 정보 수집하도록 함 (아래 코드 삭제 예정)
-            # fn_source = cls.make_source_function(source)
-            # fn_reports = cls.inspect_function(fn_source)
-            # result = cls.util.dumps({"functions": fn_reports})
-
             result = cls.inspect_code(code)
             return cls.util.dumps(result)
 
@@ -118,7 +92,7 @@ class DoubleSharp:
         codes = [code]
         for code in codes:
             # debug
-            cls.util.print_code(code)
+            # cls.util.print_code(code)
 
             bytecode = dis.Bytecode(code)
             for inst in bytecode:
@@ -141,52 +115,6 @@ class DoubleSharp:
             # unbound_names -> ICodeVariables.unboundVariables
             "unbound_names": list(unbound_names),
         }
-
-    # @deprecated
-    @classmethod
-    def inspect_function(cls, function):
-        import inspect
-        import dis
-
-        if isinstance(function, str):
-            exec(function, cls.internal_module.__dict__)
-            function = cls.internal_module._source_
-
-        reports = []
-        fns = [function]
-
-        for fn in fns:
-            code = fn.__code__
-            closurevars = inspect.getclosurevars(fn)
-
-            # debug
-            cls.util.print_closurevars(closurevars, inspect.getmembers(fn))
-
-            # inspect할 functions 추가
-            # NOTE: module을 function화하면 globals 안 생기는 듯? -> 확실하면 아래 코드 제거
-            global_fns = [
-                var for var in closurevars.globals.values() if inspect.isfunction(var)
-            ]
-            fns.extend(global_fns)
-
-            # function 정보 추가
-            report = {
-                "name": code.co_name,
-                # co_varnames -> ICodeVariables.variables
-                "co_varnames": code.co_varnames,
-                # unbound -> ICodeVariables.unboundVariables
-                "unbound": list(closurevars.unbound),
-            }
-            reports.append(report)
-
-        return reports
-
-    # @deprecated
-    @staticmethod
-    def make_source_function(source):
-        import re
-
-        return "def _source_():\n    " + re.sub(r"\n", "\n    ", source)
 
 
 DoubleSharp.init()

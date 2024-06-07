@@ -136,17 +136,17 @@ export class KernelExecutor {
   ): Promise<KernelExecutor.IInspectResult | undefined> {
     const escaped = source.replace(/"""/g, '\\"\\"\\"');
     const code = `DoubleSharp.inspect("""${escaped}""")`;
-    // console.debug(code);
+    // Log.debug(code);
 
     let ret: KernelExecutor.IInspectResult | undefined;
 
     await this.execute(code, {
       onExecuteResult(result: KernelExecutor.IInspectResult) {
         ret = result;
-        // console.debug('inspect result:', result);
+        // Log.debug('inspect result:', result);
       },
       onStream(result, streamType) {
-        // console.debug('inspect log:', result);
+        // Log.debug('inspect log:', result);
       }
     });
     return ret;
