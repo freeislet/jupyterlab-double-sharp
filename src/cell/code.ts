@@ -100,7 +100,7 @@ export class CodeContext {
   /**
    * ##Code metadata에 variables 정보 저장 및 리턴 (또는, 기존 metadata 조회))
    */
-  async getMetadata(): Promise<CellMetadata.ICode> {
+  async getData(): Promise<CellMetadata.ICode> {
     const cachedMetadata = CellMetadata.code.get(this.cell.model);
     if (cachedMetadata) return cachedMetadata;
 
@@ -114,11 +114,11 @@ export class CodeContext {
    * ICode metadata + IExecutionVariables(unresolved variables) 조회
    */
   async getExecutionVariables(): Promise<CellCode.IExecutionVariables> {
-    const metadata = await this.getMetadata();
+    const data = await this.getData();
     const unresolvedVariables = this.inspector.filterNonKernelVariables(
-      metadata.unboundVariables
+      data.unboundVariables
     );
-    const execVars = { ...metadata, unresolvedVariables };
+    const execVars = { ...data, unresolvedVariables };
     // console.debug('execution variables', execVars);
     return execVars;
   }
@@ -127,9 +127,9 @@ export class CodeContext {
    * Cell variables cached 여부 리턴
    */
   async isCached(): Promise<boolean> {
-    const metadata = await this.getMetadata();
+    const data = await this.getData();
     const uncachedVars = this.inspector.filterNonKernelVariables(
-      metadata.variables
+      data.variables
     );
     return !uncachedVars.length;
   }
@@ -160,8 +160,8 @@ export class CodeContext {
     if (config.useCache) {
       cached = await this.isCached();
       if (cached) {
-        const metadata = await this.getMetadata();
-        this._output.printCached(metadata);
+        const data = await this.getData();
+        this._output.printCached(data);
         return { cached };
       }
     }
@@ -369,9 +369,9 @@ export class CodeOutput {
     this.print('## skipped\n', { streamType: 'stderr' });
   }
 
-  printCached(metadata: CellMetadata.ICode) {
+  printCached(data: CellMetadata.ICode) {
     this.clearError();
-    this.print(`## cached: ${stringFrom(metadata.variables)}\n`, {
+    this.print(`## cached: ${stringFrom(data.variables)}\n`, {
       streamType: 'stderr'
     });
   }
