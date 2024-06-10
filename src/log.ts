@@ -173,7 +173,8 @@ namespace Private {
 const _Log = Log;
 
 declare global {
+  // eslint-disable-next-line no-var
   var Log: typeof _Log;
-  interface Log extends InstanceType<typeof Log> {}
+  type Log = InstanceType<typeof Log>;
 }
 globalThis.Log = _Log;
