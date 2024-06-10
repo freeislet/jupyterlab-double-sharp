@@ -26,23 +26,12 @@ export class Settings {
     return this.instance._editorChanged;
   }
 
-  static get toolbarChanged(): ISignal<
-    Settings,
-    Settings.IChangeParams<boolean>
-  > {
-    return this.instance._toolbarChanged;
-  }
-
   //----
 
   private _settings: Settings.ISettings = Settings.DEFAULT_SETTINGS;
   private _editorChanged = new Signal<
     Settings,
     Settings.IChangeParams<Settings.IEditor>
-  >(this);
-  private _toolbarChanged = new Signal<
-    Settings,
-    Settings.IChangeParams<boolean>
   >(this);
 
   constructor(settings: ISettingRegistry.ISettings) {
@@ -59,11 +48,6 @@ export class Settings {
     this._settings = new_;
 
     this._emitOnChanged(old.editor, new_.editor, this._editorChanged);
-    this._emitOnChanged(
-      old.showToolbar,
-      new_.showToolbar,
-      this._toolbarChanged
-    );
   }
 
   private _emitOnChanged<T, V>(
@@ -103,7 +87,6 @@ export namespace Settings {
   export interface ISettings {
     execution: IExecution;
     editor: IEditor;
-    showToolbar: boolean;
     enableCSMagic: boolean;
     verbose: IVerbose;
   }
@@ -120,7 +103,6 @@ export namespace Settings {
     editor: {
       highlight: true
     },
-    showToolbar: true,
     enableCSMagic: true,
     verbose: {
       log: false,

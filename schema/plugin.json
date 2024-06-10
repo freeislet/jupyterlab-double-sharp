@@ -81,11 +81,6 @@
       },
       "additionalProperties": false
     },
-    "showToolbar": {
-      "title": "Show Toolbar",
-      "type": "boolean",
-      "default": true
-    },
     "enableCSMagic": {
       "title": "Enable Client-side Magic Command",
       "type": "boolean",
