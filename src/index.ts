@@ -4,11 +4,13 @@ import {
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ILoggerRegistry } from '@jupyterlab/logconsole';
+import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
-import { Log } from './log';
 import { Settings } from './settings';
+import { Log } from './log';
+import { setupCommands } from './commands';
 import { setupCellExtensions, setupCellActions } from './cell';
 import { setupCodeExtensions } from './code';
 import { setupExecution } from './execution';
@@ -24,6 +26,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   requires: [
     ISettingRegistry,
     ILoggerRegistry,
+    ICommandPalette,
     INotebookTracker,
     IEditorExtensionRegistry
   ],
@@ -31,6 +34,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
     loggerRegistry: ILoggerRegistry,
+    commandPalette: ICommandPalette,
     nbtracker: INotebookTracker,
     editorExtensionRegistry: IEditorExtensionRegistry
   ) => {
@@ -44,8 +48,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.composite
         );
 
-        Log.setup(loggerRegistry, nbtracker);
         Settings.setup(settings);
+        Log.setup(loggerRegistry, nbtracker);
+        setupCommands(app, commandPalette, nbtracker);
         setupCellExtensions(app);
         setupCellActions();
         setupCodeExtensions(app);

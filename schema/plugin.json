@@ -2,6 +2,18 @@
   "jupyter.lab.shortcuts": [],
   "jupyter.lab.setting-icon": "double-sharp:icon",
   "jupyter.lab.setting-icon-label": "Double Sharp",
+  "jupyter.lab.toolbars": {
+    "Notebook": [
+      {
+        "name": "cell-properties",
+        "command": "double-sharp:cell-properties"
+      },
+      {
+        "name": "run-all-cells",
+        "command": "double-sharp:run-all-cells"
+      }
+    ]
+  },
   "title": "Double Sharp",
   "description": "Double Sharp settings.",
   "type": "object",
