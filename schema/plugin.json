@@ -5,8 +5,8 @@
   "jupyter.lab.toolbars": {
     "Notebook": [
       {
-        "name": "cell-properties",
-        "command": "double-sharp:cell-properties"
+        "name": "cell-inspector",
+        "command": "double-sharp:cell-inspector"
       },
       {
         "name": "run-all-cells",

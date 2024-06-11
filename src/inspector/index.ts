@@ -2,7 +2,7 @@ import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 // import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { CellInspectorWidget } from './widget';
-import { cellPropertiesIcon } from '../icon';
+import { cellInspectorIcon } from '../icon';
 import { CommandRegistration } from '../command';
 
 export function setupInspectors(
@@ -10,24 +10,24 @@ export function setupInspectors(
   restorer?: ILayoutRestorer
 ) {
   const widget = new CellInspectorWidget();
-  widget.title.icon = cellPropertiesIcon;
-  widget.title.caption = '## Cell Properties';
-  widget.id = 'double-sharp:cell-properties';
+  widget.title.icon = cellInspectorIcon;
+  widget.title.caption = '## Cell Inspector';
+  widget.id = 'double-sharp:cell-inspector';
   labshell.add(widget, 'right', {
     rank: 200,
-    type: 'double-sharp:cell-properties'
+    type: 'double-sharp:cell-inspector'
   });
 
   if (restorer) {
-    restorer.add(widget, 'double-sharp:cell-properties');
+    restorer.add(widget, 'double-sharp:cell-inspector');
   }
 
-  // Cell Properties command
+  // Cell Inspector command
   CommandRegistration.add(
-    'double-sharp:cell-properties',
+    'double-sharp:cell-inspector',
     {
-      icon: cellPropertiesIcon,
-      label: '## Cell Properties',
+      icon: cellInspectorIcon,
+      label: '## Cell Inspector',
       execute: () => {
         // TODO
         Log.debug('## cell properties');
