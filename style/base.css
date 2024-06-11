@@ -4,19 +4,8 @@
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
 
-/* stylelint-disable-next-line selector-class-pattern */
-.jp-ToolbarButtonComponent.lm-mod-hidden {
-  display: none;
-}
-
-/* notebook widget 테스트 */
-.jp-myextension-myheader {
-  min-height: 20px;
-  background-color: lightsalmon;
-}
-
 /*
- * Cell states
+    Cell states
  */
 
 .jp-Notebook .jp-Cell.jp-DoubleSharp-skip::after {
@@ -37,4 +26,19 @@
 }
 .jp-Notebook .jp-Cell.jp-DoubleSharp-cache.jp-mod-dirty::before {
   background-color: var(--jp-warn-color3);
+}
+
+/*
+    Cell Inspector
+*/
+
+.jp-DoubleSharp-CellInspector {
+  display: flex;
+  flex-direction: column;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+}
+
+.jp-DoubleSharp-CellInspector-placeholder {
+  margin: auto;
 }

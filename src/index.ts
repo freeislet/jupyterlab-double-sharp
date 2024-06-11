@@ -64,7 +64,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         setupCodeExtensions(app);
         setupExecution();
         setupEditor(editorExtensionRegistry);
-        setupInspectors(labshell, restorer);
+        setupInspectors(nbtracker, labshell, restorer);
         CommandRegistration.end();
       })
       .catch(reason => {

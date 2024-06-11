@@ -1,5 +1,5 @@
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
-// import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { CellInspectorWidget } from './widget';
 import { cellInspectorIcon } from '../icon';
@@ -7,11 +7,12 @@ import { CommandRegistration } from '../command';
 import { commandIds, selectors } from '../const';
 
 export function setupInspectors(
+  nbtracker: INotebookTracker,
   labshell: ILabShell,
   restorer?: ILayoutRestorer
 ) {
   const commandId = commandIds.CELL_INSPECTOR;
-  const widget = new CellInspectorWidget();
+  const widget = new CellInspectorWidget(nbtracker);
   widget.title.icon = cellInspectorIcon;
   widget.title.caption = '## Cell Inspector';
   widget.id = commandId;
