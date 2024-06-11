@@ -10,6 +10,7 @@ import { ILoggerRegistry } from '@jupyterlab/logconsole';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
+import { PLUGIN_ID } from './const';
 import { CommandRegistration } from './command';
 import { Settings } from './settings';
 import { Log } from './log';
@@ -23,8 +24,8 @@ import { setupInspectors } from './inspector';
  * Initialization data for the jupyterlab-double-sharp extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab-double-sharp:plugin',
-  description: 'Convert comments starting with ## to markdown-like heading',
+  id: PLUGIN_ID,
+  description: 'Execution cache and dependency management extension',
   autoStart: true,
   requires: [
     ILabShell,

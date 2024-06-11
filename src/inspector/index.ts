@@ -4,39 +4,37 @@ import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import { CellInspectorWidget } from './widget';
 import { cellInspectorIcon } from '../icon';
 import { CommandRegistration } from '../command';
+import { commandIds, selectors } from '../const';
 
 export function setupInspectors(
   labshell: ILabShell,
   restorer?: ILayoutRestorer
 ) {
+  const commandId = commandIds.CELL_INSPECTOR;
   const widget = new CellInspectorWidget();
   widget.title.icon = cellInspectorIcon;
   widget.title.caption = '## Cell Inspector';
-  widget.id = 'double-sharp:cell-inspector';
+  widget.id = commandId;
   labshell.add(widget, 'right', {
     rank: 200,
-    type: 'double-sharp:cell-inspector'
+    type: commandId
   });
 
   if (restorer) {
-    restorer.add(widget, 'double-sharp:cell-inspector');
+    restorer.add(widget, commandId);
   }
 
   // Cell Inspector command
   CommandRegistration.add(
-    'double-sharp:cell-inspector',
+    commandId,
     {
       icon: cellInspectorIcon,
       label: '## Cell Inspector',
       execute: () => {
-        // TODO
-        Log.debug('## cell properties');
+        labshell.activateById(widget.id);
       }
       // isEnabled: () => nbtracker.activeCell?.model.type === 'code'
     },
-    {
-      keys: ['Shift 3'],
-      selector: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
-    }
+    { keys: ['Shift 3'], selector: selectors.NOTEBOOK_COMMAND_MODE }
   );
 }

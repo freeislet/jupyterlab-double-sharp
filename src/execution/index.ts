@@ -2,13 +2,14 @@ import { fastForwardIcon } from '@jupyterlab/ui-components';
 
 import { patchExecutionFunctions } from './patch';
 import { CommandRegistration } from '../command';
+import { commandIds, selectors } from '../const';
 
 export function setupExecution() {
   patchExecutionFunctions();
 
   // Run All Cells command
   CommandRegistration.add(
-    'double-sharp:run-all-cells',
+    commandIds.RUN_ALL_CELLS,
     {
       icon: fastForwardIcon,
       label: '## Run all cells (with cache)',
@@ -17,7 +18,7 @@ export function setupExecution() {
         CommandRegistration.current?.registry.execute('notebook:run-all-cells');
       }
     },
-    { keys: ['Accel Shift Enter'], selector: '.jp-Notebook' }
+    { keys: ['Accel Shift Enter'], selector: selectors.NOTEBOOK }
   );
 }
 
