@@ -1,20 +1,23 @@
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabShell,
+  ILayoutRestorer
 } from '@jupyterlab/application';
+import { ICommandPalette } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ILoggerRegistry } from '@jupyterlab/logconsole';
-import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
+import { CommandRegistration } from './command';
 import { Settings } from './settings';
 import { Log } from './log';
-import { setupCommands } from './commands';
 import { setupCellExtensions, setupCellActions } from './cell';
 import { setupCodeExtensions } from './code';
 import { setupExecution } from './execution';
 import { setupEditor } from './editor';
+import { setupInspectors } from './inspector';
 
 /**
  * Initialization data for the jupyterlab-double-sharp extension.
@@ -24,19 +27,23 @@ const plugin: JupyterFrontEndPlugin<void> = {
   description: 'Convert comments starting with ## to markdown-like heading',
   autoStart: true,
   requires: [
+    ILabShell,
+    ICommandPalette,
     ISettingRegistry,
     ILoggerRegistry,
-    ICommandPalette,
     INotebookTracker,
     IEditorExtensionRegistry
   ],
+  optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
+    labshell: ILabShell,
+    commandPalette: ICommandPalette,
     settingRegistry: ISettingRegistry,
     loggerRegistry: ILoggerRegistry,
-    commandPalette: ICommandPalette,
     nbtracker: INotebookTracker,
-    editorExtensionRegistry: IEditorExtensionRegistry
+    editorExtensionRegistry: IEditorExtensionRegistry,
+    restorer?: ILayoutRestorer
   ) => {
     console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
 
@@ -48,14 +55,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.composite
         );
 
+        CommandRegistration.begin(app.commands, commandPalette);
         Settings.setup(settings);
         Log.setup(loggerRegistry, nbtracker);
-        setupCommands(app, commandPalette, nbtracker);
         setupCellExtensions(app);
         setupCellActions();
         setupCodeExtensions(app);
         setupExecution();
         setupEditor(editorExtensionRegistry);
+        setupInspectors(labshell, restorer);
+        CommandRegistration.end();
       })
       .catch(reason => {
         console.error(
