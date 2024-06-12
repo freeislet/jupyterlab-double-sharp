@@ -11,6 +11,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
 import { PLUGIN_ID } from './const';
+import { App } from './app';
 import { CommandRegistration } from './command';
 import { Settings } from './settings';
 import { Log } from './log';
@@ -42,9 +43,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commandPalette: ICommandPalette,
     settingRegistry: ISettingRegistry,
     loggerRegistry: ILoggerRegistry,
-    nbtracker: INotebookTracker,
+    notebookTracker: INotebookTracker,
     editorExtensionRegistry: IEditorExtensionRegistry,
-    restorer?: ILayoutRestorer
+    layoutRestorer?: ILayoutRestorer
   ) => {
     console.log('JupyterLab extension jupyterlab-double-sharp is activated!');
 
@@ -56,15 +57,21 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.composite
         );
 
+        App.setup({
+          app,
+          labshell,
+          layoutRestorer,
+          notebookTracker
+        });
         CommandRegistration.begin(app.commands, commandPalette);
         Settings.setup(settings);
-        Log.setup(loggerRegistry, nbtracker);
+        Log.setup(loggerRegistry, notebookTracker);
         setupCellExtensions(app);
         setupCellActions();
         setupCodeExtensions(app);
         setupExecution();
         setupEditor(editorExtensionRegistry);
-        setupInspectors(nbtracker, labshell, restorer);
+        setupInspectors(notebookTracker, labshell, layoutRestorer);
         CommandRegistration.end();
       })
       .catch(reason => {
