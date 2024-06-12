@@ -3,6 +3,7 @@ import { ICellModel } from '@jupyterlab/cells';
 import { settingsIcon } from '@jupyterlab/ui-components';
 
 import { CellContext } from '../cell';
+import { App } from '../app';
 
 interface IContextProps {
   context: CellContext;
@@ -26,6 +27,11 @@ interface IChildrenProps {
 }
 
 function Header({ children }: IChildrenProps) {
+  const openSettings = () =>
+    App.instance.commands.execute('settingeditor:open', {
+      query: 'Double Sharp'
+    });
+
   return (
     <div className="jp-DoubleSharp-CellInspector-Header">
       <div className="jp-DoubleSharp-CellInspector-Header-title">
@@ -34,9 +40,7 @@ function Header({ children }: IChildrenProps) {
       <div className="jp-DoubleSharp-CellInspector-Header-toolbar">
         <button
           className="jp-ToolbarButtonComponent jp-mod-minimal jp-Button"
-          onClick={() => {
-            Log.debug('## Settings...');
-          }}
+          onClick={openSettings}
         >
           <settingsIcon.react />
         </button>
