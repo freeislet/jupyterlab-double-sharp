@@ -4,17 +4,23 @@ import { Signal } from '@lumino/signaling';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 
-import CellTools from './component';
 import { CellContext } from '../cell';
+import CellTools from './component';
 
 export class CellInspectorWidget extends ReactWidget {
-  private _cellChanged = new Signal<this, void>(this);
+  private _cellChanged = new Signal<this, CellContext | null>(this);
   private _cellContext: CellContext | null = null;
+  private _placeholder: React.JSX.Element;
 
-  constructor(public readonly nbtracker: INotebookTracker) {
+  constructor(nbtracker: INotebookTracker) {
     super();
 
     this.addClass('jp-DoubleSharp-CellInspector');
+    this._placeholder = (
+      <div className="jp-DoubleSharp-CellInspector-placeholder">
+        No cell is selected.
+      </div>
+    );
 
     nbtracker.activeCellChanged.connect((tracker, cell) => {
       // Log.debug('activeCellChanged', tracker, cell);
@@ -36,20 +42,14 @@ export class CellInspectorWidget extends ReactWidget {
 
   setCell(cell: Cell | null) {
     this._cellContext = cell ? new CellContext(cell) : null;
-    this._cellChanged.emit();
+    this._cellChanged.emit(this._cellContext);
   }
 
   render() {
     return (
       <UseSignal signal={this._cellChanged}>
-        {() =>
-          this._cellContext ? (
-            <CellTools context={this._cellContext} />
-          ) : (
-            <div className="jp-DoubleSharp-CellInspector-placeholder">
-              No cell is selected.
-            </div>
-          )
+        {(_, cellContext) =>
+          cellContext ? <CellTools context={cellContext} /> : this._placeholder
         }
       </UseSignal>
     );
