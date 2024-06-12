@@ -12,7 +12,6 @@ import { IEditorExtensionRegistry } from '@jupyterlab/codemirror';
 
 import { PLUGIN_ID } from './const';
 import { App } from './app';
-import { CommandRegistration } from './command';
 import { Settings } from './settings';
 import { Log } from './log';
 import { setupCellExtensions, setupCellActions } from './cell';
@@ -61,9 +60,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
           app,
           labshell,
           layoutRestorer,
+          commandPalette,
           notebookTracker
         });
-        CommandRegistration.begin(app.commands, commandPalette);
         Settings.setup(settings);
         Log.setup(loggerRegistry, notebookTracker);
         setupCellExtensions(app);
@@ -72,7 +71,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
         setupExecution();
         setupEditor(editorExtensionRegistry);
         setupInspectors(notebookTracker, labshell, layoutRestorer);
-        CommandRegistration.end();
       })
       .catch(reason => {
         console.error(

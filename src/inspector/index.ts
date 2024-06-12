@@ -3,7 +3,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { CellInspectorWidget } from './widget';
 import { cellInspectorIcon } from '../icon';
-import { CommandRegistration } from '../command';
+import { App } from '../app';
 import { commandIds, selectors } from '../const';
 
 export function setupInspectors(
@@ -26,7 +26,7 @@ export function setupInspectors(
   }
 
   // Cell Inspector command
-  CommandRegistration.add(
+  App.instance.addCommand(
     commandId,
     {
       icon: cellInspectorIcon,

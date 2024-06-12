@@ -4,13 +4,17 @@ import {
   ILayoutRestorer
 } from '@jupyterlab/application';
 import { CommandRegistry } from '@lumino/commands';
+import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+
+import { addCommand, addCommandPalette } from './utils/command';
 
 export namespace App {
   export interface IOptions {
     app: JupyterFrontEnd;
     labshell: ILabShell;
     layoutRestorer?: ILayoutRestorer;
+    commandPalette: ICommandPalette;
     notebookTracker: INotebookTracker;
   }
 }
@@ -46,6 +50,10 @@ export class App implements IAppContext {
     return this._context.app.commands;
   }
 
+  get commandPalette(): ICommandPalette {
+    return this._context.commandPalette;
+  }
+
   get labshell(): ILabShell {
     return this._context.labshell;
   }
@@ -60,5 +68,17 @@ export class App implements IAppContext {
 
   get currentNotebook(): NotebookPanel | null {
     return this.notebookTracker.currentWidget;
+  }
+
+  addCommand(
+    id: string,
+    options: CommandRegistry.ICommandOptions,
+    keyBindingOptions?: PartialPick<
+      CommandRegistry.IKeyBindingOptions,
+      'command'
+    >
+  ) {
+    addCommand(this.commands, id, options, keyBindingOptions);
+    addCommandPalette(this.commandPalette, { command: id });
   }
 }
