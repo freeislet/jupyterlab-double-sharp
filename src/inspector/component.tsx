@@ -39,6 +39,7 @@ function Header({ children }: IChildrenProps) {
       </div>
       <div className="jp-DoubleSharp-CellInspector-Header-toolbar">
         <button
+          title="Double Sharp settings"
           className="jp-ToolbarButtonComponent jp-mod-minimal jp-Button"
           onClick={openSettings}
         >
