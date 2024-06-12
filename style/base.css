@@ -42,3 +42,32 @@
 .jp-DoubleSharp-CellInspector-placeholder {
   margin: auto;
 }
+
+.jp-DoubleSharp-CellInspector-Header {
+  display: flex;
+  justify-content: space-between;
+  background: var(--jp-layout-color2);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-DoubleSharp-CellInspector-Header-title {
+  padding: 6px;
+  font-weight: bold;
+}
+
+.jp-DoubleSharp-CellInspector-Header-toolbar {
+  display: flex;
+  align-items: end;
+}
+
+.jp-DoubleSharp-CellInspector-Content {
+  padding: 6px;
+}
+
+/*
+    misc.
+*/
+
+fieldset {
+  border-radius: 4px;
+}
