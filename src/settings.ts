@@ -3,69 +3,14 @@ import { ISignal, Signal } from '@lumino/signaling';
 import merge from 'lodash.merge';
 import equal from 'fast-deep-equal';
 
-export class Settings {
-  private static _instance?: Settings;
-
-  static setup(settings: ISettingRegistry.ISettings) {
-    this._instance = new Settings(settings);
-  }
-
-  static get instance(): Settings {
-    if (!this._instance) throw Error('Settings instance is not initialized.');
-    return this._instance;
-  }
-
-  static get settings(): Settings.ISettings {
-    return this.instance._settings;
-  }
-
-  static get editorChanged(): ISignal<
-    Settings,
-    Settings.IChangeParams<Settings.IEditor>
-  > {
-    return this.instance._editorChanged;
-  }
-
-  //----
-
-  private _settings: Settings.ISettings = Settings.DEFAULT_SETTINGS;
-  private _editorChanged = new Signal<
-    Settings,
-    Settings.IChangeParams<Settings.IEditor>
-  >(this);
-
-  constructor(settings: ISettingRegistry.ISettings) {
-    this._settings = merge(this._settings, Settings.load(settings));
-
-    settings.changed.connect(this.update, this);
-  }
-
-  update(settings: ISettingRegistry.ISettings) {
-    // console.log(this._settings, settings.composite);
-
-    const old = structuredClone(this._settings);
-    const new_ = Settings.load(settings);
-    this._settings = new_;
-
-    this._emitOnChanged(old.editor, new_.editor, this._editorChanged);
-  }
-
-  private _emitOnChanged<T, V>(
-    oldValue: V,
-    newValue: V,
-    signal: Signal<T, Settings.IChangeParams<V>>
-  ) {
-    if (newValue === undefined) return;
-    if (!equal(oldValue, newValue)) {
-      signal.emit({
-        oldValue,
-        newValue
-      });
-    }
-  }
-}
-
 export namespace Settings {
+  export interface ISettings {
+    execution: IExecution;
+    editor: IEditor;
+    enableCSMagic: boolean;
+    verbose: IVerbose;
+  }
+
   export interface IExecution {
     useCache: boolean;
     autoDependency: boolean;
@@ -84,14 +29,14 @@ export namespace Settings {
     metadata: boolean;
   }
 
-  export interface ISettings {
-    execution: IExecution;
-    editor: IEditor;
-    enableCSMagic: boolean;
-    verbose: IVerbose;
+  export interface IChangeParams<T> {
+    oldValue: T;
+    newValue: T;
   }
+}
 
-  export const DEFAULT_SETTINGS: ISettings = {
+export class Settings {
+  static readonly DEFAULT_SETTINGS: Settings.ISettings = {
     execution: {
       useCache: true,
       autoDependency: true,
@@ -110,14 +55,78 @@ export namespace Settings {
     }
   };
 
-  export function load(
-    settings: ISettingRegistry.ISettings
-  ): Settings.ISettings {
+  static setup(settings: ISettingRegistry.ISettings) {
+    this._instance = new Settings(settings);
+  }
+
+  private static _instance?: Settings;
+  static get instance(): Settings {
+    if (!this._instance) throw Error('Settings instance is not initialized.');
+    return this._instance;
+  }
+
+  static get settings(): Settings.ISettings {
+    return this.instance._settings;
+  }
+
+  static get editorChanged(): ISignal<
+    Settings,
+    Settings.IChangeParams<Settings.IEditor>
+  > {
+    return this.instance._editorChanged;
+  }
+
+  static get verboseChanged(): ISignal<
+    Settings,
+    Settings.IChangeParams<Settings.IVerbose>
+  > {
+    return this.instance._verboseChanged;
+  }
+
+  //----
+
+  private _settings: Settings.ISettings = Settings.DEFAULT_SETTINGS;
+  private _editorChanged = new Signal<
+    Settings,
+    Settings.IChangeParams<Settings.IEditor>
+  >(this);
+  private _verboseChanged = new Signal<
+    Settings,
+    Settings.IChangeParams<Settings.IVerbose>
+  >(this);
+
+  constructor(settings: ISettingRegistry.ISettings) {
+    this._settings = merge(this._settings, this._load(settings));
+
+    settings.changed.connect(this.update, this);
+  }
+
+  update(settings: ISettingRegistry.ISettings) {
+    // console.log(this._settings, settings.composite);
+
+    const old = structuredClone(this._settings);
+    const new_ = this._load(settings);
+    this._settings = new_;
+
+    this._emitOnChanged(old.editor, new_.editor, this._editorChanged);
+    this._emitOnChanged(old.verbose, new_.verbose, this._verboseChanged);
+  }
+
+  private _load(settings: ISettingRegistry.ISettings): Settings.ISettings {
     return settings.composite as object as Settings.ISettings;
   }
 
-  export interface IChangeParams<T> {
-    oldValue: T;
-    newValue: T;
+  private _emitOnChanged<T, V>(
+    oldValue: V,
+    newValue: V,
+    signal: Signal<T, Settings.IChangeParams<V>>
+  ) {
+    if (newValue === undefined) return;
+    if (!equal(oldValue, newValue)) {
+      signal.emit({
+        oldValue,
+        newValue
+      });
+    }
   }
 }
