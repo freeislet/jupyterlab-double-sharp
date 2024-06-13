@@ -19,70 +19,54 @@ export namespace Log {
   }
 }
 
-export class DefaultLogger implements Log.ILogger {
-  constructor() {}
+export class Logger implements Log.ILogger {
+  constructor(
+    public readonly logger: ILogger,
+    public readonly manager: Log
+  ) {}
 
   critical(...data: any[]) {
-    console.error(...data);
+    this.manager.log('critical', data, this.logger);
   }
 
   error(...data: any[]) {
-    console.error(...data);
+    this.manager.log('error', data, this.logger);
   }
 
   warning(...data: any[]) {
-    console.warn(...data);
+    this.manager.log('warning', data, this.logger);
   }
 
   info(...data: any[]) {
-    console.log(...data);
+    this.manager.log('info', data, this.logger);
   }
 
   debug(...data: any[]) {
-    if (Private.skipLog('debug')) return;
-
-    console.debug(...data);
+    this.manager.log('debug', data, this.logger);
   }
 }
 
-export class Logger implements Log.ILogger {
-  constructor(public readonly logger: ILogger) {}
+export class DefaultLogger implements Log.ILogger {
+  constructor(public readonly manager: Log) {}
 
   critical(...data: any[]) {
-    this._log('critical', data);
-    console.error(...data);
+    this.manager.log('critical', data);
   }
 
   error(...data: any[]) {
-    this._log('error', data);
-    console.error(...data);
+    this.manager.log('error', data);
   }
 
   warning(...data: any[]) {
-    this._log('warning', data);
-    console.warn(...data);
+    this.manager.log('warning', data);
   }
 
   info(...data: any[]) {
-    this._log('info', data);
-    console.log(...data);
+    this.manager.log('info', data);
   }
 
   debug(...data: any[]) {
-    if (Private.skipLog('debug')) return;
-
-    this._log('debug', data);
-    console.debug(...data);
-  }
-
-  _log(level: LogLevel, data: any[]) {
-    const text = Private.stringify(data);
-    const msg: ITextLog = {
-      type: 'text',
-      level: level,
-      data: text
-    };
-    this.logger.log(msg);
+    this.manager.log('debug', data);
   }
 }
 
@@ -91,6 +75,11 @@ export class Log {
 
   static setup(registry: ILoggerRegistry, nbtracker: INotebookTracker) {
     this.instance.set(registry, nbtracker);
+
+    this.instance.verbose = Settings.settings.verbose.log;
+    Settings.verboseChanged.connect((_, change) => {
+      this.instance.verbose = change.newValue.log;
+    });
   }
 
   static get(panel: NotebookPanel): Log.ILogger {
@@ -125,11 +114,19 @@ export class Log {
 
   private _registry?: ILoggerRegistry;
   private _nbtracker?: INotebookTracker;
-  private _loggers = new Map<NotebookPanel, Logger>();
-  private _defaultLogger = new DefaultLogger();
+  private _loggers = new Map<NotebookPanel | null, Logger>();
+  private _defaultLogger = new DefaultLogger(this);
+  private _verbose = false;
 
-  get loggers(): ReadonlyMap<NotebookPanel, Log.ILogger> {
+  get loggers(): ReadonlyMap<NotebookPanel | null, Log.ILogger> {
     return this._loggers;
+  }
+
+  get verbose(): boolean {
+    return this._verbose;
+  }
+  set verbose(value: boolean) {
+    this._verbose = value;
   }
 
   constructor() {}
@@ -141,27 +138,49 @@ export class Log {
 
   getCurrentLogger(): Log.ILogger {
     const panel = this._nbtracker?.currentWidget;
-    return panel ? this.getLogger(panel) : this._defaultLogger;
+    return this.getLogger(panel);
   }
 
-  getLogger(panel: NotebookPanel): Log.ILogger {
+  getLogger(panel?: NotebookPanel | null): Log.ILogger {
+    panel = panel ?? null;
+
     let logger = this._loggers.get(panel);
     if (!logger) {
-      const jllogger = this._registry?.getLogger(panel.context.path);
+      const source = panel?.context.path ?? '';
+      const jllogger = this._registry?.getLogger(source);
       if (jllogger) {
-        logger = new Logger(jllogger);
+        logger = new Logger(jllogger, this);
         this._loggers.set(panel, logger);
       }
     }
     return logger ?? this._defaultLogger;
   }
+
+  log(level: LogLevel, data: any[], logger?: ILogger) {
+    if (level === 'debug' && !this.verbose) return;
+
+    if (logger) {
+      const text = Private.stringify(data);
+      const msg: ITextLog = {
+        type: 'text',
+        level: level,
+        data: text
+      };
+      logger.log(msg);
+    }
+
+    const consoleLogs = {
+      critical: console.error,
+      error: console.error,
+      warning: console.warn,
+      info: console.log,
+      debug: console.debug
+    };
+    consoleLogs[level]?.(...data);
+  }
 }
 
 namespace Private {
-  export function skipLog(level: LogLevel): boolean {
-    return level === 'debug' && !Settings.settings.verbose.log;
-  }
-
   export function stringify(data: any[], separator = ' '): string {
     return data.map(stringFrom).join(separator);
   }
