@@ -1,9 +1,12 @@
 import * as React from 'react';
-import { ICellModel } from '@jupyterlab/cells';
+// import { ICellModel } from '@jupyterlab/cells';
 import { settingsIcon } from '@jupyterlab/ui-components';
 
-import { CellContext } from '../cell';
+import { CellContext, CellMetadata, CellConfig } from '../cell';
 import { App } from '../app';
+import { IChildrenProps } from '../ui';
+import Group from '../ui/group';
+import Checkbox from '../ui/checkbox';
 
 interface IContextProps {
   context: CellContext;
@@ -16,14 +19,10 @@ export default function CellTools({ context }: ICellToolsProps) {
     <>
       <Header>## Cell Inspector</Header>
       <Content>
-        <Model model={context.cell.model} />
+        <Config context={context} />
       </Content>
     </>
   );
-}
-
-interface IChildrenProps {
-  children?: React.ReactNode;
 }
 
 function Header({ children }: IChildrenProps) {
@@ -54,15 +53,53 @@ function Content({ children }: IChildrenProps) {
   return <div className="jp-DoubleSharp-CellInspector-Content">{children}</div>;
 }
 
-interface IModelProps {
-  model: ICellModel;
-}
+function Config({ context }: IContextProps) {
+  const model = context.cell.model;
+  const config = CellMetadata.config.getCoalesced(model);
+  const checked = config.useCache ?? false; // TODO: useSettings UI
+  const onChangeUseCache = (checked: boolean) =>
+    CellMetadata.config.update(model, { useCache: checked });
+  const finalConfig = CellConfig.get(context.cell.model);
+  finalConfig;
 
-function Model({ model }: IModelProps) {
   return (
-    <fieldset>
-      <legend>Model</legend>
-      <p>{model.id}</p>
-    </fieldset>
+    <Group>
+      <Group.Title>Config</Group.Title>
+      <ConfigCheckItem checked={checked} onChange={onChangeUseCache}>
+        Use Cache
+      </ConfigCheckItem>
+      {context.cell.model.id}
+    </Group>
   );
 }
+
+interface IConfigCheckProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  children: React.ReactNode;
+}
+
+function ConfigCheckItem({ checked, onChange, children }: IConfigCheckProps) {
+  return (
+    <Checkbox
+      className="jp-DoubleSharp-CellInspector-ConfigItem"
+      checked={checked}
+      onChange={e => onChange(e.target.checked)}
+    >
+      {children}
+    </Checkbox>
+  );
+}
+
+// interface IModelProps {
+//   model: ICellModel;
+// }
+
+// function Model({ model }: IModelProps) {
+//   return (
+//     <fieldset>
+//       <legend>Model</legend>
+//       <p>{model.id}</p>
+//     </fieldset>
+//   );
+// }
