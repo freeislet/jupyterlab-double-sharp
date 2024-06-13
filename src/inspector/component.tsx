@@ -26,11 +26,6 @@ export default function CellTools({ context }: ICellToolsProps) {
 }
 
 function Header({ children }: IChildrenProps) {
-  const openSettings = () =>
-    App.instance.commands.execute('settingeditor:open', {
-      query: 'Double Sharp'
-    });
-
   return (
     <div className="jp-DoubleSharp-CellInspector-Header">
       <div className="jp-DoubleSharp-CellInspector-Header-title">
@@ -40,7 +35,7 @@ function Header({ children }: IChildrenProps) {
         <button
           title="Double Sharp settings"
           className="jp-ToolbarButtonComponent jp-mod-minimal jp-Button"
-          onClick={openSettings}
+          onClick={() => App.instance.openSettings()}
         >
           <settingsIcon.react />
         </button>

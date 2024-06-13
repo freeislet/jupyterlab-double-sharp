@@ -17,53 +17,45 @@ export namespace App {
     commandPalette: ICommandPalette;
     notebookTracker: INotebookTracker;
   }
+
+  export interface IJLabContext extends IOptions {
+    commands: CommandRegistry;
+    currentNotebook: NotebookPanel | null;
+  }
 }
 
-export interface IAppContext extends Readonly<App.IOptions> {
-  readonly commands: CommandRegistry;
-  readonly currentNotebook: NotebookPanel | null;
-}
+export class App {
+  static setup(options: App.IOptions) {
+    this._instance = new App(options);
+  }
 
-export class App implements IAppContext {
   static _instance: App;
   static get instance(): App {
     return this._instance;
   }
 
-  static setup(options: App.IOptions) {
-    this._instance = new App(options);
-  }
-
   //----
 
-  private _context: App.IOptions;
+  public readonly jlab: Readonly<App.IJLabContext>;
 
   constructor(options: App.IOptions) {
-    this._context = options;
-  }
-
-  get app(): JupyterFrontEnd {
-    return this._context.app;
+    this.jlab = {
+      ...options,
+      get commands() {
+        return this.app.commands;
+      },
+      get currentNotebook() {
+        return this.notebookTracker.currentWidget;
+      }
+    };
   }
 
   get commands(): CommandRegistry {
-    return this._context.app.commands;
-  }
-
-  get commandPalette(): ICommandPalette {
-    return this._context.commandPalette;
-  }
-
-  get labshell(): ILabShell {
-    return this._context.labshell;
-  }
-
-  get layoutRestorer(): ILayoutRestorer | undefined {
-    return this._context.layoutRestorer;
+    return this.jlab.commands;
   }
 
   get notebookTracker(): INotebookTracker {
-    return this._context.notebookTracker;
+    return this.jlab.notebookTracker;
   }
 
   get currentNotebook(): NotebookPanel | null {
@@ -79,6 +71,12 @@ export class App implements IAppContext {
     >
   ) {
     addCommand(this.commands, id, options, keyBindingOptions);
-    addCommandPalette(this.commandPalette, { command: id });
+    addCommandPalette(this.jlab.commandPalette, { command: id });
+  }
+
+  openSettings() {
+    this.commands.execute('settingeditor:open', {
+      query: 'Double Sharp'
+    });
   }
 }
