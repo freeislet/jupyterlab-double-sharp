@@ -10,17 +10,11 @@ import CellTools from './components/cell-tools';
 export class CellInspectorWidget extends ReactWidget {
   private _cellChanged = new Signal<this, CellContext | null>(this);
   private _cellContext: CellContext | null = null;
-  private _placeholder: React.JSX.Element;
 
   constructor(nbtracker: INotebookTracker) {
     super();
 
     this.addClass('jp-DoubleSharp-CellInspector');
-    this._placeholder = (
-      <div className="jp-DoubleSharp-CellInspector-placeholder">
-        No cell is selected.
-      </div>
-    );
 
     nbtracker.activeCellChanged.connect((tracker, cell) => {
       // Log.debug('activeCellChanged', tracker, cell);
@@ -48,9 +42,7 @@ export class CellInspectorWidget extends ReactWidget {
   render() {
     return (
       <UseSignal signal={this._cellChanged}>
-        {(_, cellContext) =>
-          cellContext ? <CellTools context={cellContext} /> : this._placeholder
-        }
+        {(_, cellContext) => <CellTools context={cellContext ?? null} />}
       </UseSignal>
     );
   }

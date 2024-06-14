@@ -9,21 +9,27 @@ import ToolbarButton from '../../ui/toolbar-button';
 import Group from '../../ui/group';
 import Checkbox from '../../ui/checkbox';
 
-interface IContextProps {
-  context: CellContext;
+export interface ICellToolsProps {
+  context: CellContext | null;
 }
 
-export interface ICellToolsProps extends IContextProps {}
-
 export default function CellTools({ context }: ICellToolsProps) {
-  return (
-    <>
-      <Header>## Cell Inspector</Header>
-      <Content>
-        <Config context={context} />
-      </Content>
-    </>
-  );
+  if (context) {
+    return (
+      <>
+        <Header>## Cell Inspector</Header>
+        <Content>
+          <Config context={context} />
+        </Content>
+      </>
+    );
+  } else {
+    return (
+      <div className="jp-DoubleSharp-CellInspector-placeholder">
+        No cell is selected.
+      </div>
+    );
+  }
 }
 
 function Header({ children }: IChildrenProps) {
@@ -46,6 +52,10 @@ function Header({ children }: IChildrenProps) {
 
 function Content({ children }: IChildrenProps) {
   return <div className="jp-DoubleSharp-CellInspector-Content">{children}</div>;
+}
+
+interface IContextProps {
+  context: CellContext;
 }
 
 function Config({ context }: IContextProps) {
