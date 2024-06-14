@@ -5,7 +5,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 
 import { CellContext } from '../cell';
-import CellTools from './component';
+import CellTools from './components/cell-tools';
 
 export class CellInspectorWidget extends ReactWidget {
   private _cellChanged = new Signal<this, CellContext | null>(this);

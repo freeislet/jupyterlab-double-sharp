@@ -2,12 +2,12 @@ import * as React from 'react';
 // import { ICellModel } from '@jupyterlab/cells';
 import { settingsIcon } from '@jupyterlab/ui-components';
 
-import { CellContext, CellMetadata, CellConfig } from '../cell';
-import { App } from '../app';
-import { IChildrenProps } from '../ui';
-import ToolbarButton from '../ui/toolbar-button';
-import Group from '../ui/group';
-import Checkbox from '../ui/checkbox';
+import { CellContext, CellMetadata, CellConfig } from '../../cell';
+import { App } from '../../app';
+import { IChildrenProps } from '../../ui';
+import ToolbarButton from '../../ui/toolbar-button';
+import Group from '../../ui/group';
+import Checkbox from '../../ui/checkbox';
 
 interface IContextProps {
   context: CellContext;
