@@ -5,6 +5,7 @@ import { settingsIcon } from '@jupyterlab/ui-components';
 import { CellContext, CellMetadata, CellConfig } from '../cell';
 import { App } from '../app';
 import { IChildrenProps } from '../ui';
+import ToolbarButton from '../ui/toolbar-button';
 import Group from '../ui/group';
 import Checkbox from '../ui/checkbox';
 
@@ -32,13 +33,12 @@ function Header({ children }: IChildrenProps) {
         {children}
       </div>
       <div className="jp-DoubleSharp-CellInspector-Header-toolbar">
-        <button
+        <ToolbarButton
           title="Double Sharp settings"
-          className="jp-ToolbarButtonComponent jp-mod-minimal jp-Button"
           onClick={() => App.instance.openSettings()}
         >
           <settingsIcon.react />
-        </button>
+        </ToolbarButton>
       </div>
     </div>
   );
