@@ -25,7 +25,7 @@ export default function CellTools({ context }: ICellToolsProps) {
     );
   } else {
     return (
-      <div className="jp-DoubleSharp-CellInspector-placeholder">
+      <div className="jp-DoubleSharp-Inspector-placeholder">
         No cell is selected.
       </div>
     );
@@ -34,11 +34,9 @@ export default function CellTools({ context }: ICellToolsProps) {
 
 function Header({ children }: IChildrenProps) {
   return (
-    <div className="jp-DoubleSharp-CellInspector-Header">
-      <div className="jp-DoubleSharp-CellInspector-Header-title">
-        {children}
-      </div>
-      <div className="jp-DoubleSharp-CellInspector-Header-toolbar">
+    <div className="jp-DoubleSharp-Inspector-Header">
+      <div className="jp-DoubleSharp-Inspector-Header-title">{children}</div>
+      <div className="jp-DoubleSharp-Inspector-Header-toolbar">
         <ToolbarButton
           title="Double Sharp settings"
           onClick={() => App.instance.openSettings()}
@@ -51,7 +49,7 @@ function Header({ children }: IChildrenProps) {
 }
 
 function Content({ children }: IChildrenProps) {
-  return <div className="jp-DoubleSharp-CellInspector-Content">{children}</div>;
+  return <div className="jp-DoubleSharp-Inspector-Content">{children}</div>;
 }
 
 interface IContextProps {
@@ -87,7 +85,7 @@ interface IConfigCheckProps {
 function ConfigCheckItem({ checked, onChange, children }: IConfigCheckProps) {
   return (
     <Checkbox
-      className="jp-DoubleSharp-CellInspector-ConfigItem"
+      className="jp-DoubleSharp-Inspector-ConfigItem"
       checked={checked}
       onChange={e => onChange(e.target.checked)}
     >

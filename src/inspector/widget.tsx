@@ -1,10 +1,14 @@
 import * as React from 'react';
-import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
-import { Signal } from '@lumino/signaling';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
+import { Signal } from '@lumino/signaling';
+import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
+import { settingsIcon } from '@jupyterlab/ui-components';
 
+import { App } from '../app';
 import { CellContext } from '../cell';
+import Accordion from '../ui/accordion';
+import ToolbarButton from '../ui/toolbar-button';
 import CellTools from './components/cell-tools';
 
 export class CellInspectorWidget extends ReactWidget {
@@ -41,9 +45,33 @@ export class CellInspectorWidget extends ReactWidget {
 
   render() {
     return (
-      <UseSignal signal={this._cellChanged}>
-        {(_, cellContext) => <CellTools context={cellContext ?? null} />}
-      </UseSignal>
+      <>
+        <Accordion>
+          <Accordion.TriggerContainer>
+            <Accordion.Trigger>## Settings</Accordion.Trigger>
+            <div className="jp-DoubleSharp-Accordion-toolbar">
+              <ToolbarButton
+                title="Double Sharp settings"
+                onClick={() => App.instance.openSettings()}
+              >
+                <settingsIcon.react />
+              </ToolbarButton>
+            </div>
+          </Accordion.TriggerContainer>
+          <Accordion.Content>
+            <p>settings...</p>
+            <p>...</p>
+          </Accordion.Content>
+        </Accordion>
+        <Accordion initialActive={true}>
+          <Accordion.Trigger>## Cell Inspector</Accordion.Trigger>
+          <Accordion.Content>
+            <UseSignal signal={this._cellChanged}>
+              {(_, cellContext) => <CellTools context={cellContext ?? null} />}
+            </UseSignal>
+          </Accordion.Content>
+        </Accordion>
+      </>
     );
   }
 }

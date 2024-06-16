@@ -1,3 +1,32 @@
+/* Accordion */
+
+.jp-DoubleSharp-Accordion-trigger-container {
+  background-color: #eee;
+}
+
+.jp-DoubleSharp-Accordion-trigger {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+
+.jp-DoubleSharp-Accordion-trigger.jp-mod-active,
+.jp-DoubleSharp-Accordion-trigger:hover {
+  background-color: #ccc;
+}
+
+.jp-DoubleSharp-Accordion-toolbar {
+  display: flex;
+  align-items: end;
+  margin-left: auto;
+}
+
 /* Group */
 
 .jp-DoubleSharp-Group {
@@ -18,4 +47,12 @@
   margin-right: 4px;
   vertical-align: top;
   background-color: var(--jp-brand-color1);
+}
+
+/* Collapsible */
+
+.jp-DoubleSharp-Collapsible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
