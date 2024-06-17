@@ -16,14 +16,21 @@ export default function Collapsible({
 }: ICollapsibleProps) {
   const ref = React.useRef<HTMLDivElement>(null!);
 
-  const update = (mutations?: MutationRecord[]) => {
-    // console.debug('Collapsible', ref.current.scrollHeight, collapse, mutations);
+  const update = () => {
+    // console.debug('Mutation', ref.current.scrollHeight, collapse);
     const maxHeight = collapse ? null : ref.current.scrollHeight + 'px';
     ref.current.style.setProperty('max-height', maxHeight);
   };
-  useMutationObserver(ref, update, { subtree: true, childList: true });
+  useMutationObserver(
+    ref,
+    (mutations?: MutationRecord[]) => {
+      // console.debug('Mutation', ref.current.scrollHeight, collapse, mutations);
+      requestAnimationFrame(() => update());
+    },
+    { subtree: true, childList: true }
+  );
 
-  React.useLayoutEffect(() => update(), [collapse]);
+  React.useLayoutEffect(update, [collapse]);
 
   return (
     <div
