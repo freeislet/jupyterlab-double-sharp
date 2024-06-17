@@ -1,30 +1,51 @@
 /* Accordion */
 
 .jp-DoubleSharp-Accordion-trigger-container {
-  background-color: #eee;
+  display: flex;
+  align-items: center;
+  background-color: var(--jp-input-background);
+  border-bottom: 1px solid var(--jp-border-color2);
 }
 
 .jp-DoubleSharp-Accordion-trigger {
-  background-color: #eee;
-  color: #444;
   cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  outline: none;
-  transition: 0.4s;
+  flex-grow: 1;
+  padding: 8px;
+  background-color: var(--jp-input-background);
+  color: var(--jp-ui-font-color1);
+  font-weight: bold;
+  transition: 0.2s;
 }
 
-.jp-DoubleSharp-Accordion-trigger.jp-mod-active,
+.jp-DoubleSharp-Accordion-trigger.jp-mod-active {
+  background-color: var(--jp-layout-color2);
+}
+
 .jp-DoubleSharp-Accordion-trigger:hover {
-  background-color: #ccc;
+  background-color: var(--jp-toolbar-active-background);
 }
 
-.jp-DoubleSharp-Accordion-toolbar {
+/* Collapsible */
+
+.jp-DoubleSharp-Collapsible {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+/* Toolbar */
+
+.jp-DoubleSharp-Toolbar {
   display: flex;
-  align-items: end;
-  margin-left: auto;
+  align-items: center;
+  padding: 2px;
+}
+
+.jp-DoubleSharp-Toolbar-button {
+  cursor: pointer;
+  height: 24px;
+  background-color: transparent;
+  border: none;
 }
 
 /* Group */
@@ -47,12 +68,4 @@
   margin-right: 4px;
   vertical-align: top;
   background-color: var(--jp-brand-color1);
-}
-
-/* Collapsible */
-
-.jp-DoubleSharp-Collapsible {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
 }

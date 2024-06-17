@@ -8,7 +8,7 @@ import { settingsIcon } from '@jupyterlab/ui-components';
 import { App } from '../app';
 import { CellContext } from '../cell';
 import Accordion from '../ui/accordion';
-import ToolbarButton from '../ui/toolbar-button';
+import Toolbar from '../ui/toolbar';
 import CellTools from './components/cell-tools';
 
 export class CellInspectorWidget extends ReactWidget {
@@ -49,14 +49,14 @@ export class CellInspectorWidget extends ReactWidget {
         <Accordion>
           <Accordion.TriggerContainer>
             <Accordion.Trigger>## Settings</Accordion.Trigger>
-            <div className="jp-DoubleSharp-Accordion-toolbar">
-              <ToolbarButton
+            <Toolbar>
+              <Toolbar.Button
                 title="Double Sharp settings"
                 onClick={() => App.instance.openSettings()}
               >
                 <settingsIcon.react />
-              </ToolbarButton>
-            </div>
+              </Toolbar.Button>
+            </Toolbar>
           </Accordion.TriggerContainer>
           <Accordion.Content>
             <p>settings...</p>
