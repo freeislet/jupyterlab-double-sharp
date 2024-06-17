@@ -1,4 +1,5 @@
 import * as React from 'react';
+import useMutationObserver from '@rooks/use-mutation-observer';
 import cn from 'classnames';
 
 import { IDivProps } from '.';
@@ -15,12 +16,14 @@ export default function Collapsible({
 }: ICollapsibleProps) {
   const ref = React.useRef<HTMLDivElement>(null!);
 
-  React.useLayoutEffect(() => {
-    // const maxHeight = collapse ? null : ref.current.scrollHeight + 'px';
-    // NOTE: scrollHeight 초기화 및 contents 추가 반영 이슈로 일단 max-height 애니메이션 없이 revert, 추후 MutationObserver 적용
-    const maxHeight = collapse ? null : 'revert';
+  const update = (mutations?: MutationRecord[]) => {
+    // console.debug('Collapsible', ref.current.scrollHeight, collapse, mutations);
+    const maxHeight = collapse ? null : ref.current.scrollHeight + 'px';
     ref.current.style.setProperty('max-height', maxHeight);
-  }, [collapse]);
+  };
+  useMutationObserver(ref, update, { subtree: true, childList: true });
+
+  React.useLayoutEffect(() => update(), [collapse]);
 
   return (
     <div
