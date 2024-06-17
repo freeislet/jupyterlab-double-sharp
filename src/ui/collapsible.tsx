@@ -1,9 +1,9 @@
 import * as React from 'react';
 import cn from 'classnames';
 
-import { IDivChildrenProps } from '.';
+import { IDivProps } from '.';
 
-export interface ICollapsibleProps extends IDivChildrenProps {
+export interface ICollapsibleProps extends IDivProps {
   collapse: boolean;
 }
 

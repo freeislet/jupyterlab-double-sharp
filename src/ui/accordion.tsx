@@ -2,7 +2,7 @@ import * as React from 'react';
 import cn from 'classnames';
 import { FaChevronDown } from 'react-icons/fa';
 
-import { IChildrenProps, IDivChildrenProps } from '.';
+import { IChildrenProps, IDivProps } from '.';
 import Collapsible from './collapsible';
 
 interface IAccordionContext {
@@ -34,7 +34,7 @@ export default function Accordion({
   );
 }
 
-export interface IAccordionTriggerProps extends IDivChildrenProps {}
+export interface IAccordionTriggerProps extends IDivProps {}
 
 function AccordionTrigger({
   className,
@@ -61,7 +61,7 @@ function AccordionTrigger({
 }
 Accordion.Trigger = AccordionTrigger;
 
-export interface IAccordionTriggerContainerProps extends IDivChildrenProps {}
+export interface IAccordionTriggerContainerProps extends IDivProps {}
 
 function AccordionTriggerContainer({
   className,
@@ -79,7 +79,7 @@ function AccordionTriggerContainer({
 }
 Accordion.TriggerContainer = AccordionTriggerContainer;
 
-export interface IAccordionContentProps extends IDivChildrenProps {}
+export interface IAccordionContentProps extends IDivProps {}
 
 function AccordionContent({ children, ...props }: IAccordionContentProps) {
   const { active } = React.useContext(AccordionContext);
