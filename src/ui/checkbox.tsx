@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { forwardRef } from 'react';
 
-import { IChildrenProps } from '.';
+import { IInputProps } from '.';
 
-export interface ICheckboxProps
-  extends React.InputHTMLAttributes<HTMLInputElement>,
-    IChildrenProps {}
+export interface ICheckboxProps extends IInputProps {}
 
 const Checkbox = forwardRef<HTMLInputElement, ICheckboxProps>(
   ({ className, style, children, ...props }, ref) => {
