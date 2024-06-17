@@ -43,22 +43,6 @@
   margin: auto;
 }
 
-.jp-DoubleSharp-Inspector-Header {
-  display: flex;
-  justify-content: space-between;
-  background: var(--jp-layout-color2);
-  border-bottom: 1px solid var(--jp-border-color2);
-}
-
-.jp-DoubleSharp-Inspector-Header-title {
-  padding: 6px;
-  font-weight: bold;
-}
-
-.jp-DoubleSharp-Inspector-Content {
-  padding: 6px;
-}
-
 .jp-DoubleSharp-Inspector-ConfigItem {
   margin: 8px 0;
 }

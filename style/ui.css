@@ -6,7 +6,7 @@
   align-items: center;
   width: 100%;
   background-color: var(--jp-input-background);
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color2);
   border-bottom: 1px solid var(--jp-border-color2);
   font-weight: bold;
   transition: 0.2s;
@@ -19,6 +19,7 @@
 
 .jp-DoubleSharp-Accordion-trigger.jp-mod-active {
   background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-DoubleSharp-Accordion-trigger:hover {
@@ -28,7 +29,7 @@
 .jp-DoubleSharp-Accordion-trigger-chevron {
   margin-left: 6px;
   vertical-align: middle;
-  color: var(--jp-ui-font-color3);
+  color: var(--jp-ui-font-color2);
   transition: transform 0.2s ease-out;
 }
 
@@ -37,9 +38,8 @@
   transform: rotate(90deg);
 }
 
-.jp-DoubleSharp-Accordion-trigger:hover
-  .jp-DoubleSharp-Accordion-trigger-chevron {
-  color: var(--jp-ui-font-color2);
+.jp-DoubleSharp-Accordion-content {
+  padding: 8px;
 }
 
 /* Collapsible */

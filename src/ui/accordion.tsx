@@ -110,12 +110,21 @@ Accordion.Trigger = AccordionTrigger;
 
 export interface IAccordionContentProps extends IDivProps {}
 
-function AccordionContent({ children, ...props }: IAccordionContentProps) {
+function AccordionContent({
+  className,
+  children,
+  ...props
+}: IAccordionContentProps) {
   const { active } = React.useContext(AccordionContext);
 
   return (
-    <Collapsible collapse={!active} {...props}>
-      {children}
+    <Collapsible collapse={!active}>
+      <div
+        className={cn('jp-DoubleSharp-Accordion-content', className)}
+        {...props}
+      >
+        {children}
+      </div>
     </Collapsible>
   );
 }

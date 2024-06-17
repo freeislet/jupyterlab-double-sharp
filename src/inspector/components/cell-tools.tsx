@@ -1,11 +1,7 @@
 import * as React from 'react';
 // import { ICellModel } from '@jupyterlab/cells';
-import { settingsIcon } from '@jupyterlab/ui-components';
 
 import { CellContext, CellMetadata, CellConfig } from '../../cell';
-import { App } from '../../app';
-import { IChildrenProps } from '../../ui';
-import ToolbarButton from '../../ui/toolbar';
 import Group from '../../ui/group';
 import Checkbox from '../../ui/checkbox';
 
@@ -17,10 +13,7 @@ export default function CellTools({ context }: ICellToolsProps) {
   if (context) {
     return (
       <>
-        <Header>## Cell Inspector</Header>
-        <Content>
-          <Config context={context} />
-        </Content>
+        <Config context={context} />
       </>
     );
   } else {
@@ -30,26 +23,6 @@ export default function CellTools({ context }: ICellToolsProps) {
       </div>
     );
   }
-}
-
-function Header({ children }: IChildrenProps) {
-  return (
-    <div className="jp-DoubleSharp-Inspector-Header">
-      <div className="jp-DoubleSharp-Inspector-Header-title">{children}</div>
-      <div className="jp-DoubleSharp-Inspector-Header-toolbar">
-        <ToolbarButton
-          title="Double Sharp settings"
-          onClick={() => App.instance.openSettings()}
-        >
-          <settingsIcon.react />
-        </ToolbarButton>
-      </div>
-    </div>
-  );
-}
-
-function Content({ children }: IChildrenProps) {
-  return <div className="jp-DoubleSharp-Inspector-Content">{children}</div>;
 }
 
 interface IContextProps {
