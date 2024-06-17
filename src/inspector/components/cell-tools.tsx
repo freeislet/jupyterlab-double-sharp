@@ -58,7 +58,7 @@ interface IConfigCheckProps {
 function ConfigCheckItem({ checked, onChange, children }: IConfigCheckProps) {
   return (
     <Checkbox
-      className="jp-DoubleSharp-Inspector-ConfigItem"
+      className="jp-DoubleSharp-CellTools-ConfigItem"
       checked={checked}
       onChange={e => onChange(e.target.checked)}
     >

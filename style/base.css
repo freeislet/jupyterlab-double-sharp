@@ -43,6 +43,18 @@
   margin: auto;
 }
 
-.jp-DoubleSharp-Inspector-ConfigItem {
+/*
+    Inspector > Settings
+*/
+
+.jp-DoubleSharp-Settings-row {
+  margin: 8px 0;
+}
+
+/*
+    Inspector > Cell Tools
+*/
+
+.jp-DoubleSharp-CellTools-ConfigItem {
   margin: 8px 0;
 }

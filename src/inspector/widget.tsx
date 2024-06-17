@@ -9,16 +9,17 @@ import { App } from '../app';
 import { CellContext } from '../cell';
 import Accordion from '../ui/accordion';
 import Toolbar from '../ui/toolbar';
+import Settings from './components/settings';
 import CellTools from './components/cell-tools';
 
-export class CellInspectorWidget extends ReactWidget {
+export class InspectorWidget extends ReactWidget {
   private _cellChanged = new Signal<this, CellContext | null>(this);
   private _cellContext: CellContext | null = null;
 
   constructor(nbtracker: INotebookTracker) {
     super();
 
-    this.addClass('jp-DoubleSharp-CellInspector');
+    this.addClass('jp-DoubleSharp-Inspector');
 
     nbtracker.activeCellChanged.connect((tracker, cell) => {
       // Log.debug('activeCellChanged', tracker, cell);
@@ -59,8 +60,7 @@ export class CellInspectorWidget extends ReactWidget {
             </Toolbar>
           </Accordion.TriggerContainer>
           <Accordion.Content>
-            <p>settings...</p>
-            <p>...</p>
+            <Settings />
           </Accordion.Content>
         </Accordion>
         <Accordion initialActive={true}>

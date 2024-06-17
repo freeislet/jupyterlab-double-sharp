@@ -1,7 +1,7 @@
 export const PLUGIN_ID = 'jupyterlab-double-sharp:plugin';
 
 export const commandIds = {
-  CELL_INSPECTOR: 'double-sharp:cell-inspector',
+  INSPECTOR: 'double-sharp:inspector',
   RUN_ALL_CELLS: 'double-sharp:run-all-cells'
 };
 

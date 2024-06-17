@@ -7,7 +7,7 @@ import Checkbox from '../../ui/checkbox';
 export default function Settings() {
   return (
     <Checkbox
-      className="jp-DoubleSharp-Inspector-ConfigItem"
+      className="jp-DoubleSharp-Settings-row"
       checked={true}
       // onChange={e => onChange(e.target.checked)}
     >

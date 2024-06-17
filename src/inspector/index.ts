@@ -1,8 +1,8 @@
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { CellInspectorWidget } from './widget';
-import { cellInspectorIcon } from '../icon';
+import { InspectorWidget } from './widget';
+import { inspectorIcon } from '../icon';
 import { App } from '../app';
 import { commandIds, selectors } from '../const';
 
@@ -11,10 +11,10 @@ export function setupInspectors(
   labshell: ILabShell,
   restorer?: ILayoutRestorer
 ) {
-  const commandId = commandIds.CELL_INSPECTOR;
-  const widget = new CellInspectorWidget(nbtracker);
-  widget.title.icon = cellInspectorIcon;
-  widget.title.caption = '## Cell Inspector';
+  const commandId = commandIds.INSPECTOR;
+  const widget = new InspectorWidget(nbtracker);
+  widget.title.icon = inspectorIcon;
+  widget.title.caption = '## Inspector';
   widget.id = commandId;
   labshell.add(widget, 'right', {
     rank: 200,
@@ -25,12 +25,12 @@ export function setupInspectors(
     restorer.add(widget, commandId);
   }
 
-  // Cell Inspector command
+  // Inspector command
   App.instance.addCommand(
     commandId,
     {
-      icon: cellInspectorIcon,
-      label: '## Cell Inspector',
+      icon: inspectorIcon,
+      label: '## Inspector',
       execute: () => {
         labshell.activateById(widget.id);
       }
