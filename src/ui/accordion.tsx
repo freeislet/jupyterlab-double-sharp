@@ -1,9 +1,13 @@
 import * as React from 'react';
 import cn from 'classnames';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaChevronRight } from 'react-icons/fa';
 
 import { IChildrenProps, IDivProps } from '.';
 import Collapsible from './collapsible';
+
+/**
+ * Accordion
+ */
 
 interface IAccordionContext {
   active: boolean;
@@ -34,15 +38,18 @@ export default function Accordion({
   );
 }
 
-export interface IAccordionTriggerProps extends IDivProps {}
+/**
+ * Accordion Trigger
+ */
 
-function AccordionTrigger({
+export interface IAccordionTriggerContainerProps extends IDivProps {}
+
+function AccordionTriggerContainer({
   className,
-  onClick,
   children,
   ...props
-}: IAccordionTriggerProps) {
-  const { active, toggleActive } = React.useContext(AccordionContext);
+}: IAccordionTriggerContainerProps) {
+  const { active } = React.useContext(AccordionContext);
 
   return (
     <div
@@ -51,26 +58,6 @@ function AccordionTrigger({
         { 'jp-mod-active': active },
         className
       )}
-      onClick={toggleActive}
-      {...props}
-    >
-      {children}
-      <FaChevronDown />
-    </div>
-  );
-}
-Accordion.Trigger = AccordionTrigger;
-
-export interface IAccordionTriggerContainerProps extends IDivProps {}
-
-function AccordionTriggerContainer({
-  className,
-  children,
-  ...props
-}: IAccordionTriggerProps) {
-  return (
-    <div
-      className={cn('jp-DoubleSharp-Accordion-trigger', className)}
       {...props}
     >
       {children}
@@ -78,6 +65,48 @@ function AccordionTriggerContainer({
   );
 }
 Accordion.TriggerContainer = AccordionTriggerContainer;
+
+export interface IAccordionTriggerInnerProps extends IDivProps {}
+
+function AccordionTriggerInner({
+  className,
+  onClick,
+  children,
+  ...props
+}: IAccordionTriggerInnerProps) {
+  const { toggleActive } = React.useContext(AccordionContext);
+
+  return (
+    <div
+      className={cn('jp-DoubleSharp-Accordion-trigger-inner', className)}
+      onClick={toggleActive}
+      {...props}
+    >
+      {children}
+      <FaChevronRight className="jp-DoubleSharp-Accordion-trigger-chevron" />
+    </div>
+  );
+}
+Accordion.TriggerInner = AccordionTriggerInner;
+
+export interface IAccordionTriggerProps extends IDivProps {}
+
+function AccordionTrigger({
+  className,
+  children,
+  ...props
+}: IAccordionTriggerProps) {
+  return (
+    <AccordionTriggerContainer className={className}>
+      <AccordionTriggerInner {...props}>{children}</AccordionTriggerInner>
+    </AccordionTriggerContainer>
+  );
+}
+Accordion.Trigger = AccordionTrigger;
+
+/**
+ * Accordion Content
+ */
 
 export interface IAccordionContentProps extends IDivProps {}
 

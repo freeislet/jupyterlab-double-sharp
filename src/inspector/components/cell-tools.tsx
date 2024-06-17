@@ -5,7 +5,7 @@ import { settingsIcon } from '@jupyterlab/ui-components';
 import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { App } from '../../app';
 import { IChildrenProps } from '../../ui';
-import ToolbarButton from '../../ui/toolbar-button';
+import ToolbarButton from '../../ui/toolbar';
 import Group from '../../ui/group';
 import Checkbox from '../../ui/checkbox';
 

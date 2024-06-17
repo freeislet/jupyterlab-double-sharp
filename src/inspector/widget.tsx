@@ -48,7 +48,7 @@ export class CellInspectorWidget extends ReactWidget {
       <>
         <Accordion>
           <Accordion.TriggerContainer>
-            <Accordion.Trigger>## Settings</Accordion.Trigger>
+            <Accordion.TriggerInner>## Settings</Accordion.TriggerInner>
             <Toolbar>
               <Toolbar.Button
                 title="Double Sharp settings"
