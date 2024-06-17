@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import Checkbox from '../../ui/checkbox';
 
-export interface ISettingsProps {}
+// export interface ISettingsProps {}
 
-export default function Settings({}: ISettingsProps) {
+export default function Settings() {
   return (
     <Checkbox
       className="jp-DoubleSharp-Inspector-ConfigItem"
