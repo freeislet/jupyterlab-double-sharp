@@ -1,5 +1,4 @@
 import * as React from 'react';
-import useMutationObserver from '@rooks/use-mutation-observer';
 import cn from 'classnames';
 
 import { IDivProps } from '.';
@@ -16,21 +15,26 @@ export default function Collapsible({
 }: ICollapsibleProps) {
   const ref = React.useRef<HTMLDivElement>(null!);
 
-  const update = () => {
-    // console.debug('Mutation', ref.current.scrollHeight, collapse);
-    const maxHeight = collapse ? null : ref.current.scrollHeight + 'px';
-    ref.current.style.setProperty('max-height', maxHeight);
-  };
-  useMutationObserver(
-    ref,
-    (mutations?: MutationRecord[]) => {
-      // console.debug('Mutation', ref.current.scrollHeight, collapse, mutations);
-      requestAnimationFrame(() => update());
-    },
-    { subtree: true, childList: true }
-  );
+  React.useEffect(() => {
+    const el = ref.current;
 
-  React.useLayoutEffect(update, [collapse]);
+    if (collapse) {
+      const heightIsTemporary = el.style.maxHeight === 'revert';
+      if (heightIsTemporary && el.scrollHeight) {
+        el.style.maxHeight = el.scrollHeight + 'px';
+        requestAnimationFrame(() => el.style.setProperty('max-height', null));
+      } else {
+        el.style.setProperty('max-height', null);
+      }
+    } else {
+      const maybeInvalidScrollHeight = el.scrollHeight === 0;
+      el.style.maxHeight = maybeInvalidScrollHeight
+        ? 'revert'
+        : el.scrollHeight + 'px';
+    }
+
+    // console.debug('Mutation', collapse, el.scrollHeight, el.style.maxHeight);
+  }, [collapse]);
 
   return (
     <div
