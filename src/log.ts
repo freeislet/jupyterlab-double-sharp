@@ -76,7 +76,7 @@ export class Log {
   static setup(registry: ILoggerRegistry, nbtracker: INotebookTracker) {
     this.instance.set(registry, nbtracker);
 
-    this.instance.verbose = Settings.settings.verbose.log;
+    this.instance.verbose = Settings.data.verbose.log;
     Settings.verboseChanged.connect((_, change) => {
       this.instance.verbose = change.newValue.log;
     });

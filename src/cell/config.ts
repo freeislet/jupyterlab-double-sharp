@@ -14,7 +14,7 @@ export namespace CellConfig {
   }
 
   export function get(model: ICellModel): NonNullableField<IConfig> {
-    const execSettings = Settings.settings.execution;
+    const execSettings = Settings.data.execution;
     const settings: NonNullableField<PickNullish<IConfig>> = {
       useCache: execSettings.useCache,
       autoDependency: execSettings.autoDependency

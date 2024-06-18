@@ -1,5 +1,6 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ISignal, Signal } from '@lumino/signaling';
+import { PartialJSONObject } from '@lumino/coreutils';
 import merge from 'lodash.merge';
 import equal from 'fast-deep-equal';
 
@@ -65,8 +66,15 @@ export class Settings {
     return this._instance;
   }
 
-  static get settings(): Settings.ISettings {
-    return this.instance._settings;
+  static get data(): Settings.ISettings {
+    return this.instance._data;
+  }
+
+  static get executionChanged(): ISignal<
+    Settings,
+    Settings.IChangeParams<Settings.IExecution>
+  > {
+    return this.instance._executionChanged;
   }
 
   static get editorChanged(): ISignal<
@@ -83,9 +91,23 @@ export class Settings {
     return this.instance._verboseChanged;
   }
 
+  static async updateExecution(
+    settings: Partial<Settings.IExecution>
+  ): Promise<void> {
+    this.instance.updateExecution(settings);
+  }
+
   //----
 
-  private _settings: Settings.ISettings = Settings.DEFAULT_SETTINGS;
+  private _data: Settings.ISettings = Settings.DEFAULT_SETTINGS;
+  get data(): Settings.ISettings {
+    return this._data;
+  }
+
+  private _executionChanged = new Signal<
+    Settings,
+    Settings.IChangeParams<Settings.IExecution>
+  >(this);
   private _editorChanged = new Signal<
     Settings,
     Settings.IChangeParams<Settings.IEditor>
@@ -95,19 +117,20 @@ export class Settings {
     Settings.IChangeParams<Settings.IVerbose>
   >(this);
 
-  constructor(settings: ISettingRegistry.ISettings) {
-    this._settings = merge(this._settings, this._load(settings));
+  constructor(public readonly settings: ISettingRegistry.ISettings) {
+    merge(this._data, this._load(settings));
 
-    settings.changed.connect(this.update, this);
+    settings.changed.connect(this._onChanged, this);
   }
 
-  update(settings: ISettingRegistry.ISettings) {
+  private _onChanged(settings: ISettingRegistry.ISettings) {
     // console.log(this._settings, settings.composite);
 
-    const old = structuredClone(this._settings);
+    const old = structuredClone(this._data);
     const new_ = this._load(settings);
-    this._settings = new_;
+    this._data = new_;
 
+    this._emitOnChanged(old.execution, new_.execution, this._executionChanged);
     this._emitOnChanged(old.editor, new_.editor, this._editorChanged);
     this._emitOnChanged(old.verbose, new_.verbose, this._verboseChanged);
   }
@@ -128,5 +151,17 @@ export class Settings {
         newValue
       });
     }
+  }
+
+  async updateExecution(settings: Partial<Settings.IExecution>): Promise<void> {
+    const execSettings = merge(
+      {},
+      this._data.execution,
+      settings
+    ) as Settings.IExecution;
+    await this.settings.set(
+      'execution',
+      execSettings as object as PartialJSONObject
+    );
   }
 }

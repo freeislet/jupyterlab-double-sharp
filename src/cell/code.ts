@@ -242,7 +242,7 @@ export class CodeContext {
           );
         }
 
-        const saveUnresolvedDependencies = Settings.settings.verbose.metadata;
+        const saveUnresolvedDependencies = Settings.data.verbose.metadata;
         if (dependencyResolved || saveUnresolvedDependencies) {
           dependencies.push(dependency);
         }
