@@ -44,6 +44,8 @@
 */
 
 .jp-DoubleSharp-Settings-row {
+  display: flex;
+  align-items: center;
   margin: 8px 0;
 }
 
