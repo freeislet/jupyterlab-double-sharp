@@ -17,11 +17,7 @@ export default function CellTools({ context }: ICellToolsProps) {
       </>
     );
   } else {
-    return (
-      <div className="jp-DoubleSharp-Inspector-placeholder">
-        No cell is selected.
-      </div>
-    );
+    return <p>No cell is selected.</p>;
   }
 }
 
