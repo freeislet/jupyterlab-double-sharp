@@ -70,7 +70,6 @@
         "@lumino/disposable": "^2.1.2",
         "@lumino/signaling": "^2.1.2",
         "@lumino/widgets": "^2.3.2",
-        "@rooks/use-mutation-observer": "^4.11.2",
         "@teppeis/multimaps": "^3.0.0",
         "classnames": "^2.5.1",
         "fast-deep-equal": "^3.1.3",

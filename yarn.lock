@@ -3843,15 +3843,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rooks/use-mutation-observer@npm:^4.11.2":
-  version: 4.11.2
-  resolution: "@rooks/use-mutation-observer@npm:4.11.2"
-  peerDependencies:
-    react: ">=16.8.0"
-  checksum: 9f60f58f9c2dc49f65384edd98b838178f1e1a9981d13ca61f3a62b922518a57f2eefe98332b55c4dc03c6d15548702a1437cf90dbca003315d28ad60929da73
-  languageName: node
-  linkType: hard
-
 "@sinclair/typebox@npm:^0.27.8":
   version: 0.27.8
   resolution: "@sinclair/typebox@npm:0.27.8"
@@ -8692,7 +8683,6 @@ __metadata:
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.2
-    "@rooks/use-mutation-observer": ^4.11.2
     "@teppeis/multimaps": ^3.0.0
     "@types/jest": ^29.2.0
     "@types/json-schema": ^7.0.11
