@@ -62,39 +62,40 @@ export class Settings {
 
   private static _instance?: Settings;
   static get instance(): Settings {
-    if (!this._instance) throw Error('Settings instance is not initialized.');
-    return this._instance;
+    if (!Settings._instance)
+      throw Error('Settings instance is not initialized.');
+    return Settings._instance;
   }
 
   static get data(): Settings.ISettings {
-    return this.instance._data;
+    return Settings.instance._data;
   }
 
   static get executionChanged(): ISignal<
     Settings,
     Settings.IChangeParams<Settings.IExecution>
   > {
-    return this.instance._executionChanged;
+    return Settings.instance._executionChanged;
   }
 
   static get editorChanged(): ISignal<
     Settings,
     Settings.IChangeParams<Settings.IEditor>
   > {
-    return this.instance._editorChanged;
+    return Settings.instance._editorChanged;
   }
 
   static get verboseChanged(): ISignal<
     Settings,
     Settings.IChangeParams<Settings.IVerbose>
   > {
-    return this.instance._verboseChanged;
+    return Settings.instance._verboseChanged;
   }
 
   static async updateExecution(
     settings: Partial<Settings.IExecution>
   ): Promise<void> {
-    await this.instance.updateExecution(settings);
+    await Settings.instance.updateExecution(settings);
   }
 
   //----
