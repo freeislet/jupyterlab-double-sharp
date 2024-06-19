@@ -1,23 +1,20 @@
 import * as React from 'react';
-import merge from 'lodash.merge';
 
 import { Settings as AppSettings } from '../../settings';
-import { useSignal } from '../../ui/hooks';
+import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
 import Checkbox from '../../ui/checkbox';
 
 // export interface ISettingsProps {}
 
 export default function Settings() {
-  const [execution, setExecution] = React.useState(AppSettings.data.execution);
+  const [execution, updateExecution, setExecution] = useStateObject(
+    AppSettings.data.execution,
+    AppSettings.updateExecution
+  );
   useSignal(AppSettings.executionChanged, (_, change) => {
     setExecution(change.newValue);
   });
-
-  function updateExecution(partial: Partial<AppSettings.IExecution>) {
-    AppSettings.updateExecution(partial);
-    setExecution(execution => merge({}, execution, partial)); // NOTE: rerender 위해 {} 생성
-  }
 
   const onUseCache = React.useCallback(
     (checked: boolean) => updateExecution({ useCache: checked }),
