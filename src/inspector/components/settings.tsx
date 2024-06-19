@@ -2,7 +2,7 @@ import * as React from 'react';
 import merge from 'lodash.merge';
 
 import { Settings as AppSettings } from '../../settings';
-import { useSignal } from '../../ui/hooks/signal';
+import { useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
 import Checkbox from '../../ui/checkbox';
 
