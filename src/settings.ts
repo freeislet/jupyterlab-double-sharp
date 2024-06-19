@@ -94,7 +94,7 @@ export class Settings {
   static async updateExecution(
     settings: Partial<Settings.IExecution>
   ): Promise<void> {
-    this.instance.updateExecution(settings);
+    await this.instance.updateExecution(settings);
   }
 
   //----
