@@ -77,13 +77,16 @@
 /* Group */
 
 .jp-DoubleSharp-Group {
-  margin: 8px 0 16px;
+  margin: 8px 0;
+  padding: 0 6px 6px;
+  border-left: 6px solid var(--jp-border-color3);
 }
 
 .jp-DoubleSharp-Group-title {
   color: var(--jp-ui-font-color2);
   font-weight: 600;
   margin-bottom: 8px;
+  margin-left: -12px;
 }
 
 .jp-DoubleSharp-Group-title::before {

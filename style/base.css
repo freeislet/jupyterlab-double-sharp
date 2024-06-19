@@ -46,7 +46,10 @@
 .jp-DoubleSharp-Settings-row {
   display: flex;
   align-items: center;
-  margin: 8px 0;
+}
+
+.jp-DoubleSharp-Settings-row ~ .jp-DoubleSharp-Settings-row {
+  margin-top: 8px;
 }
 
 /*
