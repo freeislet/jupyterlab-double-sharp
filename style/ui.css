@@ -95,3 +95,15 @@
   vertical-align: top;
   background-color: var(--jp-border-color1);
 }
+
+/* Icon */
+
+.jp-DoubleSharp-icon-inline {
+  display: flex;
+  margin-right: 4px;
+}
+
+.jp-DoubleSharp-icon-inline > svg {
+  height: 16px;
+  width: auto;
+}
