@@ -66,7 +66,7 @@ const BooleanSetting = React.memo(
       <Checkbox
         className="jp-DoubleSharp-Settings-row"
         checked={checked}
-        onChange={e => onChange(e.target.checked)}
+        onChangeValue={onChange}
       >
         <span>{children}</span>
       </Checkbox>

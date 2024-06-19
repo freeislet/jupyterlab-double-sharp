@@ -3,13 +3,24 @@ import { forwardRef } from 'react';
 
 import { IInputProps } from '.';
 
-export interface ICheckboxProps extends IInputProps {}
+export type ICheckboxProps = IInputProps & {
+  checked: boolean;
+  onChangeValue?: (checked: boolean) => void;
+};
 
 const Checkbox = forwardRef<HTMLInputElement, ICheckboxProps>(
-  ({ className, style, children, ...props }, ref) => {
+  ({ className, style, onChange, onChangeValue, children, ...props }, ref) => {
     return (
       <label className={className} style={style}>
-        <input ref={ref} type="checkbox" {...props} />
+        <input
+          ref={ref}
+          type="checkbox"
+          onChange={e => {
+            onChange?.(e);
+            onChangeValue?.(e.target.checked);
+          }}
+          {...props}
+        />
         {children}
       </label>
     );
