@@ -24,7 +24,7 @@ function stringifyReplacerForLog(key: string, value: any): any {
 export function replaceValue(obj: any, fromValue: any, toValue: any): any {
   if (obj === fromValue) return toValue;
   if (typeof obj === 'object') {
-    for (let key in obj) {
+    for (const key in obj) {
       obj[key] = replaceValue(obj[key], fromValue, toValue);
     }
   }
