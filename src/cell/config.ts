@@ -5,7 +5,7 @@ import { CellMetadata } from './metadata';
 import { Settings } from '../settings';
 
 export namespace CellConfig {
-  export type UseSettings = undefined;
+  export type UseSettings = null;
 
   export interface IConfig {
     skip: boolean;
