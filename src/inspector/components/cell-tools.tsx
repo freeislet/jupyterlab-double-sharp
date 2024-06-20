@@ -2,8 +2,9 @@ import * as React from 'react';
 // import { ICellModel } from '@jupyterlab/cells';
 
 import { CellContext, CellMetadata, CellConfig } from '../../cell';
+import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import Checkbox from '../../ui/checkbox';
+import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
 
 export interface ICellToolsProps {
   context: CellContext | null;
@@ -14,6 +15,7 @@ export default function CellTools({ context }: ICellToolsProps) {
     return (
       <>
         <Config context={context} />
+        {context.cell.model.id}
       </>
     );
   } else {
@@ -25,53 +27,101 @@ interface IContextProps {
   context: CellContext;
 }
 
+/**
+ * Config
+ */
+
 function Config({ context }: IContextProps) {
-  const model = context.cell.model;
-  const config = CellMetadata.config.getCoalesced(model);
-  const checked = config.useCache ?? false; // TODO: useSettings UI
-  const onChangeUseCache = (checked: boolean) =>
-    CellMetadata.config.update(model, { useCache: checked });
-  const finalConfig = CellConfig.get(context.cell.model);
-  finalConfig;
+  const [config, setConfig, updateConfig, setOnUpdateConfig] = useStateObject(
+    CellMetadata.config.defaultValue
+  );
+
+  React.useEffect(() => {
+    const model = context.cell.model;
+    const config = CellMetadata.config.getCoalesced(model);
+    setConfig(config);
+    setOnUpdateConfig((value, merged) => {
+      CellMetadata.config.update(model, value);
+    });
+    Log.debug('Config', model.id, config);
+  }, [context]);
+  useSignal;
+
+  const onUseCache = React.useCallback(
+    (value: boolean | null) => updateConfig({ useCache: value }),
+    []
+  );
+  const onAutoDependency = React.useCallback(
+    (value: boolean | null) => updateConfig({ autoDependency: value }),
+    []
+  );
+  const onSkip = React.useCallback(
+    (value: boolean) => updateConfig({ skip: value }),
+    []
+  );
+  // const finalConfig = CellConfig.get(context.cell.model);
+  // finalConfig;
+  CellConfig;
 
   return (
     <Group>
       <Group.Title>Config</Group.Title>
-      <ConfigCheckItem checked={checked} onChange={onChangeUseCache}>
+      <NullableBooleanConfig value={config.useCache} onChange={onUseCache}>
         Use Cache
-      </ConfigCheckItem>
-      {context.cell.model.id}
+      </NullableBooleanConfig>
+      <NullableBooleanConfig
+        value={config.autoDependency}
+        onChange={onAutoDependency}
+      >
+        Auto Dependency
+      </NullableBooleanConfig>
+      <BooleanConfig value={config.skip} onChange={onSkip}>
+        Skip
+      </BooleanConfig>
     </Group>
   );
 }
 
-interface IConfigCheckProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  children: React.ReactNode;
+// Config Items
+
+interface IBooleanConfigProps {
+  value: boolean;
+  onChange: (value: boolean) => void;
+  children?: React.ReactNode;
 }
 
-function ConfigCheckItem({ checked, onChange, children }: IConfigCheckProps) {
-  return (
-    <Checkbox
-      className="jp-DoubleSharp-CellTools-ConfigItem"
-      checked={checked}
-      onChange={e => onChange(e.target.checked)}
-    >
-      {children}
-    </Checkbox>
-  );
+const BooleanConfig = React.memo(
+  ({ value, onChange, children }: IBooleanConfigProps) => {
+    return (
+      <Checkbox
+        className="jp-DoubleSharp-CellTools-ConfigItem"
+        checked={value}
+        onChangeValue={onChange}
+      >
+        <span>{children}</span>
+      </Checkbox>
+    );
+  }
+);
+BooleanConfig.displayName = 'BooleanConfig';
+
+interface INullableBooleanConfigProps {
+  value: boolean | null;
+  onChange: (value: boolean | null) => void;
+  children?: React.ReactNode;
 }
 
-// interface IModelProps {
-//   model: ICellModel;
-// }
-
-// function Model({ model }: IModelProps) {
-//   return (
-//     <fieldset>
-//       <legend>Model</legend>
-//       <p>{model.id}</p>
-//     </fieldset>
-//   );
-// }
+const NullableBooleanConfig = React.memo(
+  ({ value, onChange, children }: INullableBooleanConfigProps) => {
+    return (
+      <NullableCheckbox
+        className="jp-DoubleSharp-CellTools-ConfigItem"
+        checked={value}
+        onChangeValue={onChange}
+      >
+        <span>{children}</span>
+      </NullableCheckbox>
+    );
+  }
+);
+NullableBooleanConfig.displayName = 'NullableBooleanConfig';
