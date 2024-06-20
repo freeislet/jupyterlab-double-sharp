@@ -8,7 +8,7 @@ import Checkbox from '../../ui/checkbox';
 // export interface ISettingsProps {}
 
 export default function Settings() {
-  const [execution, updateExecution, setExecution] = useStateObject(
+  const [execution, setExecution, updateExecution] = useStateObject(
     AppSettings.data.execution,
     AppSettings.updateExecution
   );
