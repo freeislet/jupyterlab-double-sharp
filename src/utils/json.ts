@@ -1,11 +1,12 @@
 import { Cell } from '@jupyterlab/cells';
 import { Widget } from '@lumino/widgets';
 
-export function stringify(obj: any): string {
-  return JSON.stringify(obj, replace);
+export function stringify(obj: any, replaceForLog = false): string {
+  const replacer = replaceForLog ? stringifyReplacerForLog : undefined;
+  return JSON.stringify(obj, replacer);
 }
 
-function replace(key: string, value: any) {
+function stringifyReplacerForLog(key: string, value: any): any {
   if (value instanceof Map) {
     return Object.fromEntries(value);
   } else if (value instanceof Set) {

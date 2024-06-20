@@ -7,7 +7,7 @@ export function stringFrom(obj: any): string {
     let str = obj + '';
     if (str.startsWith('[object')) {
       try {
-        str = stringify(obj);
+        str = stringify(obj, true);
       } catch {}
     }
     return str;
