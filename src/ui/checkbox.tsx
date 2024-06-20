@@ -91,10 +91,7 @@ export const NullableCheckbox = forwardRef<
     }
 
     onChangeValue?.(checked);
-    // Log.debug('NullableCheckbox update', checked);
   }
-
-  // Log.debug('NullableCheckbox', checked);
 
   return (
     <Checkbox
