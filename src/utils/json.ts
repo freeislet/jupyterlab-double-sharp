@@ -20,3 +20,35 @@ function stringifyReplacerForLog(key: string, value: any): any {
     return `<${value.type}>(${value.id})`;
   } else return value;
 }
+
+export function replaceValue(obj: any, fromValue: any, toValue: any): any {
+  if (obj === fromValue) return toValue;
+  if (typeof obj === 'object') {
+    for (let key in obj) {
+      obj[key] = replaceValue(obj[key], fromValue, toValue);
+    }
+  }
+  return obj;
+}
+
+export function encodeNull(obj: any, clone = false): any {
+  if (clone) {
+    obj = cloneObj(obj);
+  }
+  return replaceValue(obj, null, 'null');
+}
+
+export function decodeNull(obj: any, clone = false): any {
+  if (clone) {
+    obj = cloneObj(obj);
+  }
+  return replaceValue(obj, 'null', null);
+}
+
+function cloneObj<T>(obj: T): T {
+  try {
+    return structuredClone(obj);
+  } catch {
+    return obj;
+  }
+}

@@ -1,14 +1,31 @@
 import { ICellModel } from '@jupyterlab/cells';
 import equal from 'fast-deep-equal';
 
+import { encodeNull, decodeNull } from './json';
+
 export class Metadata<T> {
-  constructor(public readonly name: string) {}
+  constructor(
+    public readonly name: string,
+    public nullish = false
+  ) {}
 
   get(model: ICellModel): T | undefined {
-    return model.getMetadata(this.name);
+    return this._getMetadata(model);
+  }
+
+  _getMetadata(model: ICellModel): T | undefined {
+    const metadata = model.getMetadata(this.name);
+    return this.nullish ? decodeNull(metadata) : metadata;
   }
 
   set(model: ICellModel, value: T) {
+    this._setMetadata(model, value);
+  }
+
+  _setMetadata(model: ICellModel, value: T) {
+    if (this.nullish) {
+      value = encodeNull(value, true);
+    }
     model.setMetadata(this.name, value);
   }
 
@@ -20,9 +37,10 @@ export class Metadata<T> {
 export class MetadataGroup<T> extends Metadata<T> {
   constructor(
     public readonly name: string,
-    public readonly defaultValue: T
+    public readonly defaultValue: T,
+    public nullish = false
   ) {
-    super(name);
+    super(name, nullish);
   }
 
   getCoalesced(model: ICellModel): T {
@@ -38,7 +56,7 @@ export class MetadataGroup<T> extends Metadata<T> {
     if (deleteIfEqualDefault && equal(value, this.defaultValue)) {
       this.delete(model);
     } else {
-      model.setMetadata(this.name, value);
+      this._setMetadata(model, value);
     }
   }
 
@@ -58,9 +76,10 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   constructor(
     public readonly name: string,
     public readonly defaultValue: T,
+    public nullish = false,
     dirtyFlagName?: string
   ) {
-    super(name, defaultValue);
+    super(name, defaultValue, nullish);
     this.dirtyFlagName = dirtyFlagName ?? name + '-dirty';
   }
 

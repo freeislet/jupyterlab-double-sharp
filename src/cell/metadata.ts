@@ -64,11 +64,15 @@ export class CellMetadata {
 
 namespace Private {
   export const cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
-  export const config = new MetadataGroup<CellMetadata.IConfig>('##Config', {
-    skip: false,
-    useCache: null,
-    autoDependency: null
-  });
+  export const config = new MetadataGroup<CellMetadata.IConfig>(
+    '##Config',
+    {
+      skip: false,
+      useCache: null,
+      autoDependency: null
+    },
+    true
+  );
   export const configOverride =
     new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
       '##ConfigOverride',
