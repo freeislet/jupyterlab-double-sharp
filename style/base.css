@@ -78,3 +78,18 @@
 /*
     Inspector > Cell Tools
 */
+
+/*
+    Misc.
+*/
+
+/* Accessibility for links inside dialog box text */
+.jp-DoubleSharp-Inspector a {
+  text-decoration: revert;
+  color: var(--jp-content-link-color);
+  cursor: pointer;
+}
+
+.jp-DoubleSharp-Inspector a:hover {
+  text-decoration: revert;
+}
