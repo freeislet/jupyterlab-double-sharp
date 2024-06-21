@@ -1,5 +1,6 @@
 import * as React from 'react';
-// import { ICellModel } from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
+import { IMapChange } from '@jupyter/ydoc';
 
 import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { useStateObject, useSignal } from '../../ui/hooks';
@@ -12,21 +13,29 @@ export interface ICellToolsProps {
 }
 
 export default function CellTools({ context }: ICellToolsProps) {
-  if (context && context.isCodeCell) {
-    return (
-      <>
-        <Config context={context} />
-        <Code context={context} />
-        {context.cell.model.id}
-      </>
-    );
-  } else {
-    return <p>No code cell is selected.</p>;
-  }
+  return context ? (
+    context.isCodeCell ? (
+      <CodeCellTools context={context} />
+    ) : (
+      <p>No code cell is selected.</p>
+    )
+  ) : (
+    <p>No code cell is selected.</p>
+  );
 }
 
 interface IContextProps {
   context: CellContext;
+}
+
+function CodeCellTools({ context }: IContextProps) {
+  return (
+    <>
+      <Config context={context} />
+      <Code context={context} />
+      {context.cell.model.id}
+    </>
+  );
 }
 
 /**
