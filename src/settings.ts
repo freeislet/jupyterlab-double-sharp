@@ -13,9 +13,9 @@ export namespace Settings {
   }
 
   export interface IExecution {
-    useCache: boolean;
+    cache: boolean;
     autoDependency: boolean;
-    forceExecutionOnSingleCell: boolean;
+    forceOnSingleCell: boolean;
     disableCache: boolean;
     disableAutoDependency: boolean;
     disableSkip: boolean;
@@ -39,9 +39,9 @@ export namespace Settings {
 export class Settings {
   static readonly DEFAULT_SETTINGS: Settings.ISettings = {
     execution: {
-      useCache: true,
+      cache: true,
       autoDependency: true,
-      forceExecutionOnSingleCell: true,
+      forceOnSingleCell: true,
       disableCache: false,
       disableAutoDependency: false,
       disableSkip: false

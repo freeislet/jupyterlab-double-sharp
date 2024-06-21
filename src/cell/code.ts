@@ -157,7 +157,7 @@ export class CodeContext {
       this._output.printSkipped();
       return { skipped: true };
     }
-    if (config.useCache) {
+    if (config.cache) {
       cached = await this.isCached();
       if (cached) {
         const data = await this.getData();

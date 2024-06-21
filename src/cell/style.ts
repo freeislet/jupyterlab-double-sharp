@@ -17,11 +17,11 @@ export namespace CellStyle {
     const config = CellConfig.get(cell.model);
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
-      'jp-DoubleSharp-cache': config.useCache // TODO: cached, uncached 구분
+      'jp-DoubleSharp-cache': config.cache // TODO: cached, uncached 구분
     };
 
     // if (cellExecution.skip) {
-    // } else if (cellExecution.useCache) {
+    // } else if (cellExecution.cache) {
     // }
 
     setClasses(cell, classes);

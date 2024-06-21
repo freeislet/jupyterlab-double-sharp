@@ -22,26 +22,26 @@
       "title": "Execution",
       "type": "object",
       "properties": {
-        "useCache": {
-          "title": "Use Execution Result Cache",
+        "cache": {
+          "title": "Execution Cache",
           "type": "boolean",
-          "description": "Skip execution if the outputs of the cell, such as assigned variables and imported modules, already exist.\nThis parameter can be overridden by property panel setting or '##%cache' command (TODO: manual link).\nThis behavior can be disabled by checking 'Disable Execution Result Cache'.",
+          "description": "Skip execution if the outputs of the cell, such as assigned variables and imported modules, already exist.\nThis parameter can be overridden by property panel setting or '##%cache' command (TODO: manual link).\nThis behavior can be disabled by checking 'Disable Execution Cache'.",
           "default": true
         },
         "autoDependency": {
           "title": "Auto Dependency",
           "type": "boolean",
-          "description": "Execute dependent cells if unresolved variables or modules in the cell are assigned in the cells above.\nThis parameter can be overridden in the property panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
+          "description": "Execute dependent cells if unresolved variables or modules of the cell are assigned in the cells above.\nThis parameter can be overridden in the property panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
           "default": true
         },
-        "forceExecutionOnSingleCell": {
+        "forceOnSingleCell": {
           "title": "Force Execution on Single Cell",
           "type": "boolean",
           "description": "When running only one cell, cache or skip configurations are ignored.",
           "default": true
         },
         "disableCache": {
-          "title": "Disable Execution Result Cache",
+          "title": "Disable Execution Cache",
           "type": "boolean",
           "default": false
         },
@@ -57,9 +57,9 @@
         }
       },
       "default": {
-        "useCache": true,
+        "cache": true,
         "autoDependency": true,
-        "forceExecutionOnSingleCell": true,
+        "forceOnSingleCell": true,
         "disableCache": false,
         "disableAutoDependency": false,
         "disableSkip": false

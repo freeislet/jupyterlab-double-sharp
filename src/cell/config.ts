@@ -9,19 +9,19 @@ export namespace CellConfig {
 
   export interface IConfig {
     skip: boolean;
-    useCache: boolean | UseSettings;
+    cache: boolean | UseSettings;
     autoDependency: boolean | UseSettings;
   }
 
   export function get(model: ICellModel): NonNullableField<IConfig> {
     const execSettings = Settings.data.execution;
     const settings: NonNullableField<PickNullish<IConfig>> = {
-      useCache: execSettings.useCache,
+      cache: execSettings.cache,
       autoDependency: execSettings.autoDependency
     };
     const forcedSettings: Partial<IConfig> = {
       skip: execSettings.disableSkip ? false : undefined,
-      useCache: execSettings.disableCache ? false : undefined,
+      cache: execSettings.disableCache ? false : undefined,
       autoDependency: execSettings.disableAutoDependency ? false : undefined
     };
 

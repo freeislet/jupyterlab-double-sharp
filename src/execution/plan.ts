@@ -88,7 +88,7 @@ export class ExecutionCells {
       item.execute = false;
       item.extra.excludedReason = 'skipped';
       item.extra.message = this._message('skipped' /*, metadata.skipMessage*/);
-    } else if (metadata.useCache && this.cached(cell)) {
+    } else if (metadata.cache && this.cached(cell)) {
       item.execute = false;
       item.extra.excludedReason = 'cached';
     } else if (this.exists(cell)) {

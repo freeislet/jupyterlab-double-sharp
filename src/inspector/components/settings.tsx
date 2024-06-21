@@ -16,17 +16,16 @@ export default function Settings() {
     setExecution(change.newValue);
   });
 
-  const onUseCache = React.useCallback(
-    (checked: boolean) => updateExecution({ useCache: checked }),
+  const onCache = React.useCallback(
+    (checked: boolean) => updateExecution({ cache: checked }),
     []
   );
   const onAutoDependency = React.useCallback(
     (checked: boolean) => updateExecution({ autoDependency: checked }),
     []
   );
-  const onForceSingleExec = React.useCallback(
-    (checked: boolean) =>
-      updateExecution({ forceExecutionOnSingleCell: checked }),
+  const onForceOnSingleCell = React.useCallback(
+    (checked: boolean) => updateExecution({ forceOnSingleCell: checked }),
     []
   );
 
@@ -35,8 +34,8 @@ export default function Settings() {
   return (
     <Group>
       <Group.Title>Execution settings</Group.Title>
-      <BooleanSetting checked={execution.useCache} onChange={onUseCache}>
-        Use Cache by default
+      <BooleanSetting checked={execution.cache} onChange={onCache}>
+        Execution Cache by default
       </BooleanSetting>
       <BooleanSetting
         checked={execution.autoDependency}
@@ -45,8 +44,8 @@ export default function Settings() {
         Auto Dependency by default
       </BooleanSetting>
       <BooleanSetting
-        checked={execution.forceExecutionOnSingleCell}
-        onChange={onForceSingleExec}
+        checked={execution.forceOnSingleCell}
+        onChange={onForceOnSingleCell}
       >
         Force Execution on Single Cell
       </BooleanSetting>

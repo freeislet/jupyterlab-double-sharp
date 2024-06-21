@@ -47,8 +47,8 @@ function Config({ context }: IContextProps) {
   }, [context]);
   useSignal;
 
-  const onUseCache = React.useCallback(
-    (value: boolean | null) => updateConfig({ useCache: value }),
+  const onCache = React.useCallback(
+    (value: boolean | null) => updateConfig({ cache: value }),
     []
   );
   const onAutoDependency = React.useCallback(
@@ -66,8 +66,8 @@ function Config({ context }: IContextProps) {
   return (
     <Group>
       <Group.Title>Config</Group.Title>
-      <NullableBooleanConfig value={config.useCache} onChange={onUseCache}>
-        Use Cache
+      <NullableBooleanConfig value={config.cache} onChange={onCache}>
+        Execution Cache
       </NullableBooleanConfig>
       <NullableBooleanConfig
         value={config.autoDependency}

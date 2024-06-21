@@ -68,7 +68,7 @@ namespace Private {
     '##Config',
     {
       skip: false,
-      useCache: null,
+      cache: null,
       autoDependency: null
     },
     true
