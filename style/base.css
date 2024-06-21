@@ -39,25 +39,15 @@
   background: var(--jp-layout-color1);
 }
 
-/*
-    Inspector > Settings
-*/
-
-.jp-DoubleSharp-Settings-row {
+.jp-DoubleSharp-Inspector-row {
   display: flex;
   align-items: center;
 }
 
-.jp-DoubleSharp-Settings-row ~ .jp-DoubleSharp-Settings-row {
+.jp-DoubleSharp-Inspector-row ~ .jp-DoubleSharp-Inspector-row {
   margin-top: 8px;
 }
 
 /*
     Inspector > Cell Tools
 */
-
-.jp-DoubleSharp-CellTools-ConfigItem {
-  display: flex;
-  align-items: center;
-  margin-top: 8px; /* todo: space 처리 */
-}

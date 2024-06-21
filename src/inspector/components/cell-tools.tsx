@@ -94,7 +94,7 @@ const BooleanConfig = React.memo(
   ({ value, onChange, children }: IBooleanConfigProps) => {
     return (
       <Checkbox
-        className="jp-DoubleSharp-CellTools-ConfigItem"
+        className="jp-DoubleSharp-Inspector-row"
         checked={value}
         onChangeValue={onChange}
       >
@@ -115,7 +115,7 @@ const NullableBooleanConfig = React.memo(
   ({ value, onChange, children }: INullableBooleanConfigProps) => {
     return (
       <NullableCheckbox
-        className="jp-DoubleSharp-CellTools-ConfigItem"
+        className="jp-DoubleSharp-Inspector-row"
         checked={value}
         onChangeValue={onChange}
       >
