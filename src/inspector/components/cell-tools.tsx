@@ -5,6 +5,7 @@ import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
+import { Block } from './common';
 
 export interface ICellToolsProps {
   context: CellContext | null;
@@ -15,6 +16,7 @@ export default function CellTools({ context }: ICellToolsProps) {
     return (
       <>
         <Config context={context} />
+        <Code context={context} />
         {context.cell.model.id}
       </>
     );
@@ -125,3 +127,37 @@ const NullableBooleanConfig = React.memo(
   }
 );
 NullableBooleanConfig.displayName = 'NullableBooleanConfig';
+
+/**
+ * Code
+ */
+
+function Code({ context }: IContextProps) {
+  const code = context.codeContext;
+  if (!code) return null;
+
+  const model = context.cell.model;
+  const dirty = CellMetadata.code.isDirty(model);
+  const metadata = CellMetadata.code.getRaw(model);
+
+  return (
+    <Group>
+      <Group.Title>Code</Group.Title>
+      {dirty && (
+        <Block type="warning" className="jp-DoubleSharp-Inspector-row">
+          Code information is dirty.
+          <br />
+          <strong>execute</strong> the cell or <a>click</a>.
+        </Block>
+      )}
+      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">
+        <strong>Variables: </strong>
+        <span>{metadata?.variables.join(', ')}</span>
+      </div>
+      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">
+        <strong>Unbound Vars: </strong>
+        <span>{metadata?.unboundVariables.join(', ')}</span>
+      </div>
+    </Group>
+  );
+}

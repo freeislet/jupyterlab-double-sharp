@@ -48,6 +48,33 @@
   margin-top: 8px;
 }
 
+.jp-DoubleSharp-Inspector-space > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 4px;
+}
+
+.jp-DoubleSharp-Inspector-Block {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-DoubleSharp-Inspector-Block-info {
+  background-color: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color1);
+}
+
+.jp-DoubleSharp-Inspector-Block-warning {
+  background-color: var(--jp-warn-color3);
+}
+
+.jp-DoubleSharp-Inspector-Block-error {
+  background-color: var(--jp-error-color3);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon {
+  margin-right: 6px;
+}
+
 /*
     Inspector > Cell Tools
 */
