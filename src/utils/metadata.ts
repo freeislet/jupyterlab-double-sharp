@@ -96,9 +96,9 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     model.setMetadata(this.dirtyFlagName, dirty);
   }
 
-  get(model: ICellModel): T | undefined {
+  get(model: ICellModel, resolveIfDirty = true): T | undefined {
     if (this.isDirty(model)) {
-      if (this._dirtyResolver) {
+      if (this._dirtyResolver && resolveIfDirty) {
         this._dirtyResolver(model);
         if (this.isDirty(model)) return;
       } else return;
