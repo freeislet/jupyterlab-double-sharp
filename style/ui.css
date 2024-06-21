@@ -29,7 +29,7 @@
 }
 
 .jp-DoubleSharp-Accordion-trigger-chevron {
-  margin-left: 6px;
+  margin-left: 4px;
   vertical-align: middle;
   color: var(--jp-ui-font-color2);
   transition: transform 0.2s ease-out;

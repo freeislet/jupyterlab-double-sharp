@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cn from 'classnames';
-import { FaChevronRight } from 'react-icons/fa';
+import { VscChevronRight } from 'react-icons/vsc';
 
 import { IChildrenProps, IDivProps } from '.';
 import Collapsible from './collapsible';
@@ -83,7 +83,7 @@ function AccordionTriggerInner({
       {...props}
     >
       {children}
-      <FaChevronRight className="jp-DoubleSharp-Accordion-trigger-chevron" />
+      <VscChevronRight className="jp-DoubleSharp-Accordion-trigger-chevron" />
     </div>
   );
 }
