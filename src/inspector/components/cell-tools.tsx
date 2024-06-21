@@ -12,16 +12,16 @@ export interface ICellToolsProps {
 }
 
 export default function CellTools({ context }: ICellToolsProps) {
-  if (context) {
+  if (context && context.isCodeCell) {
     return (
       <>
         <Config context={context} />
-        {context.isCodeCell && <Code context={context} />}
+        <Code context={context} />
         {context.cell.model.id}
       </>
     );
   } else {
-    return <p>No cell is selected.</p>;
+    return <p>No code cell is selected.</p>;
   }
 }
 
