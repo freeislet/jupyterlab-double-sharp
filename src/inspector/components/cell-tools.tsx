@@ -47,8 +47,9 @@ function Config({ context }: IContextProps) {
     CellMetadata.config.defaultValue
   );
 
+  const model = context.cell.model;
+
   React.useEffect(() => {
-    const model = context.cell.model;
     const config = CellMetadata.config.getCoalesced(model);
     setConfig(config);
     setOnUpdateConfig((value, merged) => {
@@ -56,7 +57,16 @@ function Config({ context }: IContextProps) {
     });
     // Log.debug('Config', model.id, config);
   }, [context]);
-  useSignal;
+
+  useSignal(
+    model.metadataChanged,
+    (model: ICellModel, change: IMapChange) => {
+      if (change.key === CellMetadata.configOverride.dirtyFlagName) {
+        // TODO
+      }
+    },
+    [context]
+  );
 
   const onCache = React.useCallback(
     (value: boolean | null) => updateConfig({ cache: value }),
@@ -146,36 +156,52 @@ function Code({ context }: IContextProps) {
   >(CellMetadata.code.defaultValue);
   const [dirty, setDirty] = React.useState(false);
 
+  const model = context.cell.model;
+
   React.useEffect(() => {
-    const model = context.cell.model;
     const metadata = CellMetadata.code.getRaw(model);
     const dirty = CellMetadata.code.isDirty(model);
     setMetadata(metadata);
     setDirty(dirty);
   }, [context]);
 
-  const codeContext = context.codeContext;
-  const update = async () => {
-    const metadata = await codeContext?.getData();
-    setMetadata(metadata);
-    setDirty(false);
-  };
+  useSignal(
+    model.metadataChanged,
+    (model: ICellModel, change: IMapChange) => {
+      // metadataChanged signal을 통해 metadata, dirty state 갱신
+      //   1. dirty 해결 (false)
+      //     A. 셀 실행
+      //     B. dirty 알림 click 클릭 > update > CodeContext.getData
+      //   2. dirty 설정 (true)
+      //     A. source 수정
 
-  // TODO: executed signal
-  // TODO: dirty signal (metadata changed)
+      switch (change.key) {
+        case CellMetadata.code.name: // ##Code
+          setMetadata(change.newValue);
+          break;
+
+        case CellMetadata.code.dirtyFlagName: // ##Code-dirty
+          setDirty(change.newValue as boolean);
+          break;
+      }
+
+      // Log.debug('Code metadataChanged', model, change);
+    },
+    [context]
+  );
+
+  const update = async () => {
+    await context.codeContext?.getData();
+  };
 
   return (
     <Group>
       <Group.Title>Code</Group.Title>
       {dirty && (
         <Block type="warning" className="jp-DoubleSharp-Inspector-row">
-          Code information is dirty.
+          Code info may be invalid.
           <br />
-          <strong>execute</strong> the cell or{' '}
-          <a onClick={update}>
-            <strong>click</strong>
-          </a>
-          .
+          <strong>execute</strong> the cell or <a onClick={update}>click</a>.
         </Block>
       )}
       <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">

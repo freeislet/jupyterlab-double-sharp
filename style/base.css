@@ -88,6 +88,7 @@
   text-decoration: revert;
   color: var(--jp-content-link-color);
   cursor: pointer;
+  font-weight: bold;
 }
 
 .jp-DoubleSharp-Inspector a:hover {
