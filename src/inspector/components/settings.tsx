@@ -12,9 +12,13 @@ export default function Settings() {
     AppSettings.data.execution,
     AppSettings.updateExecution
   );
-  useSignal(AppSettings.executionChanged, (_, change) => {
-    setExecution(change.newValue);
-  });
+  useSignal(
+    AppSettings.executionChanged,
+    (_, change) => {
+      setExecution(change.newValue);
+    },
+    []
+  );
 
   const onCache = React.useCallback(
     (checked: boolean) => updateExecution({ cache: checked }),
