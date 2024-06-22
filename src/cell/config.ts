@@ -3,6 +3,7 @@ import merge from 'lodash.merge';
 
 import { CellMetadata } from './metadata';
 import { Settings } from '../settings';
+import { replaceValue } from '../utils/json';
 
 export namespace CellConfig {
   export type UseSettings = null;
@@ -25,10 +26,14 @@ export namespace CellConfig {
       autoDependency: execSettings.disableAutoDependency ? false : undefined
     };
 
-    const config = CellMetadata.config.getCoalesced(model);
-    const override = CellMetadata.configOverride.get(model);
+    const config = removeNull(CellMetadata.config.getCoalesced(model));
+    const override = removeNull(CellMetadata.configOverride.get(model));
     const coalesced = merge(settings, config, override, forcedSettings);
     Log.debug('cell config', coalesced);
     return coalesced;
+  }
+
+  function removeNull(obj: any) {
+    return replaceValue(obj, null, undefined);
   }
 }
