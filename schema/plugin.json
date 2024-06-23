@@ -43,16 +43,19 @@
         "disableCache": {
           "title": "Disable Execution Cache",
           "type": "boolean",
+          "description": "Disable the cache feature completely, including 'Execution Cache' config and '##%cache' client-side magic command.",
           "default": false
         },
         "disableAutoDependency": {
           "title": "Disable Auto Dependency",
           "type": "boolean",
+          "description": "Disable the auto dependency feature completely, including 'Auto Dependency' config.",
           "default": false
         },
         "disableSkip": {
           "title": "Disable Cell Execution Skip",
           "type": "boolean",
+          "description": "Disable the skip feature completely, including 'Skip' config and '##%skip' client-side magic command.",
           "default": false
         }
       },
