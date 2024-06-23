@@ -9,9 +9,9 @@ import Checkbox from '../../ui/checkbox';
 
 export default function Settings() {
   const [execution, setExecution, updateExecution] = useStateObject(
-    AppSettings.data.execution,
-    AppSettings.updateExecution
+    AppSettings.data.execution
   );
+
   useSignal(
     AppSettings.executionChanged,
     (_, change) => {
@@ -20,16 +20,20 @@ export default function Settings() {
     []
   );
 
+  const updateAndApply = (execution: Partial<AppSettings.IExecution>) => {
+    updateExecution(execution);
+    AppSettings.updateExecution(execution);
+  };
   const onCache = React.useCallback(
-    (checked: boolean) => updateExecution({ cache: checked }),
+    (checked: boolean) => updateAndApply({ cache: checked }),
     []
   );
   const onAutoDependency = React.useCallback(
-    (checked: boolean) => updateExecution({ autoDependency: checked }),
+    (checked: boolean) => updateAndApply({ autoDependency: checked }),
     []
   );
   const onForceOnSingleCell = React.useCallback(
-    (checked: boolean) => updateExecution({ forceOnSingleCell: checked }),
+    (checked: boolean) => updateAndApply({ forceOnSingleCell: checked }),
     []
   );
 

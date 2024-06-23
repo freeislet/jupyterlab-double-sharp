@@ -43,19 +43,15 @@ function CodeCellTools({ context }: IContextProps) {
  */
 
 function Config({ context }: IContextProps) {
-  const [config, setConfig, updateConfig, setOnUpdateConfig] = useStateObject(
+  const [config, setConfig, updateConfig] = useStateObject(
     CellMetadata.config.defaultValue
   );
-
   const model = context.cell.model;
 
   React.useEffect(() => {
     const config = CellMetadata.config.getCoalesced(model);
     setConfig(config);
-    setOnUpdateConfig((value, merged) => {
-      CellMetadata.config.update(model, value);
-    });
-    // Log.debug('Config', model.id, config);
+    Log.debug('Config', model.id, config);
   }, [context]);
 
   useSignal(
@@ -68,17 +64,22 @@ function Config({ context }: IContextProps) {
     [context]
   );
 
+  const updateAndApply = (config: Partial<CellConfig.IConfig>) => {
+    updateConfig(config);
+    CellMetadata.config.update(model, config);
+    Log.debug('Config apply', context, model.id, config);
+  };
   const onCache = React.useCallback(
-    (value: boolean | null) => updateConfig({ cache: value }),
-    []
+    (value: boolean | null) => updateAndApply({ cache: value }),
+    [context]
   );
   const onAutoDependency = React.useCallback(
-    (value: boolean | null) => updateConfig({ autoDependency: value }),
-    []
+    (value: boolean | null) => updateAndApply({ autoDependency: value }),
+    [context]
   );
   const onSkip = React.useCallback(
-    (value: boolean) => updateConfig({ skip: value }),
-    []
+    (value: boolean) => updateAndApply({ skip: value }),
+    [context]
   );
   // const finalConfig = CellConfig.get(context.cell.model);
   CellConfig;
@@ -190,6 +191,7 @@ function Code({ context }: IContextProps) {
     [context]
   );
 
+  // const executionMatters = ...
   const update = async () => {
     await context.codeContext?.getData();
   };
@@ -201,7 +203,8 @@ function Code({ context }: IContextProps) {
         <Block type="warning" className="jp-DoubleSharp-Inspector-row">
           Code info may be invalid.
           <br />
-          <strong>execute</strong> the cell or <a onClick={update}>click</a>.
+          <strong>execute</strong> the cell or <a onClick={update}>click</a> to
+          update.
         </Block>
       )}
       <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">
