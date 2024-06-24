@@ -56,7 +56,6 @@ function CodeCellTools({ context }: IContextProps) {
     (config: Partial<CellConfig.IConfig>) => {
       updateConfig(config);
       CellMetadata.config.update(model, config);
-      Log.debug('Config apply', context, model.id, config);
     },
     [context]
   );
@@ -66,6 +65,16 @@ function CodeCellTools({ context }: IContextProps) {
     setConfig(config);
     Log.debug('Config', model.id, config);
   }, [context]);
+
+  useSignal(
+    model.metadataChanged,
+    (model: ICellModel, change: IMapChange) => {
+      if (change.key === CellMetadata.configOverride.dirtyFlagName) {
+        // TODO
+      }
+    },
+    [context]
+  );
 
   return (
     <CodeCellContext.Provider
@@ -82,46 +91,29 @@ function CodeCellTools({ context }: IContextProps) {
  * Config
  */
 function Config() {
-  const { context, config, updateConfig } = React.useContext(CodeCellContext)!;
-
-  const model = context.cell.model;
-
-  useSignal(
-    model.metadataChanged,
-    (model: ICellModel, change: IMapChange) => {
-      if (change.key === CellMetadata.configOverride.dirtyFlagName) {
-        // TODO
-      }
-    },
-    [context]
-  );
-
-  const onCache = React.useCallback(
-    (value: boolean | null) => updateConfig({ cache: value }),
-    [context]
-  );
-  const onAutoDependency = React.useCallback(
-    (value: boolean | null) => updateConfig({ autoDependency: value }),
-    [context]
-  );
-  const onSkip = React.useCallback(
-    (value: boolean) => updateConfig({ skip: value }),
-    [context]
-  );
+  const { config, updateConfig } = React.useContext(CodeCellContext)!;
 
   return (
     <Group>
       <Group.Title>Config</Group.Title>
-      <NullableBooleanConfig value={config.cache} onChange={onCache}>
+      <NullableBooleanConfig
+        value={config.cache}
+        onChange={(value: boolean | null) => updateConfig({ cache: value })}
+      >
         Execution Cache
       </NullableBooleanConfig>
       <NullableBooleanConfig
         value={config.autoDependency}
-        onChange={onAutoDependency}
+        onChange={(value: boolean | null) =>
+          updateConfig({ autoDependency: value })
+        }
       >
         Auto Dependency
       </NullableBooleanConfig>
-      <BooleanConfig value={config.skip} onChange={onSkip}>
+      <BooleanConfig
+        value={config.skip}
+        onChange={(value: boolean) => updateConfig({ skip: value })}
+      >
         Skip
       </BooleanConfig>
     </Group>
@@ -136,20 +128,17 @@ interface IBooleanConfigProps {
   children?: React.ReactNode;
 }
 
-const BooleanConfig = React.memo(
-  ({ value, onChange, children }: IBooleanConfigProps) => {
-    return (
-      <Checkbox
-        className="jp-DoubleSharp-Inspector-row"
-        checked={value}
-        onChangeValue={onChange}
-      >
-        <span>{children}</span>
-      </Checkbox>
-    );
-  }
-);
-BooleanConfig.displayName = 'BooleanConfig';
+function BooleanConfig({ value, onChange, children }: IBooleanConfigProps) {
+  return (
+    <Checkbox
+      className="jp-DoubleSharp-Inspector-row"
+      checked={value}
+      onChangeValue={onChange}
+    >
+      <span>{children}</span>
+    </Checkbox>
+  );
+}
 
 interface INullableBooleanConfigProps {
   value: boolean | null;
@@ -157,20 +146,21 @@ interface INullableBooleanConfigProps {
   children?: React.ReactNode;
 }
 
-const NullableBooleanConfig = React.memo(
-  ({ value, onChange, children }: INullableBooleanConfigProps) => {
-    return (
-      <NullableCheckbox
-        className="jp-DoubleSharp-Inspector-row"
-        checked={value}
-        onChangeValue={onChange}
-      >
-        <span>{children}</span>
-      </NullableCheckbox>
-    );
-  }
-);
-NullableBooleanConfig.displayName = 'NullableBooleanConfig';
+function NullableBooleanConfig({
+  value,
+  onChange,
+  children
+}: INullableBooleanConfigProps) {
+  return (
+    <NullableCheckbox
+      className="jp-DoubleSharp-Inspector-row"
+      checked={value}
+      onChangeValue={onChange}
+    >
+      <span>{children}</span>
+    </NullableCheckbox>
+  );
+}
 
 /**
  * Code
