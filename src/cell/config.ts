@@ -14,7 +14,10 @@ export namespace CellConfig {
     autoDependency: boolean | UseSettings;
   }
 
-  export function get(model: ICellModel): NonNullableField<IConfig> {
+  export function get(
+    model: ICellModel,
+    checkDirty = true
+  ): NonNullableField<IConfig> {
     const execSettings = Settings.data.execution;
     const settings: NonNullableField<PickNullish<IConfig>> = {
       cache: execSettings.cache,
@@ -26,9 +29,14 @@ export namespace CellConfig {
       autoDependency: execSettings.disableAutoDependency ? false : undefined
     };
 
-    const config = removeNull(CellMetadata.config.getCoalesced(model));
-    const override = removeNull(CellMetadata.configOverride.get(model));
-    const coalesced = merge(settings, config, override, forcedSettings);
+    const config = CellMetadata.config.getCoalesced(model);
+    const override = CellMetadata.configOverride.get(model, checkDirty);
+    const coalesced = merge(
+      settings,
+      removeNull(config),
+      removeNull(override),
+      forcedSettings
+    );
     Log.debug('cell config', coalesced);
     return coalesced;
   }
