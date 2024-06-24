@@ -31,14 +31,14 @@ export namespace CellConfig {
 
     const config = CellMetadata.config.getCoalesced(model);
     const override = CellMetadata.configOverride.get(model, checkDirty);
-    const coalesced = merge(
+    const composite = merge(
       settings,
       removeNull(config),
       removeNull(override),
       forcedSettings
     );
-    Log.debug('cell config', coalesced);
-    return coalesced;
+    Log.debug('cell config', composite);
+    return composite;
   }
 
   function removeNull(obj: any) {
