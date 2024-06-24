@@ -36,6 +36,18 @@ export default function Settings() {
     (checked: boolean) => updateAndApply({ forceOnSingleCell: checked }),
     []
   );
+  const onDisableCache = React.useCallback(
+    (checked: boolean) => updateAndApply({ disableCache: checked }),
+    []
+  );
+  const onDisableAutoDependency = React.useCallback(
+    (checked: boolean) => updateAndApply({ disableAutoDependency: checked }),
+    []
+  );
+  const onDisableSkip = React.useCallback(
+    (checked: boolean) => updateAndApply({ disableSkip: checked }),
+    []
+  );
 
   // Log.debug('Settings', execution, AppSettings.data.execution);
 
@@ -43,19 +55,34 @@ export default function Settings() {
     <Group>
       <Group.Title>Execution settings</Group.Title>
       <BooleanSetting checked={execution.cache} onChange={onCache}>
-        Execution Cache by default
+        Execution Cache
       </BooleanSetting>
       <BooleanSetting
         checked={execution.autoDependency}
         onChange={onAutoDependency}
       >
-        Auto Dependency by default
+        Auto Dependency
       </BooleanSetting>
       <BooleanSetting
         checked={execution.forceOnSingleCell}
         onChange={onForceOnSingleCell}
       >
         Force Execution on Single Cell
+      </BooleanSetting>
+      <BooleanSetting
+        checked={execution.disableCache}
+        onChange={onDisableCache}
+      >
+        Disable Execution Cache
+      </BooleanSetting>
+      <BooleanSetting
+        checked={execution.disableAutoDependency}
+        onChange={onDisableAutoDependency}
+      >
+        Disable Auto Dependency
+      </BooleanSetting>
+      <BooleanSetting checked={execution.disableSkip} onChange={onDisableSkip}>
+        Disable Cell Execution Skip
       </BooleanSetting>
     </Group>
   );
