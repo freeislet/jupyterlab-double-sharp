@@ -108,6 +108,7 @@ function CodeCellTools({ context }: IContextProps) {
       switch (change.key) {
         case CellMetadata.config.name: // ##Config
         // Cell Inspector > Config > updateConfig
+        // falls through
         case CellMetadata.configOverride.name: // ##ConfigOverride
           // 셀 실행 > Client-side Magic Command
           setCompositeConfig(getCompositeConfig());
