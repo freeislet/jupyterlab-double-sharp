@@ -24,36 +24,67 @@ export default function CellTools({ context }: ICellToolsProps) {
   );
 }
 
+// CodeCellContext
+
+interface ICodeCellContext {
+  context: CellContext;
+  config: CellConfig.IConfig;
+  updateConfig: (config: Partial<CellConfig.IConfig>) => void;
+}
+
+const CodeCellContext = React.createContext<ICodeCellContext | undefined>(
+  undefined
+);
+
+/**
+ * IContextProps
+ */
 interface IContextProps {
   context: CellContext;
 }
 
-function CodeCellTools({ context }: IContextProps) {
-  return (
-    <>
-      <Config context={context} />
-      <Code context={context} />
-      {context.cell.model.id}
-    </>
-  );
-}
-
 /**
- * Config
+ * CodeCellTools
  */
+function CodeCellTools({ context }: IContextProps) {
+  const model = context.cell.model;
 
-function Config({ context }: IContextProps) {
   const [config, setConfig, updateConfig] = useStateObject(
     CellMetadata.config.defaultValue
   );
-
-  const model = context.cell.model;
+  const updateAndApplyConfig = React.useCallback(
+    (config: Partial<CellConfig.IConfig>) => {
+      updateConfig(config);
+      CellMetadata.config.update(model, config);
+      Log.debug('Config apply', context, model.id, config);
+    },
+    [context]
+  );
 
   React.useEffect(() => {
     const config = CellMetadata.config.getCoalesced(model);
     setConfig(config);
     Log.debug('Config', model.id, config);
   }, [context]);
+
+  return (
+    <CodeCellContext.Provider
+      value={{ context, config, updateConfig: updateAndApplyConfig }}
+    >
+      <Config />
+      <Code context={context} />
+      {context.cell.model.id}
+    </CodeCellContext.Provider>
+  );
+}
+
+/**
+ * Config
+ */
+function Config() {
+  const { context, config, updateConfig } = React.useContext(CodeCellContext)!;
+
+  const model = context.cell.model;
 
   useSignal(
     model.metadataChanged,
@@ -65,21 +96,16 @@ function Config({ context }: IContextProps) {
     [context]
   );
 
-  const updateAndApply = (config: Partial<CellConfig.IConfig>) => {
-    updateConfig(config);
-    CellMetadata.config.update(model, config);
-    Log.debug('Config apply', context, model.id, config);
-  };
   const onCache = React.useCallback(
-    (value: boolean | null) => updateAndApply({ cache: value }),
+    (value: boolean | null) => updateConfig({ cache: value }),
     [context]
   );
   const onAutoDependency = React.useCallback(
-    (value: boolean | null) => updateAndApply({ autoDependency: value }),
+    (value: boolean | null) => updateConfig({ autoDependency: value }),
     [context]
   );
   const onSkip = React.useCallback(
-    (value: boolean) => updateAndApply({ skip: value }),
+    (value: boolean) => updateConfig({ skip: value }),
     [context]
   );
 
@@ -149,7 +175,6 @@ NullableBooleanConfig.displayName = 'NullableBooleanConfig';
 /**
  * Code
  */
-
 function Code({ context }: IContextProps) {
   const [metadata, setMetadata] = React.useState<
     CellMetadata.ICode | undefined
