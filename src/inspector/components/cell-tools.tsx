@@ -160,7 +160,7 @@ function Code({ context }: IContextProps) {
   const model = context.cell.model;
 
   React.useEffect(() => {
-    const metadata = CellMetadata.code.getRaw(model);
+    const metadata = CellMetadata.code.get(model, false);
     const dirty = CellMetadata.code.isDirty(model);
     setMetadata(metadata);
     setDirty(dirty);
