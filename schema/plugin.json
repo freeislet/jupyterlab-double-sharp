@@ -25,13 +25,13 @@
         "cache": {
           "title": "Execution Cache",
           "type": "boolean",
-          "description": "Skip execution if the outputs of the cell, such as assigned variables and imported modules, already exist.\nThis parameter can be overridden by property panel setting or '##%cache' command (TODO: manual link).\nThis behavior can be disabled by checking 'Disable Execution Cache'.",
+          "description": "Skip execution if the outputs of the cell, such as assigned variables and imported modules, already exist.\nThis parameter can be overridden with 'Execution Cache' config in '## Cell Inspector' panel or '##%cache' client-side magic command.\nThis behavior can be disabled by checking 'Disable Execution Cache'.",
           "default": true
         },
         "autoDependency": {
           "title": "Auto Dependency",
           "type": "boolean",
-          "description": "Execute dependent cells if unresolved variables or modules of the cell are assigned in the cells above.\nThis parameter can be overridden in the property panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
+          "description": "Execute dependent cells if unresolved variables or modules of the cell are assigned in the cells above.\nThis parameter can be overridden with 'Auto Dependency' config in '## Cell Inspector' panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
           "default": true
         },
         "forceOnSingleCell": {
