@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Settings as AppSettings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import Checkbox from '../../ui/checkbox';
+import { Boolean } from './common';
 
 // export interface ISettingsProps {}
 
@@ -20,91 +20,52 @@ export default function Settings() {
     []
   );
 
-  const updateAndApply = (execution: Partial<AppSettings.IExecution>) => {
+  const update = (execution: Partial<AppSettings.IExecution>) => {
     updateExecution(execution);
     AppSettings.updateExecution(execution);
   };
-  const onCache = React.useCallback(
-    (checked: boolean) => updateAndApply({ cache: checked }),
-    []
-  );
-  const onAutoDependency = React.useCallback(
-    (checked: boolean) => updateAndApply({ autoDependency: checked }),
-    []
-  );
-  const onForceOnSingleCell = React.useCallback(
-    (checked: boolean) => updateAndApply({ forceOnSingleCell: checked }),
-    []
-  );
-  const onDisableCache = React.useCallback(
-    (checked: boolean) => updateAndApply({ disableCache: checked }),
-    []
-  );
-  const onDisableAutoDependency = React.useCallback(
-    (checked: boolean) => updateAndApply({ disableAutoDependency: checked }),
-    []
-  );
-  const onDisableSkip = React.useCallback(
-    (checked: boolean) => updateAndApply({ disableSkip: checked }),
-    []
-  );
 
   // Log.debug('Settings', execution, AppSettings.data.execution);
 
   return (
     <Group>
       <Group.Title>Execution settings</Group.Title>
-      <BooleanSetting checked={execution.cache} onChange={onCache}>
+      <Boolean
+        value={execution.cache}
+        onChange={(value: boolean) => update({ cache: value })}
+      >
         Execution Cache
-      </BooleanSetting>
-      <BooleanSetting
-        checked={execution.autoDependency}
-        onChange={onAutoDependency}
+      </Boolean>
+      <Boolean
+        value={execution.autoDependency}
+        onChange={(value: boolean) => update({ autoDependency: value })}
       >
         Auto Dependency
-      </BooleanSetting>
-      <BooleanSetting
-        checked={execution.forceOnSingleCell}
-        onChange={onForceOnSingleCell}
+      </Boolean>
+      <Boolean
+        value={execution.forceOnSingleCell}
+        onChange={(value: boolean) => update({ forceOnSingleCell: value })}
       >
         Force Execution on Single Cell
-      </BooleanSetting>
-      <BooleanSetting
-        checked={execution.disableCache}
-        onChange={onDisableCache}
+      </Boolean>
+      <Boolean
+        value={execution.disableCache}
+        onChange={(value: boolean) => update({ disableCache: value })}
       >
         Disable Execution Cache
-      </BooleanSetting>
-      <BooleanSetting
-        checked={execution.disableAutoDependency}
-        onChange={onDisableAutoDependency}
+      </Boolean>
+      <Boolean
+        value={execution.disableAutoDependency}
+        onChange={(value: boolean) => update({ disableAutoDependency: value })}
       >
         Disable Auto Dependency
-      </BooleanSetting>
-      <BooleanSetting checked={execution.disableSkip} onChange={onDisableSkip}>
+      </Boolean>
+      <Boolean
+        value={execution.disableSkip}
+        onChange={(value: boolean) => update({ disableSkip: value })}
+      >
         Disable Cell Execution Skip
-      </BooleanSetting>
+      </Boolean>
     </Group>
   );
 }
-
-interface IBooleanSettingProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  children?: React.ReactNode;
-}
-
-const BooleanSetting = React.memo(
-  ({ checked, onChange, children }: IBooleanSettingProps) => {
-    return (
-      <Checkbox
-        className="jp-DoubleSharp-Inspector-row"
-        checked={checked}
-        onChangeValue={onChange}
-      >
-        <span>{children}</span>
-      </Checkbox>
-    );
-  }
-);
-BooleanSetting.displayName = 'BooleanSetting';

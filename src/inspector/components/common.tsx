@@ -3,6 +3,9 @@ import cn from 'classnames';
 import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
 import { IDivProps } from '../../ui';
+import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
+
+// Block
 
 export type BlockType = 'info' | 'warning' | 'error';
 
@@ -28,5 +31,47 @@ export function Block({ type, className, children, ...props }: IBlockProps) {
       <Icon className="jp-DoubleSharp-Inspector-Block-icon" />
       <div>{children}</div>
     </div>
+  );
+}
+
+// Boolean
+
+export interface IBooleanProps {
+  value: boolean;
+  onChange: (value: boolean) => void;
+  children?: React.ReactNode;
+}
+
+export function Boolean({ value, onChange, children }: IBooleanProps) {
+  return (
+    <Checkbox
+      className="jp-DoubleSharp-Inspector-row"
+      checked={value}
+      onChangeValue={onChange}
+    >
+      <span>{children}</span>
+    </Checkbox>
+  );
+}
+
+export interface INullableBooleanProps {
+  value: boolean | null;
+  onChange: (value: boolean | null) => void;
+  children?: React.ReactNode;
+}
+
+export function NullableBoolean({
+  value,
+  onChange,
+  children
+}: INullableBooleanProps) {
+  return (
+    <NullableCheckbox
+      className="jp-DoubleSharp-Inspector-row"
+      checked={value}
+      onChangeValue={onChange}
+    >
+      <span>{children}</span>
+    </NullableCheckbox>
   );
 }

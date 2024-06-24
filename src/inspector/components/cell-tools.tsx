@@ -4,8 +4,7 @@ import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
-import { Block } from './common';
+import { Block, Boolean, NullableBoolean } from './common';
 
 export interface ICellToolsProps {
   context: CellContext | null;
@@ -167,69 +166,27 @@ function Config() {
   return (
     <Group>
       <Group.Title>Config</Group.Title>
-      <NullableBooleanConfig
+      <NullableBoolean
         value={config.cache}
         onChange={(value: boolean | null) => updateConfig({ cache: value })}
       >
         Execution Cache
-      </NullableBooleanConfig>
-      <NullableBooleanConfig
+      </NullableBoolean>
+      <NullableBoolean
         value={config.autoDependency}
         onChange={(value: boolean | null) =>
           updateConfig({ autoDependency: value })
         }
       >
         Auto Dependency
-      </NullableBooleanConfig>
-      <BooleanConfig
+      </NullableBoolean>
+      <Boolean
         value={config.skip}
         onChange={(value: boolean) => updateConfig({ skip: value })}
       >
         Skip
-      </BooleanConfig>
+      </Boolean>
     </Group>
-  );
-}
-
-// Config Items
-
-interface IBooleanConfigProps {
-  value: boolean;
-  onChange: (value: boolean) => void;
-  children?: React.ReactNode;
-}
-
-function BooleanConfig({ value, onChange, children }: IBooleanConfigProps) {
-  return (
-    <Checkbox
-      className="jp-DoubleSharp-Inspector-row"
-      checked={value}
-      onChangeValue={onChange}
-    >
-      <span>{children}</span>
-    </Checkbox>
-  );
-}
-
-interface INullableBooleanConfigProps {
-  value: boolean | null;
-  onChange: (value: boolean | null) => void;
-  children?: React.ReactNode;
-}
-
-function NullableBooleanConfig({
-  value,
-  onChange,
-  children
-}: INullableBooleanConfigProps) {
-  return (
-    <NullableCheckbox
-      className="jp-DoubleSharp-Inspector-row"
-      checked={value}
-      onChangeValue={onChange}
-    >
-      <span>{children}</span>
-    </NullableCheckbox>
   );
 }
 
