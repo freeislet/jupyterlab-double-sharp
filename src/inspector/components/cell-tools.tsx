@@ -46,6 +46,7 @@ function Config({ context }: IContextProps) {
   const [config, setConfig, updateConfig] = useStateObject(
     CellMetadata.config.defaultValue
   );
+
   const model = context.cell.model;
 
   React.useEffect(() => {
@@ -81,8 +82,6 @@ function Config({ context }: IContextProps) {
     (value: boolean) => updateAndApply({ skip: value }),
     [context]
   );
-  // const finalConfig = CellConfig.get(context.cell.model);
-  CellConfig;
 
   return (
     <Group>
@@ -156,6 +155,7 @@ function Code({ context }: IContextProps) {
     CellMetadata.ICode | undefined
   >(CellMetadata.code.defaultValue);
   const [dirty, setDirty] = React.useState(false);
+  const [executionMatters, setExecutionMatters] = React.useState(false);
 
   const model = context.cell.model;
 
@@ -164,6 +164,11 @@ function Code({ context }: IContextProps) {
     const dirty = CellMetadata.code.isDirty(model);
     setMetadata(metadata);
     setDirty(dirty);
+
+    // 실행을 통해 dirty 상태 해결되는지 여부에 따라 "execute the cell" 문구 표시
+    const config = CellConfig.get(model, false); // checkDirty=false: cs-command까지는 확인 안 함
+    Log.debug('Code executionMatters', model, config);
+    setExecutionMatters(config.cache || config.autoDependency);
   }, [context]);
 
   useSignal(
@@ -191,8 +196,7 @@ function Code({ context }: IContextProps) {
     [context]
   );
 
-  // const executionMatters = ...
-  const update = async () => {
+  const updateMetadata = async () => {
     await context.codeContext?.getData();
   };
 
@@ -203,8 +207,12 @@ function Code({ context }: IContextProps) {
         <Block type="warning" className="jp-DoubleSharp-Inspector-row">
           Code info may be invalid.
           <br />
-          <strong>execute</strong> the cell or <a onClick={update}>click</a> to
-          update.
+          {executionMatters && (
+            <>
+              <strong>execute</strong> the cell or{' '}
+            </>
+          )}
+          <a onClick={updateMetadata}>click</a> to update.
         </Block>
       )}
       <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">
