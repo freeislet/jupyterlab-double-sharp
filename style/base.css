@@ -52,6 +52,24 @@
   margin-left: 4px;
 }
 
+.jp-DoubleSharp-Inspector-Status {
+  display: flex;
+  align-items: center;
+}
+
+.jp-DoubleSharp-Inspector-Status-icon {
+  height: 20px;
+  width: auto;
+}
+
+.jp-DoubleSharp-Inspector-Status-icon-ok {
+  color: var(--jp-success-color1);
+}
+
+.jp-DoubleSharp-Inspector-Status-icon-no {
+  color: var(--jp-layout-color3);
+}
+
 .jp-DoubleSharp-Inspector-Block {
   padding: 8px;
   border-radius: 4px;
