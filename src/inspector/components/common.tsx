@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { AiFillCheckCircle, AiFillCloseCircle } from 'react-icons/ai';
 import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
-import { IDivProps } from '../../ui';
+import { IDivProps, ISVGProps } from '../../ui';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
 
 // Row
@@ -58,31 +58,31 @@ export function NullableBoolean({
   );
 }
 
-// Status
+// StatusIcon
 
-export type StatusType = 'ok' | 'no';
+export type StatusIconType = 'ok' | 'no';
 
-const statuses: Record<StatusType, [React.ComponentType<any>, string]> = {
+const statuses: Record<StatusIconType, [React.ComponentType<any>, string]> = {
   // [icon, className]
-  ok: [AiFillCheckCircle, 'jp-DoubleSharp-Inspector-Status-icon-ok'],
-  no: [AiFillCloseCircle, 'jp-DoubleSharp-Inspector-Status-icon-no']
+  ok: [AiFillCheckCircle, 'jp-DoubleSharp-Inspector-StatusIcon-ok'],
+  no: [AiFillCloseCircle, 'jp-DoubleSharp-Inspector-StatusIcon-no']
 };
 
-export interface IStatusProps extends IDivProps {
-  type: StatusType;
+export interface IStatusIconProps extends ISVGProps {
+  type: StatusIconType;
 }
 
-export function Status({ type, className, children, ...props }: IStatusProps) {
+export function StatusIcon({ type, className, ...props }: IStatusIconProps) {
   const [Icon, iconClass] = statuses[type];
 
   return (
-    <div
-      className={cn('jp-DoubleSharp-Inspector-Status', className)}
-      {...props}
-    >
-      <Icon className={cn('jp-DoubleSharp-Inspector-Status-icon', iconClass)} />
-      {children}
-    </div>
+    <Icon
+      className={cn(
+        'jp-DoubleSharp-Inspector-StatusIcon',
+        iconClass,
+        className
+      )}
+    />
   );
 }
 
