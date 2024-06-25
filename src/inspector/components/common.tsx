@@ -82,6 +82,7 @@ export function StatusIcon({ type, className, ...props }: IStatusIconProps) {
         iconClass,
         className
       )}
+      {...props}
     />
   );
 }
