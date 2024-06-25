@@ -4,7 +4,7 @@ import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import { Boolean_, NullableBoolean, Block } from './common';
+import { Row, Boolean_, NullableBoolean, StatusIcon, Block } from './common';
 
 export interface ICellToolsProps {
   context: CellContext | null;
@@ -161,32 +161,59 @@ function CodeCellTools({ context }: IContextProps) {
  * Config
  */
 function Config() {
-  const { config, updateConfig } = React.useContext(CodeCellContext)!;
+  const { config, updateConfig, compositeConfig } =
+    React.useContext(CodeCellContext)!;
 
   return (
     <Group>
       <Group.Title>Config</Group.Title>
-      <NullableBoolean
-        value={config.cache}
-        onChange={(value: boolean | null) => updateConfig({ cache: value })}
-      >
-        Execution Cache
-      </NullableBoolean>
-      <NullableBoolean
+      <ConfigRow value={config.cache} compositeValue={compositeConfig.cache}>
+        <NullableBoolean
+          value={config.cache}
+          onChange={(value: boolean | null) => updateConfig({ cache: value })}
+        >
+          Execution Cache
+        </NullableBoolean>
+      </ConfigRow>
+      <ConfigRow
         value={config.autoDependency}
-        onChange={(value: boolean | null) =>
-          updateConfig({ autoDependency: value })
-        }
+        compositeValue={compositeConfig.autoDependency}
       >
-        Auto Dependency
-      </NullableBoolean>
-      <Boolean_
-        value={config.skip}
-        onChange={(value: boolean) => updateConfig({ skip: value })}
-      >
-        Skip
-      </Boolean_>
+        <NullableBoolean
+          value={config.autoDependency}
+          onChange={(value: boolean | null) =>
+            updateConfig({ autoDependency: value })
+          }
+        >
+          Auto Dependency
+        </NullableBoolean>
+      </ConfigRow>
+      <ConfigRow value={config.skip} compositeValue={compositeConfig.skip}>
+        <Boolean_
+          value={config.skip}
+          onChange={(value: boolean) => updateConfig({ skip: value })}
+        >
+          Skip
+        </Boolean_>
+      </ConfigRow>
     </Group>
+  );
+}
+
+interface IConfigRowProps<T> {
+  children: React.ReactNode;
+  value: T;
+  compositeValue: NonNullable<T>;
+}
+
+function ConfigRow<T>({ children, value, compositeValue }: IConfigRowProps<T>) {
+  const isOk = (value: T): boolean => Boolean(value);
+
+  return (
+    <Row className="jp-DoubleSharp-Inspector-space">
+      {children}
+      <StatusIcon type={isOk(compositeValue) ? 'ok' : 'no'} />
+    </Row>
   );
 }
 
