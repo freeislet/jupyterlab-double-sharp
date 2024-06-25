@@ -9,3 +9,4 @@ export type IButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   IChildrenProps;
 export type IInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   IChildrenProps;
+export type ISVGProps = React.SVGAttributes<SVGElement>;
