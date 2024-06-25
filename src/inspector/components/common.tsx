@@ -24,7 +24,7 @@ export interface IBooleanProps {
   children?: React.ReactNode;
 }
 
-export function Boolean({ value, onChange, children }: IBooleanProps) {
+export function Boolean_({ value, onChange, children }: IBooleanProps) {
   return (
     <Checkbox
       className="jp-DoubleSharp-Inspector-row"

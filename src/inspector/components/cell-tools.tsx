@@ -4,7 +4,7 @@ import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import { Block, Boolean, NullableBoolean } from './common';
+import { Boolean_, NullableBoolean, Block } from './common';
 
 export interface ICellToolsProps {
   context: CellContext | null;
@@ -180,12 +180,12 @@ function Config() {
       >
         Auto Dependency
       </NullableBoolean>
-      <Boolean
+      <Boolean_
         value={config.skip}
         onChange={(value: boolean) => updateConfig({ skip: value })}
       >
         Skip
-      </Boolean>
+      </Boolean_>
     </Group>
   );
 }
