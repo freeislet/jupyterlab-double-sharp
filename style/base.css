@@ -39,6 +39,11 @@
   background: var(--jp-layout-color1);
 }
 
+.jp-DoubleSharp-Inspector-row-single {
+  display: flex;
+  align-items: center;
+}
+
 .jp-DoubleSharp-Inspector-row {
   display: flex;
   align-items: center;
@@ -63,6 +68,12 @@
 
 .jp-DoubleSharp-Inspector-StatusIcon-no {
   color: var(--jp-layout-color3);
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon {
+  height: 18px;
+  width: auto;
+  color: var(--jp-ui-font-color2);
 }
 
 .jp-DoubleSharp-Inspector-Block {

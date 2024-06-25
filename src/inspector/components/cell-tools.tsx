@@ -4,7 +4,14 @@ import { CellContext, CellMetadata, CellConfig } from '../../cell';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import { Row, Boolean_, NullableBoolean, StatusIcon, Block } from './common';
+import {
+  Row,
+  Boolean_,
+  NullableBoolean,
+  StatusIcon,
+  TooltipIcon,
+  Block
+} from './common';
 
 export interface ICellToolsProps {
   context: CellContext | null;
@@ -212,7 +219,10 @@ function ConfigRow<T>({ children, value, compositeValue }: IConfigRowProps<T>) {
   return (
     <Row className="jp-DoubleSharp-Inspector-space">
       {children}
-      <StatusIcon type={isOk(compositeValue) ? 'ok' : 'no'} />
+      <Row>
+        <StatusIcon type={isOk(compositeValue) ? 'ok' : 'no'} />
+        <TooltipIcon>툴팁 테스트</TooltipIcon>
+      </Row>
     </Row>
   );
 }

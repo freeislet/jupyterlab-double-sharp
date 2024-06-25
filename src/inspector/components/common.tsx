@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cn from 'classnames';
 import { AiFillCheckCircle, AiFillCloseCircle } from 'react-icons/ai';
+import { TbInfoSquare } from 'react-icons/tb';
 import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
 import { IDivProps, ISVGProps } from '../../ui';
@@ -27,7 +28,7 @@ export interface IBooleanProps {
 export function Boolean_({ value, onChange, children }: IBooleanProps) {
   return (
     <Checkbox
-      className="jp-DoubleSharp-Inspector-row"
+      className="jp-DoubleSharp-Inspector-row-single"
       checked={value}
       onChangeValue={onChange}
     >
@@ -49,7 +50,7 @@ export function NullableBoolean({
 }: INullableBooleanProps) {
   return (
     <NullableCheckbox
-      className="jp-DoubleSharp-Inspector-row"
+      className="jp-DoubleSharp-Inspector-row-single"
       checked={value}
       onChangeValue={onChange}
     >
@@ -82,6 +83,25 @@ export function StatusIcon({ type, className, ...props }: IStatusIconProps) {
         iconClass,
         className
       )}
+      {...props}
+    />
+  );
+}
+
+// TooltipIcon
+
+export interface ITooltipIconProps extends ISVGProps {
+  children: React.ReactNode;
+}
+
+export function TooltipIcon({
+  children,
+  className,
+  ...props
+}: ITooltipIconProps) {
+  return (
+    <TbInfoSquare
+      className={cn('jp-DoubleSharp-Inspector-TooltipIcon', className)}
       {...props}
     />
   );
