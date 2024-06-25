@@ -33,10 +33,11 @@ export default function CellTools({ context }: ICellToolsProps) {
 
 interface ICodeCellContext {
   context: CellContext;
-  config: CellConfig.IConfig;
-  updateConfig: (config: Partial<CellConfig.IConfig>) => void;
+  config: CellMetadata.IConfig;
+  updateConfig: (config: Partial<CellMetadata.IConfig>) => void;
+  overriddenConfig: CellMetadata.IConfigOverride | undefined;
+  overriddenConfigDirty: boolean;
   compositeConfig: NonNullableField<CellConfig.IConfig>;
-  compositeConfigDirty: boolean;
   code: CellMetadata.ICode | undefined;
   codeDirty: boolean;
   updateCode: () => void;
@@ -64,18 +65,24 @@ function CodeCellTools({ context }: IContextProps) {
     CellMetadata.config.defaultValue
   );
   const updateAndApplyConfig = React.useCallback(
-    (config: Partial<CellConfig.IConfig>) => {
+    (config: Partial<CellMetadata.IConfig>) => {
       updateConfig(config);
       CellMetadata.config.update(model, config);
     },
     [context]
   );
 
+  // overridden config state (client-side magic command에 의한 config)
+  // NOTE: overriddenConfigDirty true인 경우 compositeConfig invalid 가능 (checkDirty=false로 get하므로)
+  const [overriddenConfig, setOverriddenConfig] =
+    React.useState<CellMetadata.IConfigOverride>(); // cs-command
+  const [overriddenConfigDirty, setOverriddenConfigDirty] =
+    React.useState(false); // cs-command dirty
+
   // settings, cell config 통합 config states
   const getCompositeConfig = () => CellConfig.get(model, false); // checkDirty=false: cs-command까지는 확인 안 함
   const [compositeConfig, setCompositeConfig] =
-    React.useState<NonNullableField<CellMetadata.IConfig>>(getCompositeConfig);
-  const [compositeConfigDirty, setCompositeConfigDirty] = React.useState(false); // cs-command dirty
+    React.useState<NonNullableField<CellConfig.IConfig>>(getCompositeConfig);
 
   // code states, callback
   const [code, setCode] = React.useState<CellMetadata.ICode>();
@@ -91,8 +98,9 @@ function CodeCellTools({ context }: IContextProps) {
   // context 초기화
   React.useEffect(() => {
     setConfig(CellMetadata.config.getCoalesced(model));
+    setOverriddenConfig(CellMetadata.configOverride.get(model, false));
+    setOverriddenConfigDirty(CellMetadata.configOverride.isDirty(model));
     setCompositeConfig(getCompositeConfig());
-    setCompositeConfigDirty(CellMetadata.configOverride.isDirty(model));
     setCode(CellMetadata.code.get(model, false));
     setCodeDirty(CellMetadata.code.isDirty(model));
   }, [context]);
@@ -113,17 +121,20 @@ function CodeCellTools({ context }: IContextProps) {
     (model, change) => {
       switch (change.key) {
         case CellMetadata.config.name: // ##Config
-        // Cell Inspector > Config > updateConfig
-        // falls through
+          // Cell Inspector > Config > updateConfig
+          setCompositeConfig(getCompositeConfig());
+          break;
+
         case CellMetadata.configOverride.name: // ##ConfigOverride
           // 셀 실행 > Client-side Magic Command
+          setOverriddenConfig(change.newValue as CellMetadata.IConfigOverride);
           setCompositeConfig(getCompositeConfig());
           break;
 
         case CellMetadata.configOverride.dirtyFlagName: // ##ConfigOverride-dirty
           // 셀 실행 시 dirty 해결 (false)
           // source 수정 시 dirty 설정 (true)
-          setCompositeConfigDirty(change.newValue as boolean);
+          setOverriddenConfigDirty(change.newValue as boolean);
           break;
 
         case CellMetadata.code.name: // ##Code
@@ -150,8 +161,9 @@ function CodeCellTools({ context }: IContextProps) {
         context,
         config,
         updateConfig: updateAndApplyConfig,
+        overriddenConfig,
+        overriddenConfigDirty,
         compositeConfig,
-        compositeConfigDirty,
         code,
         codeDirty,
         updateCode
@@ -214,14 +226,29 @@ interface IConfigRowProps<T> {
 }
 
 function ConfigRow<T>({ children, value, compositeValue }: IConfigRowProps<T>) {
-  const isOk = (value: T): boolean => Boolean(value);
+  const isOk = (): boolean => Boolean(compositeValue);
+  const comments: React.ReactNode[] = [];
+
+  if (value !== compositeValue) {
+    comments.push('툴팁 테스트');
+    comments.push('툴팁 테스트2');
+  }
 
   return (
-    <Row className="jp-DoubleSharp-Inspector-space">
+    <Row className="jp-DoubleSharp-Inspector-space4">
       {children}
-      <Row>
-        <StatusIcon type={isOk(compositeValue) ? 'ok' : 'no'} />
-        <TooltipIcon>툴팁 테스트</TooltipIcon>
+      <Row className="jp-DoubleSharp-Inspector-space2">
+        <StatusIcon type={isOk() ? 'ok' : 'no'} />
+        {comments.length > 0 && (
+          <TooltipIcon>
+            {comments.map((comment, idx) => (
+              <React.Fragment key={idx}>
+                {comment}
+                <br />
+              </React.Fragment>
+            ))}
+          </TooltipIcon>
+        )}
       </Row>
     </Row>
   );
@@ -253,11 +280,11 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">
+      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space4">
         <strong>Variables: </strong>
         <span>{code?.variables.join(', ')}</span>
       </div>
-      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space">
+      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space4">
         <strong>Unbound Vars: </strong>
         <span>{code?.unboundVariables.join(', ')}</span>
       </div>

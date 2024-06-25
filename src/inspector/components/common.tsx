@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cn from 'classnames';
-import { AiFillCheckCircle, AiFillCloseCircle } from 'react-icons/ai';
+import { FaCircleCheck, FaCircleXmark } from 'react-icons/fa6';
 import { TbInfoSquare } from 'react-icons/tb';
 import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
@@ -65,8 +65,8 @@ export type StatusIconType = 'ok' | 'no';
 
 const statuses: Record<StatusIconType, [React.ComponentType<any>, string]> = {
   // [icon, className]
-  ok: [AiFillCheckCircle, 'jp-DoubleSharp-Inspector-StatusIcon-ok'],
-  no: [AiFillCloseCircle, 'jp-DoubleSharp-Inspector-StatusIcon-no']
+  ok: [FaCircleCheck, 'jp-DoubleSharp-Inspector-StatusIcon-ok'],
+  no: [FaCircleXmark, 'jp-DoubleSharp-Inspector-StatusIcon-no']
 };
 
 export interface IStatusIconProps extends ISVGProps {
@@ -105,7 +105,7 @@ export function TooltipIcon({
         className={cn('jp-DoubleSharp-Inspector-TooltipIcon-icon', className)}
         {...props}
       />
-      <div className="jp-DoubleSharp-Inspector-TooltipIcon-content">
+      <div className="jp-DoubleSharp-Inspector-TooltipIcon-tooltip">
         {children}
       </div>
     </div>

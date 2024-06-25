@@ -53,12 +53,16 @@
   margin-top: 8px;
 }
 
-.jp-DoubleSharp-Inspector-space > :not([hidden]) ~ :not([hidden]) {
+.jp-DoubleSharp-Inspector-space2 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 2px;
+}
+
+.jp-DoubleSharp-Inspector-space4 > :not([hidden]) ~ :not([hidden]) {
   margin-left: 4px;
 }
 
 .jp-DoubleSharp-Inspector-StatusIcon {
-  height: 20px;
+  height: 18px;
   width: auto;
 }
 
@@ -75,11 +79,11 @@
 }
 
 .jp-DoubleSharp-Inspector-TooltipIcon:hover
-  .jp-DoubleSharp-Inspector-TooltipIcon-content {
+  .jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
   visibility: visible;
 }
 
-.jp-DoubleSharp-Inspector-TooltipIcon-content {
+.jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
   visibility: hidden;
   /* position: absolute;
   top: -26px;
@@ -97,7 +101,7 @@
   font-size: 11px;
 }
 
-.jp-DoubleSharp-Inspector-TooltipIcon-content:before {
+.jp-DoubleSharp-Inspector-TooltipIcon-tooltip:before {
   --size: 8px;
   content: '';
   position: absolute;
