@@ -100,10 +100,15 @@ export function TooltipIcon({
   ...props
 }: ITooltipIconProps) {
   return (
-    <TbInfoSquare
-      className={cn('jp-DoubleSharp-Inspector-TooltipIcon', className)}
-      {...props}
-    />
+    <div className="jp-DoubleSharp-Inspector-TooltipIcon">
+      <TbInfoSquare
+        className={cn('jp-DoubleSharp-Inspector-TooltipIcon-icon', className)}
+        {...props}
+      />
+      <div className="jp-DoubleSharp-Inspector-TooltipIcon-content">
+        {children}
+      </div>
+    </div>
   );
 }
 

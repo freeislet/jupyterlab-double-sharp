@@ -71,8 +71,50 @@
 }
 
 .jp-DoubleSharp-Inspector-TooltipIcon {
+  position: relative;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon:hover
+  .jp-DoubleSharp-Inspector-TooltipIcon-content {
+  visibility: visible;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-content {
+  visibility: hidden;
+  /* position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translate(-50%, -100%); */
+  position: fixed;
+  transform: translate(calc(-50% + 9px), calc(-100% - 26px));
+  z-index: 100;
+  min-width: max-content;
+  padding: 4px;
+  color: var(--jp-ui-font-color2);
+  background-color: var(--jp-input-background);
+  border-radius: 2px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-content:before {
+  --size: 8px;
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: calc(50% - var(--size));
+  top: 100%;
+  border-top: var(--size) solid var(--jp-input-background);
+  border-left: var(--size) solid transparent;
+  border-right: var(--size) solid transparent;
+  border-bottom: 0;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-icon {
   height: 18px;
   width: auto;
+  vertical-align: middle;
   color: var(--jp-ui-font-color2);
 }
 
