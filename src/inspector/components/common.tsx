@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cn from 'classnames';
 import { FaCircleCheck, FaCircleXmark } from 'react-icons/fa6';
-import { TbInfoSquare } from 'react-icons/tb';
+import { LiaComment } from 'react-icons/lia';
 import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
 import { IDivProps, ISVGProps } from '../../ui';
@@ -101,7 +101,7 @@ export function TooltipIcon({
 }: ITooltipIconProps) {
   return (
     <div className="jp-DoubleSharp-Inspector-TooltipIcon">
-      <TbInfoSquare
+      <LiaComment
         className={cn('jp-DoubleSharp-Inspector-TooltipIcon-icon', className)}
         {...props}
       />
