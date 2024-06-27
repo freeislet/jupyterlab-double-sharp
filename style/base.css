@@ -34,6 +34,8 @@
 
 .jp-DoubleSharp-Inspector {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .jp-DoubleSharp-Inspector-content {
