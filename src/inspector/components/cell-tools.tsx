@@ -41,6 +41,7 @@ interface ICodeCellContext {
   code: CellMetadata.ICode | undefined;
   codeDirty: boolean;
   updateCode: () => void;
+  execution: CellMetadata.IExecution | undefined;
 }
 
 const CodeCellContext = React.createContext<ICodeCellContext | undefined>(
@@ -95,6 +96,9 @@ function CodeCellTools({ context }: IContextProps) {
     update();
   }, [context]);
 
+  // execution status, callback
+  const [execution, setExecution] = React.useState<CellMetadata.IExecution>();
+
   // context 초기화
   React.useEffect(() => {
     setConfig(CellMetadata.config.getCoalesced(model));
@@ -103,6 +107,7 @@ function CodeCellTools({ context }: IContextProps) {
     setCompositeConfig(getCompositeConfig());
     setCode(CellMetadata.code.get(model, false));
     setCodeDirty(CellMetadata.code.isDirty(model));
+    setExecution(CellMetadata.execution.get(model));
   }, [context]);
 
   // Settings.executionChanged 시 state 업데이트
@@ -148,6 +153,11 @@ function CodeCellTools({ context }: IContextProps) {
           // source 수정 시 dirty 설정 (true)
           setCodeDirty(change.newValue as boolean);
           break;
+
+        case CellMetadata.execution.name: // ##Execution
+          // 셀 실행
+          setExecution(change.newValue);
+          break;
       }
 
       // Log.debug('Code metadataChanged', model, change);
@@ -166,11 +176,13 @@ function CodeCellTools({ context }: IContextProps) {
         compositeConfig,
         code,
         codeDirty,
-        updateCode
+        updateCode,
+        execution
       }}
     >
       <Config />
       <Code />
+      <Execution />
       {context.cell.model.id}
     </CodeCellContext.Provider>
   );
@@ -333,6 +345,23 @@ function Code() {
         <strong>Unbound Vars: </strong>
         <span>{code?.unboundVariables.join(', ')}</span>
       </Row>
+    </Group>
+  );
+}
+
+/**
+ * Execution
+ */
+function Execution() {
+  const { execution } = React.useContext(CodeCellContext)!;
+
+  return (
+    <Group className="jp-DoubleSharp-space-y-8">
+      <Group.Title>Execution</Group.Title>
+      {!execution && <Block type="info">Execution info is not exists.</Block>}
+      <Row>cached:</Row>
+      <Row>skipped:</Row>
+      <Row>cells: {execution?.cells?.length || 'no'} cells executed.</Row>
     </Group>
   );
 }
