@@ -34,9 +34,15 @@
 
 .jp-DoubleSharp-Inspector {
   display: flex;
-  flex-direction: column;
+}
+
+.jp-DoubleSharp-Inspector-content {
+  display: block;
+  min-width: var(--jp-sidebar-min-width);
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  overflow: auto;
 }
 
 /* Accessibility for links inside dialog box text */

@@ -47,7 +47,7 @@ export class InspectorWidget extends ReactWidget {
 
   render() {
     return (
-      <>
+      <div className="jp-DoubleSharp-Inspector-content">
         <Accordion>
           <Accordion.TriggerContainer>
             <Accordion.TriggerInner>
@@ -78,7 +78,7 @@ export class InspectorWidget extends ReactWidget {
             </UseSignal>
           </Accordion.Content>
         </Accordion>
-      </>
+      </div>
     );
   }
 }
