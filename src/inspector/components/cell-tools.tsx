@@ -180,13 +180,24 @@ function CodeCellTools({ context }: IContextProps) {
  * Config
  */
 function Config() {
-  const { config, updateConfig, compositeConfig } =
-    React.useContext(CodeCellContext)!;
+  const {
+    config,
+    updateConfig,
+    overriddenConfig,
+    overriddenConfigDirty,
+    compositeConfig
+  } = React.useContext(CodeCellContext)!;
 
   return (
     <Group>
       <Group.Title>Config</Group.Title>
-      <ConfigRow value={config.cache} compositeValue={compositeConfig.cache}>
+      <ConfigRow
+        value={config.cache}
+        overriddenValue={overriddenConfig?.cache}
+        overriddenValueDirty={overriddenConfigDirty}
+        compositeValue={compositeConfig.cache}
+        magic="##%cache"
+      >
         <NullableBoolean
           value={config.cache}
           onChange={(value: boolean | null) => updateConfig({ cache: value })}
@@ -196,6 +207,8 @@ function Config() {
       </ConfigRow>
       <ConfigRow
         value={config.autoDependency}
+        overriddenValue={overriddenConfig?.autoDependency}
+        overriddenValueDirty={overriddenConfigDirty}
         compositeValue={compositeConfig.autoDependency}
       >
         <NullableBoolean
@@ -207,7 +220,13 @@ function Config() {
           Auto Dependency
         </NullableBoolean>
       </ConfigRow>
-      <ConfigRow value={config.skip} compositeValue={compositeConfig.skip}>
+      <ConfigRow
+        value={config.skip}
+        overriddenValue={overriddenConfig?.skip}
+        overriddenValueDirty={overriddenConfigDirty}
+        compositeValue={compositeConfig.skip}
+        magic="##%skip"
+      >
         <Boolean_
           value={config.skip}
           onChange={(value: boolean) => updateConfig({ skip: value })}
@@ -222,23 +241,49 @@ function Config() {
 interface IConfigRowProps<T> {
   children: React.ReactNode;
   value: T;
+  overriddenValue: T | undefined;
+  overriddenValueDirty: boolean;
   compositeValue: NonNullable<T>;
+  magic?: string;
 }
 
-function ConfigRow<T>({ children, value, compositeValue }: IConfigRowProps<T>) {
-  const isOk = (): boolean => Boolean(compositeValue);
+function ConfigRow<T>({
+  children,
+  value,
+  overriddenValue,
+  overriddenValueDirty,
+  compositeValue,
+  magic
+}: IConfigRowProps<T>) {
+  const statusType = compositeValue ? 'ok' : 'no';
   const comments: React.ReactNode[] = [];
 
   if (value !== compositeValue) {
-    comments.push('툴팁 테스트');
-    comments.push('툴팁 테스트2');
+    // config 설정값과 실제 적용된 값이 다르면 툴팁 아이콘으로 이유 노출
+    const applyStr = compositeValue ? 'enabled' : 'disabled';
+
+    // client-side magic command로 config overridden
+    const overriddenApplied = overriddenValue === compositeValue;
+    if (overriddenApplied && magic) {
+      comments.push(`${applyStr} by '${magic}' command.`);
+    }
+
+    // settings에 의해 config overridden
+    const settingApplied = !overriddenApplied;
+    if (settingApplied) {
+      comments.push(`${applyStr} by settings.`);
+    }
+  }
+  if (overriddenValueDirty && magic) {
+    // client-side magic command로 config 변경될 가능성 있으면 알림
+    comments.push(`can be overridden by '${magic}' command.`);
   }
 
   return (
-    <Row className="jp-DoubleSharp-Inspector-space4">
+    <Row className="jp-DoubleSharp-Inspector-space8">
       {children}
       <Row className="jp-DoubleSharp-Inspector-space2">
-        <StatusIcon type={isOk() ? 'ok' : 'no'} />
+        <StatusIcon type={statusType} />
         {comments.length > 0 && (
           <TooltipIcon>
             {comments.map((comment, idx) => (
