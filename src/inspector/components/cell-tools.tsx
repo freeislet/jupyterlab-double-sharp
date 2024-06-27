@@ -280,9 +280,9 @@ function ConfigRow<T>({
   }
 
   return (
-    <Row className="jp-DoubleSharp-Inspector-space8">
+    <Row className="jp-DoubleSharp-space-x-8">
       {children}
-      <Row className="jp-DoubleSharp-Inspector-space2">
+      <Row className="jp-DoubleSharp-space-x-2">
         <StatusIcon type={statusType} />
         {comments.length > 0 && (
           <TooltipIcon>
@@ -311,10 +311,10 @@ function Code() {
     compositeConfig.cache || compositeConfig.autoDependency;
 
   return (
-    <Group>
+    <Group className="jp-DoubleSharp-space-y-8">
       <Group.Title>Code</Group.Title>
       {codeDirty && (
-        <Block type="warning" className="jp-DoubleSharp-Inspector-row">
+        <Block type="warning">
           Code info may be invalid.
           <br />
           {executionMatters && (
@@ -325,14 +325,14 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space4">
+      <Row className="jp-DoubleSharp-space-x-4">
         <strong>Variables: </strong>
         <span>{code?.variables.join(', ')}</span>
-      </div>
-      <div className="jp-DoubleSharp-Inspector-row jp-DoubleSharp-Inspector-space4">
+      </Row>
+      <Row className="jp-DoubleSharp-space-x-4">
         <strong>Unbound Vars: </strong>
         <span>{code?.unboundVariables.join(', ')}</span>
-      </div>
+      </Row>
     </Group>
   );
 }

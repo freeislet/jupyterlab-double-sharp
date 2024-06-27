@@ -39,30 +39,16 @@
   background: var(--jp-layout-color1);
 }
 
-.jp-DoubleSharp-Inspector-row-single {
-  display: flex;
-  align-items: center;
+/* Accessibility for links inside dialog box text */
+.jp-DoubleSharp-Inspector a {
+  text-decoration: revert;
+  color: var(--jp-content-link-color);
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.jp-DoubleSharp-Inspector-row {
-  display: flex;
-  align-items: center;
-}
-
-.jp-DoubleSharp-Inspector-row ~ .jp-DoubleSharp-Inspector-row {
-  margin-top: 8px;
-}
-
-.jp-DoubleSharp-Inspector-space2 > :not([hidden]) ~ :not([hidden]) {
-  margin-left: 2px;
-}
-
-.jp-DoubleSharp-Inspector-space4 > :not([hidden]) ~ :not([hidden]) {
-  margin-left: 4px;
-}
-
-.jp-DoubleSharp-Inspector-space8 > :not([hidden]) ~ :not([hidden]) {
-  margin-left: 8px;
+.jp-DoubleSharp-Inspector a:hover {
+  text-decoration: revert;
 }
 
 .jp-DoubleSharp-Inspector-StatusIcon {
@@ -136,7 +122,7 @@
 }
 
 .jp-DoubleSharp-Inspector-Block-info {
-  background-color: var(--jp-layout-color1);
+  background-color: var(--jp-input-background);
   border: 1px solid var(--jp-border-color1);
 }
 
@@ -155,21 +141,30 @@
 }
 
 /*
-    Inspector > Cell Tools
-*/
-
-/*
     Misc.
 */
 
-/* Accessibility for links inside dialog box text */
-.jp-DoubleSharp-Inspector a {
-  text-decoration: revert;
-  color: var(--jp-content-link-color);
-  cursor: pointer;
-  font-weight: bold;
+.jp-DoubleSharp-row {
+  display: flex;
+  align-items: center;
 }
 
-.jp-DoubleSharp-Inspector a:hover {
-  text-decoration: revert;
+.jp-DoubleSharp-row-gap-8 ~ .jp-DoubleSharp-row-gap-8 {
+  margin-top: 8px;
+}
+
+.jp-DoubleSharp-space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 2px;
+}
+
+.jp-DoubleSharp-space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 4px;
+}
+
+.jp-DoubleSharp-space-x-8 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 8px;
+}
+
+.jp-DoubleSharp-space-y-8 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 8px;
 }

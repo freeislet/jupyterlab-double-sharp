@@ -12,7 +12,10 @@ import { getOverflowOffset } from '../../utils/dom';
 
 export function Row({ className, children, ...props }: IDivProps) {
   return (
-    <div className={cn('jp-DoubleSharp-Inspector-row', className)} {...props}>
+    <div
+      className={cn('jp-DoubleSharp-row jp-DoubleSharp-row-gap-8', className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -29,7 +32,7 @@ export interface IBooleanProps {
 export function Boolean_({ value, onChange, children }: IBooleanProps) {
   return (
     <Checkbox
-      className="jp-DoubleSharp-Inspector-row-single"
+      className="jp-DoubleSharp-row"
       checked={value}
       onChangeValue={onChange}
     >
@@ -51,7 +54,7 @@ export function NullableBoolean({
 }: INullableBooleanProps) {
   return (
     <NullableCheckbox
-      className="jp-DoubleSharp-Inspector-row-single"
+      className="jp-DoubleSharp-row"
       checked={value}
       onChangeValue={onChange}
     >
@@ -149,14 +152,26 @@ const blocks: Record<BlockType, [React.ComponentType<any>, string]> = {
 
 export interface IBlockProps extends IDivProps {
   type: BlockType;
+  asRow?: boolean;
 }
 
-export function Block({ type, className, children, ...props }: IBlockProps) {
+export function Block({
+  type,
+  asRow = true,
+  className,
+  children,
+  ...props
+}: IBlockProps) {
   const [Icon, bgClass] = blocks[type];
 
   return (
     <div
-      className={cn('jp-DoubleSharp-Inspector-Block', bgClass, className)}
+      className={cn(
+        'jp-DoubleSharp-Inspector-Block',
+        asRow && 'jp-DoubleSharp-row jp-DoubleSharp-row-gap-8',
+        bgClass,
+        className
+      )}
       {...props}
     >
       <Icon className="jp-DoubleSharp-Inspector-Block-icon" />

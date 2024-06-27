@@ -28,7 +28,7 @@ export default function Settings() {
   // Log.debug('Settings', execution, AppSettings.data.execution);
 
   return (
-    <Group>
+    <Group className="jp-DoubleSharp-space-y-8">
       <Group.Title>Execution settings</Group.Title>
       <Boolean_
         value={execution.cache}
