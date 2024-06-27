@@ -10,7 +10,8 @@ import {
   NullableBoolean,
   StatusIcon,
   TooltipIcon,
-  Block
+  Block,
+  List
 } from './common';
 
 export interface ICellToolsProps {
@@ -337,14 +338,8 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <Row className="jp-DoubleSharp-space-x-4">
-        <strong>Variables: </strong>
-        <span>{code?.variables.join(', ')}</span>
-      </Row>
-      <Row className="jp-DoubleSharp-space-x-4">
-        <strong>Unbound Vars: </strong>
-        <span>{code?.unboundVariables.join(', ')}</span>
-      </Row>
+      <List header="Variables:" list={code?.variables} />
+      <List header="Unbound Vars:" list={code?.unboundVariables} />
     </Group>
   );
 }
@@ -353,15 +348,47 @@ function Code() {
  * Execution
  */
 function Execution() {
-  const { execution } = React.useContext(CodeCellContext)!;
+  const { execution, code } = React.useContext(CodeCellContext)!;
+
+  function executedMsg(numCells?: number): string {
+    if (!numCells) {
+      return 'No cells were executed.';
+    } else if (numCells === 1) {
+      return 'The cell was successfully executed.';
+    } else {
+      return numCells + ' cells were successfully executed.';
+    }
+  }
 
   return (
     <Group className="jp-DoubleSharp-space-y-8">
       <Group.Title>Execution</Group.Title>
-      {!execution && <Block type="info">Execution info is not exists.</Block>}
-      <Row>cached:</Row>
-      <Row>skipped:</Row>
-      <Row>cells: {execution?.cells?.length || 'no'} cells executed.</Row>
+      {!execution ? (
+        <Block type="info">Execution info does not exist.</Block>
+      ) : execution.skipped ? (
+        <Block type="error" iconType="info">
+          Execution skipped by config.
+        </Block>
+      ) : execution.cached ? (
+        <>
+          <Block type="warning" iconType="info">
+            Execution skipped by cache.
+          </Block>
+          <List header="Cached Vars:" list={code?.variables} />
+        </>
+      ) : (
+        <>
+          <Row>{executedMsg(execution?.cells?.length)}</Row>
+          <List
+            header="Unresolved Cell Vars:"
+            list={execution?.dependency?.unresolvedCellVariables}
+          />
+          <List
+            header="Unresolved Vars:"
+            list={execution?.dependency?.unresolvedVariables}
+          />
+        </>
+      )}
     </Group>
   );
 }

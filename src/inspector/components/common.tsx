@@ -8,19 +8,6 @@ import { IDivProps, ISVGProps } from '../../ui';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
 import { getOverflowOffset } from '../../utils/dom';
 
-// Row
-
-export function Row({ className, children, ...props }: IDivProps) {
-  return (
-    <div
-      className={cn('jp-DoubleSharp-row jp-DoubleSharp-row-gap-8', className)}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
 // Boolean
 
 export interface IBooleanProps {
@@ -139,30 +126,81 @@ export function TooltipIcon({
   );
 }
 
+// Row
+
+export function Row({ className, children, ...props }: IDivProps) {
+  return (
+    <div
+      className={cn('jp-DoubleSharp-row jp-DoubleSharp-row-gap-8', className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+// List
+
+export interface IListProps<T> extends IDivProps {
+  list: T[] | undefined;
+  header?: React.ReactNode;
+  asRow?: boolean;
+}
+
+export function List<T extends React.ReactNode>({
+  list,
+  header,
+  asRow = true,
+  className,
+  ...props
+}: IListProps<T>) {
+  return (
+    <div
+      className={cn(
+        asRow && 'jp-DoubleSharp-row jp-DoubleSharp-row-gap-8',
+        'jp-DoubleSharp-space-x-4',
+        className
+      )}
+      {...props}
+    >
+      {header &&
+        (typeof header === 'string' ? <strong>{header}</strong> : header)}
+      {list && list.map((item, idx) => <span key={idx}>{item}</span>)}
+    </div>
+  );
+}
+
 // Block
 
 export type BlockType = 'info' | 'warning' | 'error';
 
-const blocks: Record<BlockType, [React.ComponentType<any>, string]> = {
-  // [icon, className]
-  info: [VscInfo, 'jp-DoubleSharp-Inspector-Block-info'],
-  warning: [VscWarning, 'jp-DoubleSharp-Inspector-Block-warning'],
-  error: [VscError, 'jp-DoubleSharp-Inspector-Block-error']
+const blockIcons: Record<BlockType, React.ComponentType<any>> = {
+  info: VscInfo,
+  warning: VscWarning,
+  error: VscError
+};
+const blockClassNames: Record<BlockType, string> = {
+  info: 'jp-DoubleSharp-Inspector-Block-info',
+  warning: 'jp-DoubleSharp-Inspector-Block-warning',
+  error: 'jp-DoubleSharp-Inspector-Block-error'
 };
 
 export interface IBlockProps extends IDivProps {
   type: BlockType;
+  iconType?: BlockType;
   asRow?: boolean;
 }
 
 export function Block({
   type,
+  iconType,
   asRow = true,
   className,
   children,
   ...props
 }: IBlockProps) {
-  const [Icon, bgClass] = blocks[type];
+  const Icon = blockIcons[iconType ?? type];
+  const bgClass = blockClassNames[type];
 
   return (
     <div
