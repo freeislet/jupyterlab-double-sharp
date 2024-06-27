@@ -28,3 +28,26 @@ function isContainingBlockForFixed(el: HTMLElement): boolean {
     contain === 'strict'
   );
 }
+
+// overflow offset
+
+export interface IOverflowOffset {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+export function getOverflowOffset(
+  el: HTMLElement,
+  margin = 0
+): IOverflowOffset {
+  const parent = getOffsetParent(el);
+  const bound = parent.getBoundingClientRect();
+  const rc = el.getBoundingClientRect();
+  const top = bound.top - rc.top + margin;
+  const left = bound.left - rc.left + margin;
+  const right = rc.right - bound.right + margin;
+  const bottom = rc.bottom - bound.bottom + margin;
+  return { top, left, right, bottom };
+}

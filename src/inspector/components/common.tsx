@@ -6,6 +6,7 @@ import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
 import { IDivProps, ISVGProps } from '../../ui';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
+import { getOverflowOffset } from '../../utils/dom';
 
 // Row
 
@@ -99,13 +100,36 @@ export function TooltipIcon({
   className,
   ...props
 }: ITooltipIconProps) {
+  const tooltipRef = React.useRef<HTMLDivElement>(null!);
+  const [offset, setOffset] = React.useState(0);
+
+  React.useEffect(() => {
+    // 툴팁이 containing block 벗어나지 않게 위치 조정
+    const el = tooltipRef.current;
+    const overflow = getOverflowOffset(el, 4);
+    const overflowLeft = overflow.left + offset;
+    const overflowRight = overflow.right - offset;
+    const newOffset =
+      overflowLeft > 0
+        ? overflowLeft
+        : overflowRight > 0
+          ? Math.max(-overflowRight, overflowLeft)
+          : 0;
+    setOffset(newOffset);
+    el.style.setProperty('--offset', newOffset + 'px');
+    // Log.debug('TooltipIcon', overflow, offset, newOffset);
+  }, [children]);
+
   return (
     <div className="jp-DoubleSharp-Inspector-TooltipIcon">
       <LiaComment
         className={cn('jp-DoubleSharp-Inspector-TooltipIcon-icon', className)}
         {...props}
       />
-      <div className="jp-DoubleSharp-Inspector-TooltipIcon-tooltip">
+      <div
+        ref={tooltipRef}
+        className="jp-DoubleSharp-Inspector-TooltipIcon-tooltip"
+      >
         {children}
       </div>
     </div>
