@@ -83,14 +83,11 @@
   line-height: 1;
 }
 
-.jp-DoubleSharp-Inspector-TooltipIcon:hover
-  .jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
-  visibility: visible;
-}
-
 .jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
   --offset: 0px;
+
   visibility: hidden;
+
   /* position: absolute;
   top: -26px;
   left: 50%;
@@ -108,8 +105,14 @@
   z-index: 100;
 }
 
-.jp-DoubleSharp-Inspector-TooltipIcon-tooltip:before {
+.jp-DoubleSharp-Inspector-TooltipIcon:hover
+  .jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
+  visibility: visible;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-tooltip::before {
   --size: 8px;
+
   content: '';
   position: absolute;
   top: 100%;
