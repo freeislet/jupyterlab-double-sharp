@@ -338,14 +338,8 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <Row spaceX={4}>
-        <strong>Out Variables:</strong>
-        <List data={code?.variables} />
-      </Row>
-      <Row spaceX={4}>
-        <strong>Unbound Vars:</strong>
-        <List data={code?.unboundVariables} />
-      </Row>
+      <ListRow header="Out Variables:" data={code?.variables} />
+      <ListRow header="Unbound Vars:" data={code?.unboundVariables} />
     </Group>
   );
 }
@@ -370,35 +364,57 @@ function Execution() {
           <Block type="success">
             Execution skipped by <strong>cache</strong>.
           </Block>
-          <Row spaceX={4}>
-            <strong>Cached Vars:</strong>
-            <List data={execution?.outVariables} />
-          </Row>
+          <ListRow header="Cached Vars:" data={execution?.outVariables} />
         </>
       ) : (
         <>
-          <Row spaceX={4}>
-            <strong>Executed Cell Count:</strong>
+          <HeaderRow header="Executed Cell Count:">
             <span>{execution?.cells?.length}</span>
-          </Row>
-          {/* <Row spaceX={4}>
-            <strong>Out Variables:</strong>
-            <List data={execution?.outVariables} />
-          </Row> */}
+          </HeaderRow>
+          {/* <ListRow header="Out Variables:" data={execution?.outVariables} /> */}
           {/* {execution?.dependency?.unresolvedCellVariables && (
-            <Row spaceX={4}>
-              <strong>Unresolved Cell Vars:</strong>
-              <List data={execution?.dependency?.unresolvedCellVariables} />
-            </Row>
+            <ListRow
+              header="Unresolved Cell Vars:"
+              data={execution?.dependency?.unresolvedCellVariables}
+            />
           )} */}
           {execution?.dependency?.unresolvedVariables && (
-            <Row spaceX={4}>
-              <strong>Unresolved Vars:</strong>
-              <List data={execution?.dependency?.unresolvedVariables} />
-            </Row>
+            <ListRow
+              header="Unresolved Vars:"
+              data={execution?.dependency?.unresolvedVariables}
+            />
           )}
         </>
       )}
     </Group>
+  );
+}
+
+interface IHeaderRowProps {
+  header: string;
+  children?: React.ReactNode;
+}
+
+function HeaderRow({ header, children }: IHeaderRowProps) {
+  return (
+    <Row spaceX={4} wrap={true}>
+      <strong>{header}</strong>
+      {children}
+    </Row>
+  );
+}
+
+interface IListRowProps<T> extends IHeaderRowProps {
+  data: T[] | undefined;
+}
+
+function ListRow<T extends React.ReactNode>({
+  data,
+  ...props
+}: IListRowProps<T>) {
+  return (
+    <HeaderRow {...props}>
+      <List data={data} />
+    </HeaderRow>
   );
 }

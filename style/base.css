@@ -219,3 +219,7 @@
 .jp-DoubleSharp-inline-block {
   display: inline-block;
 }
+
+.jp-DoubleSharp-flex-wrap {
+  flex-wrap: wrap;
+}

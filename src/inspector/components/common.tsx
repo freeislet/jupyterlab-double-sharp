@@ -131,11 +131,13 @@ export function TooltipIcon({
 export interface IRowProps extends IDivProps {
   rowGap?: 8 | null;
   spaceX?: 2 | 4 | 8 | null;
+  wrap?: boolean;
 }
 
 export function Row({
   rowGap = 8,
   spaceX,
+  wrap,
   className,
   children,
   ...props
@@ -146,6 +148,7 @@ export function Row({
         'jp-DoubleSharp-row',
         rowGap && `jp-DoubleSharp-row-gap-${rowGap}`,
         spaceX && `jp-DoubleSharp-space-x-${spaceX}`,
+        wrap && 'jp-DoubleSharp-flex-wrap',
         className
       )}
       {...props}
