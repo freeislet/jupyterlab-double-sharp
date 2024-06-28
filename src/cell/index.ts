@@ -61,7 +61,11 @@ export function setupCellActions() {
 
       const { model, change } = args;
       const cell = CellDictionary.global.getByModel(model);
-      const styleRelevantKeys = ['##Config', '##ConfigOverride'];
+      const styleRelevantKeys = [
+        CellMetadata.config.name,
+        CellMetadata.configOverride.name,
+        CellMetadata.execution.name
+      ];
       if (cell && styleRelevantKeys.includes(change.key)) {
         CellStyle.update(cell);
       }

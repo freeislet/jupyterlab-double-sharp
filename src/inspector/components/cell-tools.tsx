@@ -356,7 +356,7 @@ function Execution() {
       {!execution ? (
         <Block type="info">Execution info does not exist.</Block>
       ) : execution.skipped ? (
-        <Block type="error" iconType="info">
+        <Block type="warning" iconType="info">
           Execution skipped.
         </Block>
       ) : execution.cached ? (

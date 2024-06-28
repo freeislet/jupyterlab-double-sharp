@@ -1,6 +1,7 @@
 import { Cell } from '@jupyterlab/cells';
 
 import { CellConfig } from './config';
+import { CellMetadata } from './metadata';
 
 export namespace CellStyle {
   let updating = false;
@@ -15,14 +16,12 @@ export namespace CellStyle {
     updating = true;
 
     const config = CellConfig.get(cell.model);
+    const execution = CellMetadata.execution.get(cell.model);
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
-      'jp-DoubleSharp-cache': config.cache // TODO: cached, uncached 구분
+      'jp-DoubleSharp-skipped': execution?.skipped,
+      'jp-DoubleSharp-cached': execution?.cached
     };
-
-    // if (cellExecution.skip) {
-    // } else if (cellExecution.cache) {
-    // }
 
     setClasses(cell, classes);
     // console.log(classes);
@@ -30,7 +29,10 @@ export namespace CellStyle {
     updating = false;
   }
 
-  function setClasses(cell: Cell, classes: { [name: string]: boolean }) {
+  function setClasses(
+    cell: Cell,
+    classes: Record<string, boolean | undefined>
+  ) {
     for (const [cls, on] of Object.entries(classes)) {
       if (on) cell.addClass(cls);
       else cell.removeClass(cls);

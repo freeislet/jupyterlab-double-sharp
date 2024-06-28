@@ -33,17 +33,25 @@
   background-color: var(--jp-layout-color2);
   opacity: 0.5;
   border-radius: 2px;
+  pointer-events: none;
 }
 
-.jp-Notebook .jp-Cell.jp-DoubleSharp-cache::before {
+.jp-Notebook .jp-Cell.jp-DoubleSharp-skipped::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-color: var(--jp-layout-color2);
+  background-color: var(--jp-warn-background-color);
+  opacity: 0.5;
   border-radius: 2px;
 }
-.jp-Notebook .jp-Cell.jp-DoubleSharp-cache.jp-mod-dirty::before {
-  background-color: var(--jp-warn-color3);
+
+.jp-Notebook .jp-Cell.jp-DoubleSharp-cached::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--jp-success-background-color);
+  opacity: 0.2;
+  border-radius: 2px;
 }
 
 /*
