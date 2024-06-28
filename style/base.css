@@ -4,6 +4,16 @@
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
 
+:root {
+  --jp-warn-background-color: var(--jp-warn-color3);
+  --jp-error-background-color: var(--jp-error-color3);
+}
+
+[data-jp-theme-light='false'] {
+  --jp-warn-background-color: var(--jp-warn-color0);
+  --jp-error-background-color: var(--jp-error-color0);
+}
+
 /*
     Cell states
  */
@@ -135,11 +145,11 @@
 }
 
 .jp-DoubleSharp-Inspector-Block-warning {
-  background-color: var(--jp-warn-color3);
+  background-color: var(--jp-warn-background-color);
 }
 
 .jp-DoubleSharp-Inspector-Block-error {
-  background-color: var(--jp-error-color3);
+  background-color: var(--jp-error-background-color);
 }
 
 .jp-DoubleSharp-Inspector-Block-icon {
