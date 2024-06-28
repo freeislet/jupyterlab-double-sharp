@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cn from 'classnames';
-import { FaCircleCheck, FaCircleXmark } from 'react-icons/fa6';
+import { FaCircleCheck, FaCircleXmark, FaCheck } from 'react-icons/fa6';
 import { LiaComment } from 'react-icons/lia';
 import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
@@ -172,17 +172,25 @@ export function List<T extends React.ReactNode>({
 
 // Block
 
-export type BlockType = 'info' | 'warning' | 'error';
+export type BlockType = 'info' | 'warning' | 'error' | 'success';
 
 const blockIcons: Record<BlockType, React.ComponentType<any>> = {
   info: VscInfo,
   warning: VscWarning,
-  error: VscError
+  error: VscError,
+  success: FaCheck
+};
+const blockIconClassNames: Record<BlockType, string> = {
+  info: 'jp-DoubleSharp-Inspector-Block-icon-info',
+  warning: 'jp-DoubleSharp-Inspector-Block-icon-warning',
+  error: 'jp-DoubleSharp-Inspector-Block-icon-error',
+  success: 'jp-DoubleSharp-Inspector-Block-icon-success'
 };
 const blockClassNames: Record<BlockType, string> = {
   info: 'jp-DoubleSharp-Inspector-Block-info',
   warning: 'jp-DoubleSharp-Inspector-Block-warning',
-  error: 'jp-DoubleSharp-Inspector-Block-error'
+  error: 'jp-DoubleSharp-Inspector-Block-error',
+  success: 'jp-DoubleSharp-Inspector-Block-success'
 };
 
 export interface IBlockProps extends IDivProps {
@@ -199,7 +207,9 @@ export function Block({
   children,
   ...props
 }: IBlockProps) {
-  const Icon = blockIcons[iconType ?? type];
+  iconType = iconType ?? type;
+  const Icon = blockIcons[iconType];
+  const iconClass = blockIconClassNames[iconType];
   const bgClass = blockClassNames[type];
 
   return (
@@ -212,7 +222,7 @@ export function Block({
       )}
       {...props}
     >
-      <Icon className="jp-DoubleSharp-Inspector-Block-icon" />
+      <Icon className={cn('jp-DoubleSharp-Inspector-Block-icon', iconClass)} />
       <div>{children}</div>
     </div>
   );
