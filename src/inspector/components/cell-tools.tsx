@@ -338,7 +338,7 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <List header="Variables:" list={code?.variables} />
+      <List header="Out Variables:" list={code?.variables} />
       <List header="Unbound Vars:" list={code?.unboundVariables} />
     </Group>
   );
@@ -348,45 +348,43 @@ function Code() {
  * Execution
  */
 function Execution() {
-  const { execution, code } = React.useContext(CodeCellContext)!;
-
-  function executedMsg(numCells?: number): string {
-    if (!numCells) {
-      return 'No cells were executed.';
-    } else if (numCells === 1) {
-      return 'The cell was successfully executed.';
-    } else {
-      return numCells + ' cells were successfully executed.';
-    }
-  }
+  const { execution } = React.useContext(CodeCellContext)!;
 
   return (
     <Group className="jp-DoubleSharp-space-y-8">
-      <Group.Title>Execution</Group.Title>
+      <Group.Title>Execution Result</Group.Title>
       {!execution ? (
         <Block type="info">Execution info does not exist.</Block>
       ) : execution.skipped ? (
         <Block type="error" iconType="info">
-          Execution skipped by config.
+          Execution skipped.
         </Block>
       ) : execution.cached ? (
         <>
-          <Block type="warning" iconType="info">
-            Execution skipped by cache.
+          <Block type="success">
+            Execution skipped by <strong>cache</strong>.
           </Block>
-          <List header="Cached Vars:" list={code?.variables} />
+          <List header="Cached Vars:" list={execution?.outVariables} />
         </>
       ) : (
         <>
-          <Row>{executedMsg(execution?.cells?.length)}</Row>
-          <List
-            header="Unresolved Cell Vars:"
-            list={execution?.dependency?.unresolvedCellVariables}
-          />
-          <List
-            header="Unresolved Vars:"
-            list={execution?.dependency?.unresolvedVariables}
-          />
+          <Row>
+            <strong>Executed Cell Count:</strong>
+            {execution?.cells?.length}
+          </Row>
+          <List header="Out Variables:" list={execution?.outVariables} />
+          {execution?.dependency?.unresolvedCellVariables && (
+            <List
+              header="Unresolved Cell Vars:"
+              list={execution?.dependency?.unresolvedCellVariables}
+            />
+          )}
+          {execution?.dependency?.unresolvedVariables && (
+            <List
+              header="Unresolved Vars:"
+              list={execution?.dependency?.unresolvedVariables}
+            />
+          )}
         </>
       )}
     </Group>
