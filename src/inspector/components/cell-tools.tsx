@@ -293,9 +293,9 @@ function ConfigRow<T>({
   }
 
   return (
-    <Row className="jp-DoubleSharp-space-x-8">
+    <Row spaceX={8}>
       {children}
-      <Row className="jp-DoubleSharp-space-x-2">
+      <Row spaceX={2}>
         <StatusIcon type={statusType} />
         {comments.length > 0 && (
           <TooltipIcon>
@@ -338,8 +338,14 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <List header="Out Variables:" list={code?.variables} />
-      <List header="Unbound Vars:" list={code?.unboundVariables} />
+      <Row spaceX={4}>
+        <strong>Out Variables:</strong>
+        <List data={code?.variables} />
+      </Row>
+      <Row spaceX={4}>
+        <strong>Unbound Vars:</strong>
+        <List data={code?.unboundVariables} />
+      </Row>
     </Group>
   );
 }
@@ -364,26 +370,32 @@ function Execution() {
           <Block type="success">
             Execution skipped by <strong>cache</strong>.
           </Block>
-          <List header="Cached Vars:" list={execution?.outVariables} />
+          <Row spaceX={4}>
+            <strong>Cached Vars:</strong>
+            <List data={execution?.outVariables} />
+          </Row>
         </>
       ) : (
         <>
-          <Row>
+          <Row spaceX={4}>
             <strong>Executed Cell Count:</strong>
-            {execution?.cells?.length}
+            <span>{execution?.cells?.length}</span>
           </Row>
-          <List header="Out Variables:" list={execution?.outVariables} />
-          {execution?.dependency?.unresolvedCellVariables && (
-            <List
-              header="Unresolved Cell Vars:"
-              list={execution?.dependency?.unresolvedCellVariables}
-            />
-          )}
+          {/* <Row spaceX={4}>
+            <strong>Out Variables:</strong>
+            <List data={execution?.outVariables} />
+          </Row> */}
+          {/* {execution?.dependency?.unresolvedCellVariables && (
+            <Row spaceX={4}>
+              <strong>Unresolved Cell Vars:</strong>
+              <List data={execution?.dependency?.unresolvedCellVariables} />
+            </Row>
+          )} */}
           {execution?.dependency?.unresolvedVariables && (
-            <List
-              header="Unresolved Vars:"
-              list={execution?.dependency?.unresolvedVariables}
-            />
+            <Row spaceX={4}>
+              <strong>Unresolved Vars:</strong>
+              <List data={execution?.dependency?.unresolvedVariables} />
+            </Row>
           )}
         </>
       )}

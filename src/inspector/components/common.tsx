@@ -128,10 +128,26 @@ export function TooltipIcon({
 
 // Row
 
-export function Row({ className, children, ...props }: IDivProps) {
+export interface IRowProps extends IDivProps {
+  rowGap?: 8 | null;
+  spaceX?: 2 | 4 | 8 | null;
+}
+
+export function Row({
+  rowGap = 8,
+  spaceX,
+  className,
+  children,
+  ...props
+}: IRowProps) {
   return (
     <div
-      className={cn('jp-DoubleSharp-row jp-DoubleSharp-row-gap-8', className)}
+      className={cn(
+        'jp-DoubleSharp-row',
+        rowGap && `jp-DoubleSharp-row-gap-${rowGap}`,
+        spaceX && `jp-DoubleSharp-space-x-${spaceX}`,
+        className
+      )}
       {...props}
     >
       {children}
@@ -142,31 +158,29 @@ export function Row({ className, children, ...props }: IDivProps) {
 // List
 
 export interface IListProps<T> extends IDivProps {
-  list: T[] | undefined;
-  header?: React.ReactNode;
-  asRow?: boolean;
+  data: T[] | undefined;
+  inline?: boolean;
 }
 
 export function List<T extends React.ReactNode>({
-  list,
-  header,
-  asRow = true,
+  data,
+  inline = true,
   className,
   ...props
 }: IListProps<T>) {
   return (
-    <div
-      className={cn(
-        asRow && 'jp-DoubleSharp-row jp-DoubleSharp-row-gap-8',
-        'jp-DoubleSharp-space-x-4',
-        className
-      )}
-      {...props}
-    >
-      {header &&
-        (typeof header === 'string' ? <strong>{header}</strong> : header)}
-      {list && list.map((item, idx) => <span key={idx}>{item}</span>)}
-    </div>
+    <>
+      {data &&
+        data.map((item, idx) => (
+          <div
+            key={idx}
+            className={cn(className, inline && 'jp-DoubleSharp-inline-block')}
+            {...props}
+          >
+            {item}
+          </div>
+        ))}
+    </>
   );
 }
 

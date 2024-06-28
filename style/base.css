@@ -215,3 +215,7 @@
 .jp-DoubleSharp-space-y-8 > :not([hidden]) ~ :not([hidden]) {
   margin-top: 8px;
 }
+
+.jp-DoubleSharp-inline-block {
+  display: inline-block;
+}
