@@ -5,13 +5,21 @@
 */
 
 :root {
+  --jp-warn-color: var(--jp-warn-color0);
   --jp-warn-background-color: var(--jp-warn-color3);
+  --jp-error-color: var(--jp-error-color0);
   --jp-error-background-color: var(--jp-error-color3);
+  --jp-success-color: var(--jp-success-color0);
+  --jp-success-background-color: var(--jp-success-color3);
 }
 
 [data-jp-theme-light='false'] {
+  --jp-warn-color: var(--jp-warn-color3);
   --jp-warn-background-color: var(--jp-warn-color0);
+  --jp-error-color: var(--jp-error-color3);
   --jp-error-background-color: var(--jp-error-color0);
+  --jp-success-color: var(--jp-success-color3);
+  --jp-success-background-color: var(--jp-success-color0);
 }
 
 /*
@@ -141,7 +149,7 @@
 
 .jp-DoubleSharp-Inspector-Block-info {
   background-color: var(--jp-input-background);
-  border: 1px solid var(--jp-border-color1);
+  box-shadow: 0 0 0 1px var(--jp-border-color1) inset;
 }
 
 .jp-DoubleSharp-Inspector-Block-warning {
@@ -152,10 +160,31 @@
   background-color: var(--jp-error-background-color);
 }
 
+.jp-DoubleSharp-Inspector-Block-success {
+  background-color: var(--jp-success-background-color);
+}
+
 .jp-DoubleSharp-Inspector-Block-icon {
+  flex-shrink: 0;
   margin-right: 6px;
   height: 16px;
   width: auto;
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-info {
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-warning {
+  color: var(--jp-warn-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-error {
+  color: var(--jp-error-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-success {
+  color: var(--jp-success-color);
 }
 
 /*
