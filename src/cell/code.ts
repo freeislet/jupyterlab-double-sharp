@@ -82,7 +82,7 @@ export class CodeContext {
   //----
 
   private _inspectorCache: Cache<CodeInspector>;
-  private _output = new CodeOutput(this);
+  // private _output = new CodeOutput(this);
 
   get inspector(): CodeInspector {
     return this._inspectorCache.value;
@@ -160,7 +160,7 @@ export class CodeContext {
 
     const config = CellConfig.get(this.cell.model);
     if (config.skip) {
-      this._output.printSkipped();
+      // this._output.printSkipped();
       return { skipped: true };
     }
     if (config.cache) {
