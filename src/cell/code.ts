@@ -177,13 +177,16 @@ export class CodeContext {
       const dependentCells = dependencyResolved
         ? this._collectDependentCells(dependency)
         : [];
+      const data = await this.getData();
       return {
         cached,
         autoDependency: true,
         cellsToExecute: [...dependentCells, this.cell],
         dependentCells,
         dependency,
-        outVariables: dependency?.cellVariables
+        // outVariables: dependency?.cellVariables
+        // NOTE: 현재 variables가 이미 kernel variables에 있으면 dependency 수집 생략
+        outVariables: data.variables
       };
     } else {
       const data = await this.getData();
