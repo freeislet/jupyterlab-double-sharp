@@ -43,6 +43,11 @@ export namespace CellCode {
     resolvedVariables: string[];
 
     /**
+     * 현재 code context의 out variables (ICodeVariables.variables)
+     */
+    cellVariables: string[];
+
+    /**
      * 현재 code context의 unbound & uncached variables (IExecutionVariables.unresolvedVariables)
      */
     unresolvedCellVariables: string[];
@@ -60,6 +65,7 @@ export namespace CellCode {
     cellsToExecute?: CodeCell[];
     dependentCells?: CodeCell[];
     dependency?: IDependency;
+    outVariables?: string[];
   }
 }
 
@@ -161,8 +167,8 @@ export class CodeContext {
       cached = await this.isCached();
       if (cached) {
         const data = await this.getData();
-        this._output.printCached(data);
-        return { cached };
+        // this._output.printCached(data);
+        return { cached, outVariables: data.variables };
       }
     }
     if (config.autoDependency) {
@@ -176,10 +182,17 @@ export class CodeContext {
         autoDependency: true,
         cellsToExecute: [...dependentCells, this.cell],
         dependentCells,
-        dependency
+        dependency,
+        outVariables: dependency?.cellVariables
       };
     } else {
-      return { cached, autoDependency: false, cellsToExecute: [this.cell] };
+      const data = await this.getData();
+      return {
+        cached,
+        autoDependency: false,
+        cellsToExecute: [this.cell],
+        outVariables: data.variables
+      };
     }
   }
 
@@ -204,6 +217,7 @@ export class CodeContext {
       context: this,
       targetVariables: [],
       resolvedVariables: [],
+      cellVariables: execVars.variables,
       unresolvedCellVariables: unresolvedVars,
       unresolvedVariables: unresolvedVars
     };
@@ -280,6 +294,7 @@ export class CodeContext {
       context: scanContext,
       targetVariables,
       resolvedVariables: resolvedVars,
+      cellVariables: execVars.variables,
       unresolvedCellVariables: unresolvedCellVars,
       unresolvedVariables: unresolvedCellVars
     };
@@ -315,7 +330,8 @@ export class CodeContext {
       skipped: plan.skipped,
       cached: plan.cached,
       cells: plan.cellsToExecute?.map(Private.cellMetadata),
-      dependency: Private.dependencyRootMetadata(plan.dependency)
+      dependency: Private.dependencyRootMetadata(plan.dependency),
+      outVariables: plan.outVariables
     };
     CellMetadata.execution.set(this.cell.model, metadata);
   }
@@ -410,6 +426,7 @@ namespace Private {
     return {
       cell: cellMetadata(dependency.context.cell),
       dependencies: dependency.dependencies?.map(dependencyMetadata),
+      cellVariables: dependency.cellVariables,
       unresolvedCellVariables: dependency.unresolvedCellVariables,
       unresolvedVariables: dependency.unresolvedVariables
     };
@@ -423,6 +440,7 @@ namespace Private {
       dependencies: dependency.dependencies?.map(dependencyMetadata),
       targetVariables: dependency.targetVariables,
       resolvedVariables: dependency.resolvedVariables,
+      cellVariables: dependency.cellVariables,
       unresolvedCellVariables: dependency.unresolvedCellVariables,
       unresolvedVariables: dependency.unresolvedVariables
     };

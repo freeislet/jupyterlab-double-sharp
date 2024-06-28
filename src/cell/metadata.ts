@@ -35,6 +35,7 @@ export namespace CellMetadata {
     cached?: boolean;
     cells?: IExecutionCell[];
     dependency?: IExecutionDependencyRoot;
+    outVariables?: string[];
   }
 }
 
