@@ -85,6 +85,13 @@ export class Settings {
     return Settings.instance._editorChanged;
   }
 
+  static get csMagicChanged(): ISignal<
+    Settings,
+    Settings.IChangeParams<boolean>
+  > {
+    return Settings.instance._csMagicChanged;
+  }
+
   static get verboseChanged(): ISignal<
     Settings,
     Settings.IChangeParams<Settings.IVerbose>
@@ -96,6 +103,10 @@ export class Settings {
     settings: Partial<Settings.IExecution>
   ): Promise<void> {
     await Settings.instance.updateExecution(settings);
+  }
+
+  static async setCSMagic(enable: boolean): Promise<void> {
+    await Settings.instance.setCSMagic(enable);
   }
 
   //----
@@ -112,6 +123,10 @@ export class Settings {
   private _editorChanged = new Signal<
     Settings,
     Settings.IChangeParams<Settings.IEditor>
+  >(this);
+  private _csMagicChanged = new Signal<
+    Settings,
+    Settings.IChangeParams<boolean>
   >(this);
   private _verboseChanged = new Signal<
     Settings,
@@ -133,6 +148,11 @@ export class Settings {
 
     this._emitOnChanged(old.execution, new_.execution, this._executionChanged);
     this._emitOnChanged(old.editor, new_.editor, this._editorChanged);
+    this._emitOnChanged(
+      old.enableCSMagic,
+      new_.enableCSMagic,
+      this._csMagicChanged
+    );
     this._emitOnChanged(old.verbose, new_.verbose, this._verboseChanged);
   }
 
@@ -164,5 +184,9 @@ export class Settings {
       'execution',
       execSettings as object as PartialJSONObject
     );
+  }
+
+  async setCSMagic(enable: boolean): Promise<void> {
+    await this.settings.set('enableCSMagic', enable);
   }
 }
