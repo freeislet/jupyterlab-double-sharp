@@ -9,6 +9,7 @@ import { CellDictionary } from './dictionary';
 import { CellActionConnector } from './actions';
 import { CellStyle } from './style';
 import { NotebookExt } from '../utils/notebook';
+import { Settings } from '../settings';
 
 /**
  * CellTracker
@@ -19,8 +20,14 @@ export class CellTracker extends NotebookExt {
   constructor(panel: NotebookPanel) {
     super(panel);
 
-    panel.context.ready.then(() => this.updateCells());
     panel.context.model.cells.changed.connect(this._onCellsChanged, this);
+    panel.context.ready.then(() => this.updateStyles());
+    Settings.executionChanged.connect((_, change) => {
+      this.updateStyles();
+    });
+    Settings.csMagicChanged.connect((_, change) => {
+      this.updateStyles();
+    });
   }
 
   dispose() {
@@ -30,7 +37,7 @@ export class CellTracker extends NotebookExt {
     Signal.clearData(this);
   }
 
-  updateCells() {
+  updateStyles() {
     const cells = this.panel.content.widgets;
     if (cells) {
       for (const cell of cells) {
