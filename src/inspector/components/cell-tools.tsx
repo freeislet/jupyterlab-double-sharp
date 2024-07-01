@@ -111,11 +111,17 @@ function CodeCellTools({ context }: IContextProps) {
     setExecution(CellMetadata.execution.get(model));
   }, [context]);
 
-  // Settings.executionChanged 시 state 업데이트
+  // Settings 변경 시 state 업데이트
   useSignal(
     Settings.executionChanged,
     (_, change) => {
-      // Execution 세팅 변경
+      setCompositeConfig(getCompositeConfig());
+    },
+    [context]
+  );
+  useSignal(
+    Settings.csMagicChanged,
+    (_, change) => {
       setCompositeConfig(getCompositeConfig());
     },
     [context]
