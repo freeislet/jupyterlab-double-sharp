@@ -4,12 +4,23 @@ import equal from 'fast-deep-equal';
 import { encodeNull, decodeNull } from './json';
 
 export class Metadata<T> {
+  private _validChecker?: (model: ICellModel) => boolean;
+
   constructor(
     public readonly name: string,
     public nullish = false
   ) {}
 
+  setValidChecker(checker: (model: ICellModel) => boolean) {
+    this._validChecker = checker;
+  }
+
+  _isValid(model: ICellModel): boolean {
+    return this._validChecker?.(model) ?? true;
+  }
+
   get(model: ICellModel): T | undefined {
+    if (!this._isValid(model)) return;
     return this._getMetadata(model);
   }
 
@@ -97,13 +108,14 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   }
 
   get(model: ICellModel, checkDirty = true): T | undefined {
+    if (!this._isValid(model)) return;
     if (checkDirty && this.isDirty(model)) {
       if (this._dirtyResolver) {
         this._dirtyResolver(model);
         if (this.isDirty(model)) return;
       } else return;
     }
-    return super.get(model);
+    return this._getMetadata(model);
   }
 
   set(model: ICellModel, value: T, deleteIfEqualDefault = false) {

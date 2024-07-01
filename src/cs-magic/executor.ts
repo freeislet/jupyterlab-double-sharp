@@ -12,6 +12,9 @@ export class CSMagicExecutor {
     this.register(new CSMagic.Skip());
     this.register(new CSMagic.Cache());
 
+    CellMetadata.configOverride.setValidChecker((model: ICellModel) => {
+      return Settings.data.enableCSMagic;
+    });
     CellMetadata.configOverride.setDirtyResolver((model: ICellModel) => {
       CSMagicExecutor.executeConfig(model);
     });
