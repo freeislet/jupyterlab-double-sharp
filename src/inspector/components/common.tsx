@@ -108,7 +108,7 @@ export function TooltipIcon({
     setOffset(newOffset);
     el.style.setProperty('--offset', newOffset + 'px');
     // Log.debug('TooltipIcon', overflow, offset, newOffset);
-  }, [children]);
+  }, [children]); // TODO: children deps 대신 resize observer 적용
 
   return (
     <div className="jp-DoubleSharp-Inspector-TooltipIcon">

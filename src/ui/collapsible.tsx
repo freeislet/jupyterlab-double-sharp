@@ -35,6 +35,7 @@ export default function Collapsible({
 
     // console.debug('Mutation', collapse, el.scrollHeight, el.style.maxHeight);
   }, [collapse]);
+  // TODO: resize observer 작용
 
   return (
     <div
