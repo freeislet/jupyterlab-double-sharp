@@ -13,10 +13,10 @@ export default function Collapsible({
   children,
   ...props
 }: ICollapsibleProps) {
-  const ref = React.useRef<HTMLDivElement>(null!);
+  const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const el = ref.current;
+    const el = ref.current!;
 
     if (collapse) {
       const heightIsTemporary = el.style.maxHeight === 'revert';

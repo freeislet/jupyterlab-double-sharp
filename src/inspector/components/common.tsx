@@ -90,12 +90,12 @@ export function TooltipIcon({
   className,
   ...props
 }: ITooltipIconProps) {
-  const tooltipRef = React.useRef<HTMLDivElement>(null!);
+  const tooltipRef = React.useRef<HTMLDivElement>(null);
   const [offset, setOffset] = React.useState(0);
 
   React.useEffect(() => {
     // 툴팁이 containing block 벗어나지 않게 위치 조정
-    const el = tooltipRef.current;
+    const el = tooltipRef.current!;
     const overflow = getOverflowOffset(el, 4);
     const overflowLeft = overflow.left + offset;
     const overflowRight = overflow.right - offset;

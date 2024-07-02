@@ -23,12 +23,12 @@ const Checkbox = forwardRef<HTMLInputElement, ICheckboxProps>(
     },
     ref
   ) => {
-    const inputRef = React.useRef<HTMLInputElement>(null!);
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useLayoutEffect(() => {
-      inputRef.current.indeterminate = indeterminate ?? false;
+      inputRef.current!.indeterminate = indeterminate ?? false;
     });
-    React.useImperativeHandle(ref, () => inputRef.current, []);
+    React.useImperativeHandle(ref, () => inputRef.current!, []);
 
     return (
       <label className={className} style={style}>
