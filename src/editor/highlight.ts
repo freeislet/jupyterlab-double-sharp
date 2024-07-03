@@ -16,7 +16,7 @@ import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { SyntaxNodeRef } from '@lezer/common';
 
-import { ConfigFacet } from './utils';
+import { ConfigFacet } from '../utils/editor';
 import { Settings } from '../settings';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-highlight';
