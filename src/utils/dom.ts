@@ -29,19 +29,19 @@ function isContainingBlockForFixed(el: HTMLElement): boolean {
   );
 }
 
-// overflow offset
+// offset overflow
 
-export interface IOverflowOffset {
+export interface IOffsetOverflow {
   left: number;
   right: number;
   top: number;
   bottom: number;
 }
 
-export function getOverflowOffset(
+export function getOffsetOverflow(
   el: HTMLElement,
   margin = 0
-): IOverflowOffset {
+): IOffsetOverflow {
   const parent = getOffsetParent(el);
   const bound = parent.getBoundingClientRect();
   const rc = el.getBoundingClientRect();

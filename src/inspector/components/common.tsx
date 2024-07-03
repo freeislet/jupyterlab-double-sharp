@@ -7,7 +7,7 @@ import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 import { IDivProps, ISVGProps } from '../../ui';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
 import { useElementSizeRef, useElementSizeTarget } from '../../ui/hooks';
-import { getOffsetParent, getOverflowOffset } from '../../utils/dom';
+import { getOffsetParent, getOffsetOverflow } from '../../utils/dom';
 
 // Boolean
 
@@ -102,7 +102,7 @@ export function TooltipIcon({
   React.useEffect(() => {
     // 툴팁이 containing block 벗어나지 않게 위치 조정
     const el = tooltipRef.current!;
-    const overflow = getOverflowOffset(el, 4);
+    const overflow = getOffsetOverflow(el, 4);
     const overflowLeft = overflow.left + offset;
     const overflowRight = overflow.right - offset;
     const newOffset =
