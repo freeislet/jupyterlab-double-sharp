@@ -6,7 +6,8 @@ import { VscInfo, VscWarning, VscError } from 'react-icons/vsc';
 
 import { IDivProps, ISVGProps } from '../../ui';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
-import { getOverflowOffset } from '../../utils/dom';
+import { useElementSizeRef, useElementSizeTarget } from '../../ui/hooks';
+import { getOffsetParent, getOverflowOffset } from '../../utils/dom';
 
 // Boolean
 
@@ -90,9 +91,14 @@ export function TooltipIcon({
   className,
   ...props
 }: ITooltipIconProps) {
-  const tooltipRef = React.useRef<HTMLDivElement>(null);
+  const [tooltipRef, tooltipSize] = useElementSizeRef<HTMLDivElement>();
+  const [setContainer, containerSize] = useElementSizeTarget();
   const [offset, setOffset] = React.useState(0);
 
+  React.useEffect(() => {
+    const container = getOffsetParent(tooltipRef.current!);
+    setContainer(container);
+  }, []);
   React.useEffect(() => {
     // 툴팁이 containing block 벗어나지 않게 위치 조정
     const el = tooltipRef.current!;
@@ -108,7 +114,7 @@ export function TooltipIcon({
     setOffset(newOffset);
     el.style.setProperty('--offset', newOffset + 'px');
     // Log.debug('TooltipIcon', overflow, offset, newOffset);
-  }, [children]); // TODO: children deps 대신 resize observer 적용
+  }, [tooltipSize, containerSize]);
 
   return (
     <div className="jp-DoubleSharp-Inspector-TooltipIcon">
