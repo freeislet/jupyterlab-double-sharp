@@ -20,7 +20,7 @@ export default function Collapsible({
   React.useEffect(() => {
     const maxHeight = collapse ? null : contentSize.height + 'px';
     ref.current!.style.setProperty('max-height', maxHeight);
-    Log.debug('Collapsible', collapse, maxHeight);
+    // Log.debug('Collapsible', collapse, maxHeight);
   }, [collapse, contentSize]);
 
   return (
