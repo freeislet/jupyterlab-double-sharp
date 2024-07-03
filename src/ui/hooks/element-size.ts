@@ -45,10 +45,23 @@ export function useElementSize<T extends Element>(
  * @param round 반올림 여부
  * @returns [target ref, target size]
  */
-export function useElementSizeRef<T extends Element>(
+export function useElementSizeRef<T extends Element = Element>(
   round = false
 ): [React.RefObject<T>, ISize] {
   const target = React.useRef<T>(null);
   const size = useElementSize(target, round);
   return [target, size];
+}
+
+/**
+ * useElementSize의 target element를 나중에 지정하는 버전
+ * @param round 반올림 여부
+ * @returns [target dispatcher, target size]
+ */
+export function useElementSizeTarget<T extends Element = Element>(
+  round = false
+): [React.Dispatch<React.SetStateAction<T | null>>, ISize] {
+  const [target, setTarget] = React.useState<T | null>(null);
+  const size = useElementSize(target, round);
+  return [setTarget, size];
 }
