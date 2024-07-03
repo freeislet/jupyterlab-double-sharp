@@ -2,6 +2,7 @@ import * as React from 'react';
 import cn from 'classnames';
 
 import { IDivProps } from '.';
+import { useElementSizeRef } from './hooks';
 
 export interface ICollapsibleProps extends IDivProps {
   collapse: boolean;
@@ -14,28 +15,13 @@ export default function Collapsible({
   ...props
 }: ICollapsibleProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const [contentRef, contentSize] = useElementSizeRef<HTMLDivElement>();
 
   React.useEffect(() => {
-    const el = ref.current!;
-
-    if (collapse) {
-      const heightIsTemporary = el.style.maxHeight === 'revert';
-      if (heightIsTemporary && el.scrollHeight) {
-        el.style.maxHeight = el.scrollHeight + 'px';
-        requestAnimationFrame(() => el.style.setProperty('max-height', null));
-      } else {
-        el.style.setProperty('max-height', null);
-      }
-    } else {
-      const maybeInvalidScrollHeight = el.scrollHeight === 0;
-      el.style.maxHeight = maybeInvalidScrollHeight
-        ? 'revert'
-        : el.scrollHeight + 'px';
-    }
-
-    // console.debug('Mutation', collapse, el.scrollHeight, el.style.maxHeight);
-  }, [collapse]);
-  // TODO: resize observer 작용
+    const maxHeight = collapse ? null : contentSize.height + 'px';
+    ref.current!.style.setProperty('max-height', maxHeight);
+    Log.debug('Collapsible', collapse, maxHeight);
+  }, [collapse, contentSize]);
 
   return (
     <div
@@ -43,7 +29,7 @@ export default function Collapsible({
       className={cn('jp-DoubleSharp-Collapsible', className)}
       {...props}
     >
-      {children}
+      <div ref={contentRef}>{children}</div>
     </div>
   );
 }
