@@ -6,25 +6,31 @@ export interface ISize {
   height: number;
 }
 
+function roundOrAsIs({ width, height }: ISize, round: boolean): ISize {
+  return round
+    ? { width: Math.round(width), height: Math.round(height) }
+    : { width, height };
+}
+
+/**
+ * Element size 변화 감지
+ * @param target target ref or target element or null
+ * @param round 반올림 여부
+ * @returns target size
+ */
 export function useElementSize<T extends Element>(
-  target: React.MutableRefObject<T | null>,
+  target: React.MutableRefObject<T | null> | T | null,
   round = false
 ): ISize {
   const [size, setSize] = React.useState<ISize>({ width: 0, height: 0 });
-
-  const setSizeInternal = ({ width, height }: ISize) => {
-    setSize(
-      round
-        ? { width: Math.round(width), height: Math.round(height) }
-        : { width, height }
-    );
-  };
+  const setSizeInternal = (size: ISize) => setSize(roundOrAsIs(size, round));
 
   React.useLayoutEffect(() => {
-    if (target.current) {
-      setSizeInternal(target.current.getBoundingClientRect());
+    const targetEl = target && 'current' in target ? target.current : target;
+    if (targetEl) {
+      setSizeInternal(targetEl.getBoundingClientRect());
     }
-  }, [target]);
+  }, [target, round]);
 
   useResizeObserver(target, entry => {
     const { inlineSize: width, blockSize: height } = entry.contentBoxSize[0];
@@ -34,6 +40,11 @@ export function useElementSize<T extends Element>(
   return size;
 }
 
+/**
+ * useElementSize의 target ref 리턴 버전
+ * @param round 반올림 여부
+ * @returns [target ref, target size]
+ */
 export function useElementSizeRef<T extends Element>(
   round = false
 ): [React.RefObject<T>, ISize] {
