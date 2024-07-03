@@ -48,8 +48,8 @@ export class CellDictionary {
     return success;
   }
 
-  has(cell: Cell): boolean {
-    return this._set.has(cell);
+  get cells(): ReadonlySet<Cell> {
+    return this._set;
   }
 
   getById(id: string): Cell | undefined {
