@@ -22,6 +22,7 @@ import { SyntaxNodeRef } from '@lezer/common';
 import { ConfigFacet } from '../utils/editor';
 import { Settings } from '../settings';
 import { CellActions } from '../cell';
+import { isTopLevelCommentNode, isStatement } from '../utils/statement';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-highlight';
 
@@ -60,19 +61,18 @@ class HighlightPlugin implements PluginValue {
   }
 
   commentDeco(view: EditorView): DecorationSet {
-    const test = view.state.facet(highlightConfig.facet);
-    if (!test) return Decoration.none;
+    const enabled = view.state.facet(highlightConfig.facet);
+    if (!enabled) return Decoration.none;
 
     function enter(node: SyntaxNodeRef): boolean | void {
-      if (node.name === 'Comment') {
+      if (isTopLevelCommentNode(node)) {
         const comment = view.state.doc.sliceString(node.from, node.to);
-        const isExt = comment.startsWith('##');
-        if (isExt) {
+        if (isStatement(comment)) {
           const deco = commentDecoration;
           builder.add(node.from, node.from, deco);
+          // Log.debug('## Comment', node, node.node);
         }
       }
-      // TODO: topLevel = node.parent?.parent !이면 return false -> 함수 안 주석 확인
     }
 
     const builder = new RangeSetBuilder<Decoration>();

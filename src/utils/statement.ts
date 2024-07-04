@@ -1,8 +1,42 @@
+import { SyntaxNodeRef } from '@lezer/common';
+
+/**
+ * syntax node ref가 top-level comment인지 검사
+ */
+export function isTopLevelCommentNode(nodeRef: SyntaxNodeRef): boolean {
+  const isTopLevel = !nodeRef.node.parent?.parent;
+  return isTopLevel && nodeRef.name === 'Comment';
+}
+
+/**
+ * 코드 라인이 Double Sharp statement인지 검사
+ */
+export function isStatement(codeline: string) {
+  return codeline.startsWith('##');
+}
+
+/**
+ * IStatementMatch
+ */
 export interface IStatementMatch {
   statement: string;
   isCommand: boolean;
   start?: number;
   end?: number;
+}
+
+/**
+ * syntax tree에서 ##으로 시작하는 라인 매칭
+ */
+export function* matchAllStatements(
+  source: string
+): Generator<IStatementMatch> {
+  // syntax 테스트 코드
+  // const editorView = (cell.editor as CodeMirrorEditor).editor;
+  // const tree = syntaxTree(editorView.state);
+  // tree.iterate({ enter });
+  // const commentNodes = tree.topNode.getChildren('Comment');
+  // console.log(commentNodes, tree.topNode);
 }
 
 /**
