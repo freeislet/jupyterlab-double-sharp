@@ -8,7 +8,7 @@ export interface IStatementMatch {
 /**
  * 텍스트에서 ##으로 시작하는 라인 매칭
  */
-export function* matchAllStatements(
+export function* matchAllStatementsFromSource(
   source: string
 ): Generator<IStatementMatch> {
   const matches = source.matchAll(/^##[^\S\r\n]*(.*)/gm); // ##으로 시작하는 텍스트 캡쳐

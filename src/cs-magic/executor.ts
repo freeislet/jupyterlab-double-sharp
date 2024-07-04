@@ -3,7 +3,7 @@ import { ICellModel } from '@jupyterlab/cells';
 import { CSMagic } from './commands';
 import { CellMetadata } from '../cell/metadata';
 import { Settings } from '../settings';
-import { matchAllStatements, tokenize } from '../utils/statement';
+import { matchAllStatementsFromSource, tokenize } from '../utils/statement';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
@@ -49,7 +49,7 @@ export class CSMagicExecutor {
 
     const source = model.sharedModel.getSource();
     // Log.debug('execute', model, source);
-    const matches = matchAllStatements(source);
+    const matches = matchAllStatementsFromSource(source);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
         this._executeStatement(model, match.statement, predicate);
