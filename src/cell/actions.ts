@@ -1,7 +1,9 @@
-import { ICellModel } from '@jupyterlab/cells';
+import { ICellModel, Cell } from '@jupyterlab/cells';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { IMapChange, ISharedCell, CellChange, Delta } from '@jupyter/ydoc';
+
+import { CellDictionary } from './dictionary';
 
 export namespace CellActions {
   export interface IParams {
@@ -55,6 +57,24 @@ export class CellActions {
   }
 
   // TODO: mimetype, syntax tree
+}
+
+export namespace CellActions {
+  export function forAllCells(
+    callback: (cell: Cell, cells: ReadonlySet<Cell>) => any,
+    predicate?: (cell: Cell, cells: ReadonlySet<Cell>) => boolean
+  ) {
+    // for (const widget of App.instance.jlab.labshell.widgets()) {
+    //   if (widget instanceof NotebookPanel) {
+    //   }
+    // }
+    CellDictionary.global.cells.forEach((value, _, set) => {
+      const filtered = predicate?.(value, set) ?? true;
+      if (filtered) {
+        callback(value, set);
+      }
+    });
+  }
 }
 
 namespace Private {
