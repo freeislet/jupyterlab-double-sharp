@@ -28,8 +28,8 @@ const FACTORY_NAME = 'jupyterlab-double-sharp:editor-highlight';
 
 // styles
 const highlightTheme = EditorView.baseTheme({
-  '.cm-commentLine': { backgroundColor: '#aaa3' },
-  '.cm-commentLine > span': { color: 'var(--jp-info-color1)' }
+  '.cm-commentLine': { backgroundColor: 'var(--jp-statement-bg-color)' },
+  '.cm-commentLine > span': { color: 'var(--jp-statement-color)' }
 });
 
 // line decoration

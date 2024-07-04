@@ -5,6 +5,8 @@
 */
 
 :root {
+  --jp-statement-color: #07a;
+  --jp-statement-bg-color: #ccd3;
   --jp-warn-color: var(--jp-warn-color0);
   --jp-warn-bg-color: var(--jp-warn-color3);
   --jp-error-color: var(--jp-error-color0);
@@ -14,6 +16,8 @@
 }
 
 [data-jp-theme-light='false'] {
+  --jp-statement-color: #7bf;
+  --jp-statement-bg-color: #5583;
   --jp-warn-color: var(--jp-warn-color3);
   --jp-warn-bg-color: var(--jp-warn-color0);
   --jp-error-color: var(--jp-error-color3);
