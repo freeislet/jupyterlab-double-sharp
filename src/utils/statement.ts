@@ -1,4 +1,7 @@
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { Cell } from '@jupyterlab/cells';
 import { SyntaxNodeRef } from '@lezer/common';
+import { syntaxTree } from '@codemirror/language';
 
 /**
  * syntax node ref가 top-level comment인지 검사
@@ -26,17 +29,28 @@ export interface IStatementMatch {
 }
 
 /**
- * syntax tree에서 ##으로 시작하는 라인 매칭
+ * cell syntax tree에서 ##으로 시작하는 라인 매칭
  */
-export function* matchAllStatements(
-  source: string
-): Generator<IStatementMatch> {
-  // syntax 테스트 코드
-  // const editorView = (cell.editor as CodeMirrorEditor).editor;
-  // const tree = syntaxTree(editorView.state);
-  // tree.iterate({ enter });
-  // const commentNodes = tree.topNode.getChildren('Comment');
-  // console.log(commentNodes, tree.topNode);
+export function* matchAllStatements(cell: Cell): Generator<IStatementMatch> {
+  const editorView = (cell.editor as CodeMirrorEditor).editor;
+  const doc = editorView.state.doc;
+  const tree = syntaxTree(editorView.state);
+  const commentNodes = tree.topNode.getChildren('Comment');
+
+  for (const commentNode of commentNodes) {
+    const comment = doc.sliceString(commentNode.from, commentNode.to);
+    if (!isStatementComment(comment)) continue;
+
+    const statement = comment.substring(2);
+    const statementMatch: IStatementMatch = {
+      statement,
+      isCommand: statement.startsWith('%'),
+      start: commentNode.from,
+      end: commentNode.to
+    };
+    // Log.debug(commentNode, statementMatch);
+    yield statementMatch;
+  }
 }
 
 /**

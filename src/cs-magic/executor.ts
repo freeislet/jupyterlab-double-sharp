@@ -2,8 +2,9 @@ import { ICellModel } from '@jupyterlab/cells';
 
 import { CSMagic } from './commands';
 import { CellMetadata } from '../cell/metadata';
+import { CellDictionary } from '../cell';
 import { Settings } from '../settings';
-import { matchAllStatementsFromSource, tokenize } from '../utils/statement';
+import { matchAllStatements, tokenize } from '../utils/statement';
 
 export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
@@ -38,18 +39,12 @@ export class CSMagicExecutor {
   ) {
     if (!Settings.data.enableCSMagic) return;
 
-    // syntax 테스트 코드
-    // const editorView = (cell.editor as CodeMirrorEditor).editor;
-    // const tree = syntaxTree(editorView.state);
-    // tree.iterate({ enter });
-    // const commentNodes = tree.topNode.getChildren('Comment');
-    // console.log(commentNodes, tree.topNode);
+    const cell = CellDictionary.global.getByModel(model);
+    if (!cell) return;
 
     CellMetadata.configOverride.deferUpdate();
 
-    const source = model.sharedModel.getSource();
-    // Log.debug('execute', model, source);
-    const matches = matchAllStatementsFromSource(source);
+    const matches = matchAllStatements(cell);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
         this._executeStatement(model, match.statement, predicate);
