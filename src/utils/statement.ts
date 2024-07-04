@@ -11,7 +11,7 @@ export function isTopLevelCommentNode(nodeRef: SyntaxNodeRef): boolean {
 /**
  * 코드 라인이 Double Sharp statement인지 검사
  */
-export function isStatement(codeline: string) {
+export function isStatementComment(codeline: string) {
   return codeline.startsWith('##');
 }
 

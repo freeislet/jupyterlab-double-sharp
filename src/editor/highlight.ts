@@ -22,7 +22,7 @@ import { SyntaxNodeRef } from '@lezer/common';
 import { ConfigFacet } from '../utils/editor';
 import { Settings } from '../settings';
 import { CellActions } from '../cell';
-import { isTopLevelCommentNode, isStatement } from '../utils/statement';
+import { isTopLevelCommentNode, isStatementComment } from '../utils/statement';
 
 const FACTORY_NAME = 'jupyterlab-double-sharp:editor-highlight';
 
@@ -67,7 +67,7 @@ class HighlightPlugin implements PluginValue {
     function enter(node: SyntaxNodeRef): boolean | void {
       if (isTopLevelCommentNode(node)) {
         const comment = view.state.doc.sliceString(node.from, node.to);
-        if (isStatement(comment)) {
+        if (isStatementComment(comment)) {
           const deco = commentDecoration;
           builder.add(node.from, node.from, deco);
           // Log.debug('## Comment', node, node.node);
