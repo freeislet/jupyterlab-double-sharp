@@ -66,10 +66,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
         Settings.setup(settings);
         Log.setup(loggerRegistry, notebookTracker);
+        setupClientSideMagic();
         setupCellExtensions(app);
         setupCellActions();
         setupCodeExtensions(app);
-        setupClientSideMagic();
         setupExecution();
         setupEditor(editorExtensionRegistry);
         setupInspectors(notebookTracker, labshell, layoutRestorer);

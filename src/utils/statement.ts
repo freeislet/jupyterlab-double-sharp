@@ -32,6 +32,8 @@ export interface IStatementMatch {
  * cell syntax tree에서 ##으로 시작하는 라인 매칭
  */
 export function* matchAllStatements(cell: Cell): Generator<IStatementMatch> {
+  if (!cell.editor) throw Error('Cell.editor is not ready.');
+
   const editorView = (cell.editor as CodeMirrorEditor).editor;
   const doc = editorView.state.doc;
   const tree = syntaxTree(editorView.state);
