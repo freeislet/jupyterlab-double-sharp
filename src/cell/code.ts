@@ -6,6 +6,8 @@ import { CellMetadata } from './metadata';
 import { CellConfig } from './config';
 import { CodeInspector, ICodeVariables } from '../code';
 import { Settings } from '../settings';
+import { metadataKeys } from '../const';
+import { MetadataGroupDirtyable } from '../utils/metadata';
 import { isCodeCell, getAboveCodeCells } from '../utils/cell';
 import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
@@ -14,6 +16,8 @@ import { ReorderSet } from '../utils/set';
 import { stringFrom } from '../utils/object';
 
 export namespace CellCode {
+  export interface IData extends ICodeVariables {}
+
   export type IExecutionVariables = ICodeVariables & {
     /**
      * unboundVariables에서 kernel variables 제외한 변수들
@@ -69,6 +73,20 @@ export namespace CellCode {
   }
 }
 
+export class CellCode {
+  private static _metadata = new MetadataGroupDirtyable<CellCode.IData>(
+    metadataKeys.code,
+    {
+      variables: [],
+      unboundVariables: []
+    }
+  );
+
+  static get metadata(): MetadataGroupDirtyable<CellCode.IData> {
+    return CellCode._metadata;
+  }
+}
+
 export class CodeContext {
   static fromCell(
     cell: Cell,
@@ -106,13 +124,13 @@ export class CodeContext {
   /**
    * ##Code metadata에 variables 정보 저장 및 리턴 (또는, 기존 metadata 조회))
    */
-  async getData(): Promise<CellMetadata.ICode> {
-    const cachedMetadata = CellMetadata.code.get(this.cell.model);
+  async getData(): Promise<CellCode.IData> {
+    const cachedMetadata = CellCode.metadata.get(this.cell.model);
     if (cachedMetadata) return cachedMetadata;
 
     const codeVars = await this.inspector.getCodeVariables(this.cell);
-    const metadata = CellMetadata.code.getCoalescedValue(codeVars);
-    CellMetadata.code.set(this.cell.model, metadata);
+    const metadata = CellCode.metadata.getCoalescedValue(codeVars);
+    CellCode.metadata.set(this.cell.model, metadata);
     return metadata;
   }
 
@@ -388,7 +406,7 @@ export class CodeOutput {
     this.print('## skipped\n', { streamType: 'stderr' });
   }
 
-  printCached(data: CellMetadata.ICode) {
+  printCached(data: CellCode.IData) {
     this.clearError();
     this.print(`## cached: ${stringFrom(data.variables)}\n`, {
       streamType: 'stderr'

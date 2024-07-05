@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { CellContext, CellMetadata, CellConfig } from '../../cell';
+import { CellContext, CellMetadata, CellConfig, CellCode } from '../../cell';
 import { CSMagicCell } from '../../cs-magic';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
@@ -40,7 +40,7 @@ interface ICodeCellContext {
   csMagic: CSMagicCell.IData | undefined;
   csMagicDirty: boolean;
   compositeConfig: NonNullableField<CellConfig.IData>;
-  code: CellMetadata.ICode | undefined;
+  code: CellCode.IData | undefined;
   codeDirty: boolean;
   updateCode: () => void;
   execution: CellMetadata.IExecution | undefined;
@@ -86,7 +86,7 @@ function CodeCellTools({ context }: IContextProps) {
     React.useState<NonNullableField<CellConfig.IData>>(getCompositeConfig);
 
   // code states, callback
-  const [code, setCode] = React.useState<CellMetadata.ICode>();
+  const [code, setCode] = React.useState<CellCode.IData>();
   const [codeDirty, setCodeDirty] = React.useState(false);
   const updateCode = React.useCallback(() => {
     const update = async () => {
@@ -105,8 +105,8 @@ function CodeCellTools({ context }: IContextProps) {
     setCsMagic(CSMagicCell.metadata.get(model, false));
     setCsMagicDirty(CSMagicCell.metadata.isDirty(model));
     setCompositeConfig(getCompositeConfig());
-    setCode(CellMetadata.code.get(model, false));
-    setCodeDirty(CellMetadata.code.isDirty(model));
+    setCode(CellCode.metadata.get(model, false));
+    setCodeDirty(CellCode.metadata.isDirty(model));
     setExecution(CellMetadata.execution.get(model));
   }, [context]);
 
@@ -148,13 +148,13 @@ function CodeCellTools({ context }: IContextProps) {
           setCsMagicDirty(change.newValue as boolean);
           break;
 
-        case CellMetadata.code.name: // ##Code
+        case CellCode.metadata.name: // ##Code
           // 1. dirty 알림 "click" 클릭 > updateCode > CodeContext.getData
           // 2. 셀 실행 (compositeConfig.cache or autoDependency true 시)
           setCode(change.newValue);
           break;
 
-        case CellMetadata.code.dirtyFlagName: // ##Code-dirty
+        case CellCode.metadata.dirtyFlagName: // ##Code-dirty
           // ##Code 업데이트 시 dirty 해결 (false)
           // source 수정 시 dirty 설정 (true)
           setCodeDirty(change.newValue as boolean);

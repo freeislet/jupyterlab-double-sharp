@@ -3,6 +3,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CellExtension } from './tracker';
 import { CellContext } from './context';
 import { CellMetadata } from './metadata';
+import { CellCode } from './code';
 import { CellStyle } from './style';
 import { CellActions } from './actions';
 import { CellDictionary } from './dictionary';
@@ -49,7 +50,7 @@ export function setupCellActions() {
       const model = cell?.model;
       if (model) {
         CSMagicCell.metadata.setDirty(model);
-        CellMetadata.code.setDirty(model);
+        CellCode.metadata.setDirty(model);
       }
     }
   );
@@ -72,6 +73,6 @@ export function setupCellActions() {
   );
 }
 
-export { CellContext, CellMetadata, CellActions, CellDictionary };
+export { CellContext, CellMetadata, CellCode, CellActions, CellDictionary };
 export { CellConfig } from './config';
-export { CellCode, CodeContext } from './code';
+export { CodeContext } from './code';
