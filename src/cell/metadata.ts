@@ -10,7 +10,7 @@ export namespace CellMetadata {
     generated?: boolean;
   }
 
-  export type IConfig = CellConfig.IConfig;
+  export type IConfig = CellConfig.IData;
 
   export type IConfigOverride = Partial<IConfig>;
 
@@ -44,9 +44,9 @@ export class CellMetadata {
     return Private.cell;
   }
 
-  static get config(): MetadataGroup<CellMetadata.IConfig> {
-    return Private.config;
-  }
+  // static get config(): MetadataGroup<CellMetadata.IConfig> {
+  //   return Private.config;
+  // }
 
   static get configOverride(): MetadataGroupDirtyable<CellMetadata.IConfigOverride> {
     return Private.configOverride;
@@ -65,15 +65,15 @@ export class CellMetadata {
 
 namespace Private {
   export const cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
-  export const config = new MetadataGroup<CellMetadata.IConfig>(
-    '##Config',
-    {
-      skip: false,
-      cache: null,
-      autoDependency: null
-    },
-    true
-  );
+  // export const config = new MetadataGroup<CellMetadata.IConfig>(
+  //   '##Config',
+  //   {
+  //     skip: false,
+  //     cache: null,
+  //     autoDependency: null
+  //   },
+  //   true
+  // );
   export const configOverride =
     new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
       '##ConfigOverride',

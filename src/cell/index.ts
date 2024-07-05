@@ -9,6 +9,7 @@ import { CellDictionary } from './dictionary';
 import { ExecutionActions } from '../execution';
 import { CSMagicExecutor } from '../cs-magic';
 import { CodeInspector } from '../code';
+import { metadataKeys } from '../const';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
@@ -62,7 +63,7 @@ export function setupCellActions() {
       const { model, change } = args;
       const cell = CellDictionary.global.getByModel(model);
       const styleRelevantKeys = [
-        CellMetadata.config.name,
+        metadataKeys.config,
         CellMetadata.configOverride.name,
         CellMetadata.execution.name
       ];

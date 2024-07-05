@@ -2,7 +2,7 @@
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import { CellMetadata } from '../cell/metadata';
+import { CellConfig } from '../cell';
 import { CodeInspector } from '../code';
 import { isCodeCell } from '../utils/cell';
 
@@ -75,7 +75,7 @@ export class ExecutionCells {
       item.extra.dependencyLevel = dependencyLevel;
     }
 
-    const metadata = CellMetadata.config.getCoalesced(cell.model);
+    const metadata = CellConfig.metadata.getCoalesced(cell.model);
     // console.log(metadata);
 
     // 셀 변수 테스트

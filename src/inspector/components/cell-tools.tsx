@@ -38,7 +38,7 @@ interface ICodeCellContext {
   updateConfig: (config: Partial<CellMetadata.IConfig>) => void;
   overriddenConfig: CellMetadata.IConfigOverride | undefined;
   overriddenConfigDirty: boolean;
-  compositeConfig: NonNullableField<CellConfig.IConfig>;
+  compositeConfig: NonNullableField<CellConfig.IData>;
   code: CellMetadata.ICode | undefined;
   codeDirty: boolean;
   updateCode: () => void;
@@ -64,12 +64,12 @@ function CodeCellTools({ context }: IContextProps) {
 
   // config state, callback
   const [config, setConfig, updateConfig] = useStateObject(
-    CellMetadata.config.defaultValue
+    CellConfig.metadata.defaultValue
   );
   const updateAndApplyConfig = React.useCallback(
     (config: Partial<CellMetadata.IConfig>) => {
       updateConfig(config);
-      CellMetadata.config.update(model, config);
+      CellConfig.metadata.update(model, config);
     },
     [context]
   );
@@ -84,7 +84,7 @@ function CodeCellTools({ context }: IContextProps) {
   // settings, cell config 통합 config states
   const getCompositeConfig = () => CellConfig.get(model, false); // checkDirty=false: cs-command까지는 확인 안 함
   const [compositeConfig, setCompositeConfig] =
-    React.useState<NonNullableField<CellConfig.IConfig>>(getCompositeConfig);
+    React.useState<NonNullableField<CellConfig.IData>>(getCompositeConfig);
 
   // code states, callback
   const [code, setCode] = React.useState<CellMetadata.ICode>();
@@ -102,7 +102,7 @@ function CodeCellTools({ context }: IContextProps) {
 
   // context 초기화
   React.useEffect(() => {
-    setConfig(CellMetadata.config.getCoalesced(model));
+    setConfig(CellConfig.metadata.getCoalesced(model));
     setOverriddenConfig(CellMetadata.configOverride.get(model, false));
     setOverriddenConfigDirty(CellMetadata.configOverride.isDirty(model));
     setCompositeConfig(getCompositeConfig());
@@ -132,7 +132,7 @@ function CodeCellTools({ context }: IContextProps) {
     model.metadataChanged,
     (model, change) => {
       switch (change.key) {
-        case CellMetadata.config.name: // ##Config
+        case CellConfig.metadata.name: // ##Config
           // Cell Inspector > Config > updateConfig
           setCompositeConfig(getCompositeConfig());
           break;

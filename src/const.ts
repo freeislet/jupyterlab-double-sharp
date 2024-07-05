@@ -10,3 +10,7 @@ export const selectors = {
   NOTEBOOK_COMMAND_MODE:
     '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
 };
+
+export const metadataKeys = {
+  config: '##Config'
+};
