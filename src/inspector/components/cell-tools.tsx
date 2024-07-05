@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { CellContext, CellMetadata, CellConfig } from '../../cell';
+import { CSMagicCell } from '../../cs-magic';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
@@ -34,10 +35,10 @@ export default function CellTools({ context }: ICellToolsProps) {
 
 interface ICodeCellContext {
   context: CellContext;
-  config: CellMetadata.IConfig;
-  updateConfig: (config: Partial<CellMetadata.IConfig>) => void;
-  overriddenConfig: CellMetadata.IConfigOverride | undefined;
-  overriddenConfigDirty: boolean;
+  config: CellConfig.IData;
+  updateConfig: (config: Partial<CellConfig.IData>) => void;
+  csMagic: CSMagicCell.IData | undefined;
+  csMagicDirty: boolean;
   compositeConfig: NonNullableField<CellConfig.IData>;
   code: CellMetadata.ICode | undefined;
   codeDirty: boolean;
@@ -67,19 +68,17 @@ function CodeCellTools({ context }: IContextProps) {
     CellConfig.metadata.defaultValue
   );
   const updateAndApplyConfig = React.useCallback(
-    (config: Partial<CellMetadata.IConfig>) => {
+    (config: Partial<CellConfig.IData>) => {
       updateConfig(config);
       CellConfig.metadata.update(model, config);
     },
     [context]
   );
 
-  // overridden config state (client-side magic command에 의한 config)
-  // NOTE: overriddenConfigDirty true인 경우 compositeConfig invalid 가능 (checkDirty=false로 get하므로)
-  const [overriddenConfig, setOverriddenConfig] =
-    React.useState<CellMetadata.IConfigOverride>(); // cs-command
-  const [overriddenConfigDirty, setOverriddenConfigDirty] =
-    React.useState(false); // cs-command dirty
+  // cs-magic state
+  // NOTE: csMagicDirty true인 경우 compositeConfig invalid 가능 (checkDirty=false로 get하므로)
+  const [csMagic, setCsMagic] = React.useState<CSMagicCell.IData>();
+  const [csMagicDirty, setCsMagicDirty] = React.useState(false);
 
   // settings, cell config 통합 config states
   const getCompositeConfig = () => CellConfig.get(model, false); // checkDirty=false: cs-command까지는 확인 안 함
@@ -103,8 +102,8 @@ function CodeCellTools({ context }: IContextProps) {
   // context 초기화
   React.useEffect(() => {
     setConfig(CellConfig.metadata.getCoalesced(model));
-    setOverriddenConfig(CellMetadata.configOverride.get(model, false));
-    setOverriddenConfigDirty(CellMetadata.configOverride.isDirty(model));
+    setCsMagic(CSMagicCell.metadata.get(model, false));
+    setCsMagicDirty(CSMagicCell.metadata.isDirty(model));
     setCompositeConfig(getCompositeConfig());
     setCode(CellMetadata.code.get(model, false));
     setCodeDirty(CellMetadata.code.isDirty(model));
@@ -137,16 +136,16 @@ function CodeCellTools({ context }: IContextProps) {
           setCompositeConfig(getCompositeConfig());
           break;
 
-        case CellMetadata.configOverride.name: // ##ConfigOverride
+        case CSMagicCell.metadata.name: // ##CSMagic
           // 셀 실행 > Client-side Magic Command
-          setOverriddenConfig(change.newValue as CellMetadata.IConfigOverride);
+          setCsMagic(change.newValue as CSMagicCell.IData);
           setCompositeConfig(getCompositeConfig());
           break;
 
-        case CellMetadata.configOverride.dirtyFlagName: // ##ConfigOverride-dirty
+        case CSMagicCell.metadata.dirtyFlagName: // ##CSMagic-dirty
           // 셀 실행 시 dirty 해결 (false)
           // source 수정 시 dirty 설정 (true)
-          setOverriddenConfigDirty(change.newValue as boolean);
+          setCsMagicDirty(change.newValue as boolean);
           break;
 
         case CellMetadata.code.name: // ##Code
@@ -178,8 +177,8 @@ function CodeCellTools({ context }: IContextProps) {
         context,
         config,
         updateConfig: updateAndApplyConfig,
-        overriddenConfig,
-        overriddenConfigDirty,
+        csMagic: csMagic,
+        csMagicDirty: csMagicDirty,
         compositeConfig,
         code,
         codeDirty,
@@ -199,23 +198,18 @@ function CodeCellTools({ context }: IContextProps) {
  * Config
  */
 function Config() {
-  const {
-    config,
-    updateConfig,
-    overriddenConfig,
-    overriddenConfigDirty,
-    compositeConfig
-  } = React.useContext(CodeCellContext)!;
+  const { config, updateConfig, csMagic, csMagicDirty, compositeConfig } =
+    React.useContext(CodeCellContext)!;
 
   return (
     <Group>
       <Group.Title>Config</Group.Title>
       <ConfigRow
         value={config.cache}
-        overriddenValue={overriddenConfig?.cache}
-        overriddenValueDirty={overriddenConfigDirty}
+        csMagicValue={csMagic?.cache}
+        csMagicValueDirty={csMagicDirty}
         compositeValue={compositeConfig.cache}
-        magic="##%cache"
+        csMagic="##%cache"
       >
         <NullableBoolean
           value={config.cache}
@@ -226,8 +220,8 @@ function Config() {
       </ConfigRow>
       <ConfigRow
         value={config.autoDependency}
-        overriddenValue={overriddenConfig?.autoDependency}
-        overriddenValueDirty={overriddenConfigDirty}
+        csMagicValue={undefined} // TODO: 제거
+        csMagicValueDirty={false}
         compositeValue={compositeConfig.autoDependency}
       >
         <NullableBoolean
@@ -241,10 +235,10 @@ function Config() {
       </ConfigRow>
       <ConfigRow
         value={config.skip}
-        overriddenValue={overriddenConfig?.skip}
-        overriddenValueDirty={overriddenConfigDirty}
+        csMagicValue={csMagic?.skip}
+        csMagicValueDirty={csMagicDirty}
         compositeValue={compositeConfig.skip}
-        magic="##%skip"
+        csMagic="##%skip"
       >
         <Boolean_
           value={config.skip}
@@ -260,19 +254,19 @@ function Config() {
 interface IConfigRowProps<T> {
   children: React.ReactNode;
   value: T;
-  overriddenValue: T | undefined;
-  overriddenValueDirty: boolean;
   compositeValue: NonNullable<T>;
-  magic?: string;
+  csMagicValue?: T | undefined;
+  csMagicValueDirty?: boolean;
+  csMagic?: string;
 }
 
 function ConfigRow<T>({
   children,
   value,
-  overriddenValue,
-  overriddenValueDirty,
   compositeValue,
-  magic
+  csMagicValue,
+  csMagicValueDirty,
+  csMagic
 }: IConfigRowProps<T>) {
   const statusType = compositeValue ? 'ok' : 'no';
   const comments: React.ReactNode[] = [];
@@ -282,20 +276,20 @@ function ConfigRow<T>({
     const applyStr = compositeValue ? 'enabled' : 'disabled';
 
     // client-side magic command로 config overridden
-    const overriddenApplied = overriddenValue === compositeValue;
-    if (overriddenApplied && magic) {
-      comments.push(`${applyStr} by '${magic}' command.`);
+    const csmagicApplied = csMagicValue === compositeValue;
+    if (csmagicApplied && csMagic) {
+      comments.push(`${applyStr} by '${csMagic}' command.`);
     }
 
     // settings에 의해 config overridden
-    const settingApplied = !overriddenApplied;
+    const settingApplied = !csmagicApplied;
     if (settingApplied) {
       comments.push(`${applyStr} by settings.`);
     }
   }
-  if (overriddenValueDirty && magic) {
+  if (csMagicValueDirty && csMagic) {
     // client-side magic command로 config 변경될 가능성 있으면 알림
-    comments.push(`can be overridden by '${magic}' command.`);
+    comments.push(`can be overridden by '${csMagic}' command.`);
   }
 
   return (

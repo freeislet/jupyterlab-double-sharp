@@ -7,7 +7,7 @@ import { CellStyle } from './style';
 import { CellActions } from './actions';
 import { CellDictionary } from './dictionary';
 import { ExecutionActions } from '../execution';
-import { CSMagicExecutor } from '../cs-magic';
+import { CSMagic, CSMagicCell } from '../cs-magic';
 import { CodeInspector } from '../code';
 import { metadataKeys } from '../const';
 
@@ -22,12 +22,10 @@ export function setupCellActions() {
 
       // 셀 실행 준비
       for (const cell of args.cells) {
-        /**
-         * ##% client-side magic command 실행
-         * - ##ConfigOverride metadata 업데이트 (skip, cache, ...)
-         * - load -> 셀 추가
-         */
-        CSMagicExecutor.execute(cell.model);
+        // ##% client-side magic command 실행
+        // - ##CSMagic metadata 업데이트 (skip, cache, ...)
+        // - load: 셀 추가
+        CSMagic.execute(cell.model);
       }
     }
   );
@@ -50,7 +48,7 @@ export function setupCellActions() {
       const cell = CellDictionary.global.getBySharedModel(sharedModel);
       const model = cell?.model;
       if (model) {
-        CellMetadata.configOverride.setDirty(model);
+        CSMagicCell.metadata.setDirty(model);
         CellMetadata.code.setDirty(model);
       }
     }
@@ -64,7 +62,7 @@ export function setupCellActions() {
       const cell = CellDictionary.global.getByModel(model);
       const styleRelevantKeys = [
         metadataKeys.config,
-        CellMetadata.configOverride.name,
+        metadataKeys.csmagic,
         CellMetadata.execution.name
       ];
       if (cell && styleRelevantKeys.includes(change.key)) {

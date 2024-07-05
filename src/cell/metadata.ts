@@ -1,4 +1,3 @@
-import { CellConfig } from './config';
 import { CellCode } from './code';
 import { ICodeVariables } from '../code';
 import { MetadataGroup, MetadataGroupDirtyable } from '../utils/metadata';
@@ -9,10 +8,6 @@ export namespace CellMetadata {
     parentId?: string;
     generated?: boolean;
   }
-
-  export type IConfig = CellConfig.IData;
-
-  export type IConfigOverride = Partial<IConfig>;
 
   export type ICode = ICodeVariables;
 
@@ -44,14 +39,6 @@ export class CellMetadata {
     return Private.cell;
   }
 
-  // static get config(): MetadataGroup<CellMetadata.IConfig> {
-  //   return Private.config;
-  // }
-
-  static get configOverride(): MetadataGroupDirtyable<CellMetadata.IConfigOverride> {
-    return Private.configOverride;
-  }
-
   static get code(): MetadataGroupDirtyable<CellMetadata.ICode> {
     return Private.code;
   }
@@ -65,20 +52,6 @@ export class CellMetadata {
 
 namespace Private {
   export const cell = new MetadataGroup<CellMetadata.ICell>('##Cell', {});
-  // export const config = new MetadataGroup<CellMetadata.IConfig>(
-  //   '##Config',
-  //   {
-  //     skip: false,
-  //     cache: null,
-  //     autoDependency: null
-  //   },
-  //   true
-  // );
-  export const configOverride =
-    new MetadataGroupDirtyable<CellMetadata.IConfigOverride>(
-      '##ConfigOverride',
-      {}
-    );
   export const code = new MetadataGroupDirtyable<CellMetadata.ICode>('##Code', {
     variables: [],
     unboundVariables: []

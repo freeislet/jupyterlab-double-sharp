@@ -12,5 +12,6 @@ export const selectors = {
 };
 
 export const metadataKeys = {
-  config: '##Config'
+  config: '##Config',
+  csmagic: '##CSMagic'
 };

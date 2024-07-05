@@ -16,6 +16,7 @@ import { Settings } from './settings';
 import { Log } from './log';
 import { setupCellExtensions, setupCellActions } from './cell';
 import { setupCodeExtensions } from './code';
+import { setupClientSideMagic } from './cs-magic';
 import { setupExecution } from './execution';
 import { setupEditor } from './editor';
 import { setupInspectors } from './inspector';
@@ -68,6 +69,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         setupCellExtensions(app);
         setupCellActions();
         setupCodeExtensions(app);
+        setupClientSideMagic();
         setupExecution();
         setupEditor(editorExtensionRegistry);
         setupInspectors(notebookTracker, labshell, layoutRestorer);

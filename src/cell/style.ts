@@ -9,7 +9,7 @@ export namespace CellStyle {
   export function update(cell: Cell) {
     /**
      * 재귀 호출 방지 위해 updating 플래그 확인
-     * CellStyle.update -> CellMetadata.configOverride 업데이트 -> metadataChanged 시그널
+     * CellStyle.update -> CSMagicCell.metadata 업데이트 -> metadataChanged 시그널
      * -> CellStyle.update 다시 호출
      */
     if (updating) return;

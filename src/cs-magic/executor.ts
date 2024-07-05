@@ -1,57 +1,56 @@
 import { ICellModel } from '@jupyterlab/cells';
 
-import { CSMagic } from './commands';
-import { CellMetadata } from '../cell/metadata';
+import { ICommand } from './command';
+import { CSMagicCell } from './cell';
 import { CellDictionary } from '../cell';
-import { Settings } from '../settings';
 import { matchAllStatements, tokenize } from '../utils/statement';
 
 export class CSMagicExecutor {
-  static commands = new Map<string, CSMagic.ICommand>();
+  private _commands = new Map<string, ICommand>();
 
-  static {
-    this._register(new CSMagic.Skip());
-    this._register(new CSMagic.Cache());
-
-    CellMetadata.configOverride.setValidChecker((model: ICellModel) => {
-      return Settings.data.enableCSMagic;
-    });
-    CellMetadata.configOverride.setDirtyResolver((model: ICellModel) => {
-      CSMagicExecutor.executeConfig(model);
-    });
+  private _enabled = true;
+  get enabled(): boolean {
+    return this._enabled;
+  }
+  set enabled(value: boolean) {
+    this._enabled = value;
   }
 
-  private static _register(command: CSMagic.ICommand) {
-    this.commands.set('%' + command.name, command);
+  constructor(commands: ICommand[]) {
+    commands.forEach((command: ICommand) => this._register(command));
   }
 
-  static execute(model: ICellModel) {
-    if (!Settings.data.enableCSMagic) return;
+  _register(command: ICommand) {
+    this._commands.set('%' + command.name, command);
+  }
+
+  execute(model: ICellModel) {
+    if (!this.enabled) return;
 
     this.executeConfig(model);
     this.executeGeneral(model);
   }
 
-  static executeGeneral(model: ICellModel) {
-    if (!Settings.data.enableCSMagic) return;
+  executeGeneral(model: ICellModel) {
+    if (!this.enabled) return;
 
     this._execute(model, command => command.type === 'general');
   }
 
-  static executeConfig(model: ICellModel) {
-    if (!Settings.data.enableCSMagic) return;
+  executeConfig(model: ICellModel) {
+    if (!this.enabled) return;
 
     this._execute(model, command => command.type === 'config');
   }
 
-  private static _execute(
+  private _execute(
     model: ICellModel,
-    predicate?: (command: CSMagic.ICommand) => boolean
+    predicate?: (command: ICommand) => boolean
   ) {
     const cell = CellDictionary.global.getByModel(model);
     if (!cell) return;
 
-    CellMetadata.configOverride.deferUpdate();
+    CSMagicCell.metadata.deferUpdate();
 
     const matches = matchAllStatements(cell);
     for (const match of matches) {
@@ -60,13 +59,13 @@ export class CSMagicExecutor {
       }
     }
 
-    CellMetadata.configOverride.flushUpdate([model]);
+    CSMagicCell.metadata.flushUpdate([model]);
   }
 
-  private static _executeStatement(
+  private _executeStatement(
     model: ICellModel,
     statement: string,
-    predicate?: (command: CSMagic.ICommand) => boolean
+    predicate?: (command: ICommand) => boolean
   ) {
     // Log.debug(statement);
 
@@ -74,7 +73,7 @@ export class CSMagicExecutor {
     if (!tokens.length) return;
 
     const commandKey = tokens[0];
-    const command = this.commands.get(commandKey);
+    const command = this._commands.get(commandKey);
     if (!command) return;
     if (predicate && !predicate(command)) return;
 

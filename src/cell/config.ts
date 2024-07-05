@@ -1,7 +1,7 @@
 import { ICellModel } from '@jupyterlab/cells';
 import merge from 'lodash.merge';
 
-import { CellMetadata } from './metadata';
+import { CSMagicCell } from '../cs-magic';
 import { Settings } from '../settings';
 import { metadataKeys } from '../const';
 import { MetadataGroup } from '../utils/metadata';
@@ -50,11 +50,11 @@ export namespace CellConfig {
     };
 
     const config = CellConfig.metadata.getCoalesced(model);
-    const override = CellMetadata.configOverride.get(model, checkDirty);
+    const csmagic = CSMagicCell.metadata.get(model, checkDirty);
     const composite = merge(
       settings,
       removeNull(config),
-      removeNull(override),
+      removeNull(csmagic),
       forcedSettings
     );
     Log.debug('cell config', composite);
