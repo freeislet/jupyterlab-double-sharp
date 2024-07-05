@@ -10,8 +10,8 @@ export class CSMagicExecutor {
   static commands = new Map<string, CSMagic.ICommand>();
 
   static {
-    this.register(new CSMagic.Skip());
-    this.register(new CSMagic.Cache());
+    this._register(new CSMagic.Skip());
+    this._register(new CSMagic.Cache());
 
     CellMetadata.configOverride.setValidChecker((model: ICellModel) => {
       return Settings.data.enableCSMagic;
@@ -21,24 +21,33 @@ export class CSMagicExecutor {
     });
   }
 
-  static register(command: CSMagic.ICommand) {
+  private static _register(command: CSMagic.ICommand) {
     this.commands.set('%' + command.name, command);
   }
 
+  static execute(model: ICellModel) {
+    if (!Settings.data.enableCSMagic) return;
+
+    this.executeConfig(model);
+    this.executeGeneral(model);
+  }
+
   static executeGeneral(model: ICellModel) {
-    this.execute(model, command => command.type === 'general');
+    if (!Settings.data.enableCSMagic) return;
+
+    this._execute(model, command => command.type === 'general');
   }
 
   static executeConfig(model: ICellModel) {
-    this.execute(model, command => command.type === 'config');
+    if (!Settings.data.enableCSMagic) return;
+
+    this._execute(model, command => command.type === 'config');
   }
 
-  static execute(
+  private static _execute(
     model: ICellModel,
     predicate?: (command: CSMagic.ICommand) => boolean
   ) {
-    if (!Settings.data.enableCSMagic) return;
-
     const cell = CellDictionary.global.getByModel(model);
     if (!cell) return;
 
