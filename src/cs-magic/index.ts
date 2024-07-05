@@ -2,14 +2,14 @@ import { ICellModel } from '@jupyterlab/cells';
 
 import { CSMagicExecutor } from './executor';
 import * as Commands from './commands';
-import { CSMagicCell } from './cell';
+import { CSMagicConfig } from './config';
 import { Settings } from '../settings';
 
 export function setupClientSideMagic() {
-  CSMagicCell.metadata.setValidChecker((model: ICellModel) => {
+  CSMagicConfig.metadata.setValidChecker((model: ICellModel) => {
     return CSMagic.executor.enabled;
   });
-  CSMagicCell.metadata.setDirtyResolver((model: ICellModel) => {
+  CSMagicConfig.metadata.setDirtyResolver((model: ICellModel) => {
     CSMagic.executor.executeConfig(model);
   });
 
@@ -29,4 +29,4 @@ export class CSMagic {
   }
 }
 
-export { CSMagicCell, CSMagicExecutor };
+export { CSMagicConfig as CSMagicCell, CSMagicExecutor };

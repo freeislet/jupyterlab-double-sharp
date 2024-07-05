@@ -1,7 +1,7 @@
 import { ICellModel } from '@jupyterlab/cells';
 
 import { ICommand } from './command';
-import { CSMagicCell } from './cell';
+import { CSMagicConfig } from './config';
 import { CellDictionary } from '../cell';
 import { matchAllStatements, tokenize } from '../utils/statement';
 
@@ -40,7 +40,9 @@ export class CSMagicExecutor {
   executeConfig(model: ICellModel) {
     if (!this.enabled) return;
 
+    CSMagicConfig.metadata.deferUpdate();
     this._execute(model, command => command.type === 'config');
+    CSMagicConfig.metadata.flushUpdate([model]);
   }
 
   private _execute(
@@ -50,16 +52,12 @@ export class CSMagicExecutor {
     const cell = CellDictionary.global.getByModel(model);
     if (!cell) return;
 
-    CSMagicCell.metadata.deferUpdate();
-
     const matches = matchAllStatements(cell);
     for (const match of matches) {
       if (match.isCommand && match.statement) {
         this._executeStatement(model, match.statement, predicate);
       }
     }
-
-    CSMagicCell.metadata.flushUpdate([model]);
   }
 
   private _executeStatement(

@@ -1,7 +1,7 @@
 import { ICellModel } from '@jupyterlab/cells';
 
 import { GeneralCommand, ConfigCommand } from './command';
-import { CSMagicCell } from './cell';
+import { CSMagicConfig } from './config';
 import { paramAsBoolean } from '../utils/statement';
 
 export class SkipCommand extends ConfigCommand {
@@ -10,7 +10,7 @@ export class SkipCommand extends ConfigCommand {
   }
 
   execute(model: ICellModel) {
-    CSMagicCell.metadata.update(model, { skip: true });
+    CSMagicConfig.metadata.update(model, { skip: true });
   }
 }
 
@@ -21,7 +21,7 @@ export class CacheCommand extends ConfigCommand {
 
   execute(model: ICellModel, flag?: string) {
     const cache = !flag || paramAsBoolean(flag, true);
-    CSMagicCell.metadata.update(model, { cache: cache });
+    CSMagicConfig.metadata.update(model, { cache: cache });
   }
 }
 
