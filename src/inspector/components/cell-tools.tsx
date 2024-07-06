@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { CellContext, CellMetadata, CellConfig, CellCode } from '../../cell';
+import { CellContext, CellConfig, CellCode, CellExecution } from '../../cell';
 import { CSMagicCell } from '../../cs-magic';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
@@ -43,7 +43,7 @@ interface ICodeCellContext {
   code: CellCode.IData | undefined;
   codeDirty: boolean;
   updateCode: () => void;
-  execution: CellMetadata.IExecution | undefined;
+  execution: CellExecution.IData | undefined;
 }
 
 const CodeCellContext = React.createContext<ICodeCellContext | undefined>(
@@ -97,7 +97,7 @@ function CodeCellTools({ context }: IContextProps) {
   }, [context]);
 
   // execution status, callback
-  const [execution, setExecution] = React.useState<CellMetadata.IExecution>();
+  const [execution, setExecution] = React.useState<CellExecution.IData>();
 
   // context 초기화
   React.useEffect(() => {
@@ -107,7 +107,7 @@ function CodeCellTools({ context }: IContextProps) {
     setCompositeConfig(getCompositeConfig());
     setCode(CellCode.metadata.get(model, false));
     setCodeDirty(CellCode.metadata.isDirty(model));
-    setExecution(CellMetadata.execution.get(model));
+    setExecution(CellExecution.metadata.get(model));
   }, [context]);
 
   // Settings 변경 시 state 업데이트
@@ -160,7 +160,7 @@ function CodeCellTools({ context }: IContextProps) {
           setCodeDirty(change.newValue as boolean);
           break;
 
-        case CellMetadata.execution.name: // ##Execution
+        case CellExecution.metadata.name: // ##Execution
           // 셀 실행
           setExecution(change.newValue);
           break;
@@ -220,8 +220,6 @@ function Config() {
       </ConfigRow>
       <ConfigRow
         value={config.autoDependency}
-        csMagicValue={undefined} // TODO: 제거
-        csMagicValueDirty={false}
         compositeValue={compositeConfig.autoDependency}
       >
         <NullableBoolean

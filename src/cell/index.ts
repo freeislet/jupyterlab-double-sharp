@@ -2,7 +2,6 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { CellExtension } from './tracker';
 import { CellContext } from './context';
-import { CellMetadata } from './metadata';
 import { CellCode } from './code';
 import { CellStyle } from './style';
 import { CellActions } from './actions';
@@ -64,7 +63,7 @@ export function setupCellActions() {
       const styleRelevantKeys = [
         metadataKeys.config,
         metadataKeys.csmagic,
-        CellMetadata.execution.name
+        metadataKeys.execution
       ];
       if (cell && styleRelevantKeys.includes(change.key)) {
         CellStyle.update(cell);
@@ -73,6 +72,7 @@ export function setupCellActions() {
   );
 }
 
-export { CellContext, CellMetadata, CellCode, CellActions, CellDictionary };
+export { CellContext, CellCode, CellActions, CellDictionary };
 export { CellConfig } from './config';
 export { CodeContext } from './code';
+export { CellExecution } from './execution';

@@ -1,7 +1,7 @@
 import { Cell } from '@jupyterlab/cells';
 
 import { CellConfig } from './config';
-import { CellMetadata } from './metadata';
+import { CellExecution } from './execution';
 
 export namespace CellStyle {
   let updating = false;
@@ -16,7 +16,7 @@ export namespace CellStyle {
     updating = true;
 
     const config = CellConfig.get(cell.model);
-    const execution = CellMetadata.execution.get(cell.model);
+    const execution = CellExecution.metadata.get(cell.model);
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
       'jp-DoubleSharp-skipped': execution?.skipped,
