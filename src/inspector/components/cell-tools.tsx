@@ -324,7 +324,8 @@ function Code() {
 
   // 실행을 통해 dirty 상태 해결되는지 여부에 따라 "execute the cell" 문구 표시
   const executionMatters =
-    compositeConfig.cache || compositeConfig.autoDependency;
+    (compositeConfig.cache || compositeConfig.autoDependency) &&
+    !compositeConfig.skip;
 
   return (
     <Group className="jp-DoubleSharp-space-y-8">
