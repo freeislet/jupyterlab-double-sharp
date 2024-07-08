@@ -1,9 +1,10 @@
 import { ICellModel } from '@jupyterlab/cells';
 
 import { CSMagic, ICSMagicData } from '../cs-magic';
+import { CellConfig } from './config';
+import { Settings } from '../settings';
 import { MetadataGroupDirtyable } from '../utils/metadata';
 import { metadataKeys } from '../const';
-import { Settings } from '../settings';
 
 export function setupCellCSMagic() {
   CSMagic.executor.metadata = CellCSMagic.metadata;
@@ -33,8 +34,11 @@ export class CellCSMagic {
 
 export namespace CellCSMagic {
   export function execute(model: ICellModel) {
-    if (Settings.data.enableCSMagic) {
-      CSMagic.executor.execute(model);
-    }
+    if (!Settings.data.enableCSMagic) return;
+
+    const config = CellConfig.get(model);
+    if (config.skip) return;
+
+    CSMagic.executor.execute(model);
   }
 }
