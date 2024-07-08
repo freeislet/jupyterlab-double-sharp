@@ -1,48 +1,36 @@
 import { ICellModel } from '@jupyterlab/cells';
 
 import { ICommand } from './command';
-import { CSMagicConfig } from './config';
+import { CSMagicMetadata } from './metadata';
 import { CellDictionary } from '../cell';
 import { matchAllStatements, tokenize } from '../utils/statement';
 
 export class CSMagicExecutor {
   private _commands = new Map<string, ICommand>();
 
-  private _enabled = true;
-  get enabled(): boolean {
-    return this._enabled;
-  }
-  set enabled(value: boolean) {
-    this._enabled = value;
-  }
+  metadata?: CSMagicMetadata;
 
   constructor(commands: ICommand[]) {
-    commands.forEach((command: ICommand) => this._register(command));
+    commands.forEach((command: ICommand) => this.register(command));
   }
 
-  _register(command: ICommand) {
+  register(command: ICommand) {
     this._commands.set('%' + command.name, command);
   }
 
   execute(model: ICellModel) {
-    if (!this.enabled) return;
-
     this.executeConfig(model);
     this.executeGeneral(model);
   }
 
   executeGeneral(model: ICellModel) {
-    if (!this.enabled) return;
-
     this._execute(model, command => command.type === 'general');
   }
 
   executeConfig(model: ICellModel) {
-    if (!this.enabled) return;
-
-    CSMagicConfig.metadata.deferUpdate();
+    this.metadata?.deferUpdate();
     this._execute(model, command => command.type === 'config');
-    CSMagicConfig.metadata.flushUpdate([model]);
+    this.metadata?.flushUpdate([model]);
   }
 
   private _execute(
@@ -75,6 +63,6 @@ export class CSMagicExecutor {
     if (!command) return;
     if (predicate && !predicate(command)) return;
 
-    command.execute(model, ...tokens.slice(1));
+    command.execute(model, this.metadata, tokens.slice(1));
   }
 }

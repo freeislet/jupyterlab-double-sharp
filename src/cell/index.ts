@@ -2,20 +2,23 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { CellExtension } from './tracker';
 import { CellContext } from './context';
+import { CellCSMagic, setupCellCSMagic } from './cs-magic';
 import { CellCode } from './code';
 import { CellStyle } from './style';
 import { CellActions } from './actions';
 import { CellDictionary } from './dictionary';
 import { ExecutionActions } from '../execution';
-import { CSMagic, CSMagicCell } from '../cs-magic';
 import { CodeInspector } from '../code';
 import { metadataKeys } from '../const';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
+
+  setupCellCSMagic();
+  setupCellActions();
 }
 
-export function setupCellActions() {
+function setupCellActions() {
   ExecutionActions.beforeExecution.connect(
     (_, args: ExecutionActions.IParams) => {
       // Log.debug('beforeExecution', args);
@@ -25,7 +28,7 @@ export function setupCellActions() {
         // ##% client-side magic command 실행
         // - ##CSMagic metadata 업데이트 (skip, cache, ...)
         // - load: 셀 추가
-        CSMagic.execute(cell.model);
+        CellCSMagic.execute(cell.model);
       }
     }
   );
@@ -48,7 +51,7 @@ export function setupCellActions() {
       const cell = CellDictionary.global.getBySharedModel(sharedModel);
       const model = cell?.model;
       if (model) {
-        CSMagicCell.metadata.setDirty(model);
+        CellCSMagic.metadata.setDirty(model);
         CellCode.metadata.setDirty(model);
       }
     }
@@ -72,7 +75,7 @@ export function setupCellActions() {
   );
 }
 
-export { CellContext, CellCode, CellActions, CellDictionary };
+export { CellContext, CellCSMagic, CellCode, CellActions, CellDictionary };
 export { CellConfig } from './config';
 export { CodeContext } from './code';
 export { CellExecution } from './execution';

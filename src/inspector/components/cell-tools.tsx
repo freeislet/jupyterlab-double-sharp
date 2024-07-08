@@ -1,7 +1,12 @@
 import * as React from 'react';
 
-import { CellContext, CellConfig, CellCode, CellExecution } from '../../cell';
-import { CSMagicCell } from '../../cs-magic';
+import {
+  CellContext,
+  CellConfig,
+  CellCSMagic,
+  CellCode,
+  CellExecution
+} from '../../cell';
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
@@ -37,7 +42,7 @@ interface ICodeCellContext {
   context: CellContext;
   config: CellConfig.IData;
   updateConfig: (config: Partial<CellConfig.IData>) => void;
-  csMagic: CSMagicCell.IData | undefined;
+  csMagic: CellCSMagic.IData | undefined;
   csMagicDirty: boolean;
   compositeConfig: NonNullableField<CellConfig.IData>;
   code: CellCode.IData | undefined;
@@ -77,7 +82,7 @@ function CodeCellTools({ context }: IContextProps) {
 
   // cs-magic state
   // NOTE: csMagicDirty true인 경우 compositeConfig invalid 가능 (checkDirty=false로 get하므로)
-  const [csMagic, setCsMagic] = React.useState<CSMagicCell.IData>();
+  const [csMagic, setCsMagic] = React.useState<CellCSMagic.IData>();
   const [csMagicDirty, setCsMagicDirty] = React.useState(false);
 
   // settings, cell config 통합 config states
@@ -102,8 +107,8 @@ function CodeCellTools({ context }: IContextProps) {
   // context 초기화
   React.useEffect(() => {
     setConfig(CellConfig.metadata.getCoalesced(model));
-    setCsMagic(CSMagicCell.metadata.get(model, false));
-    setCsMagicDirty(CSMagicCell.metadata.isDirty(model));
+    setCsMagic(CellCSMagic.metadata.get(model, false));
+    setCsMagicDirty(CellCSMagic.metadata.isDirty(model));
     setCompositeConfig(getCompositeConfig());
     setCode(CellCode.metadata.get(model, false));
     setCodeDirty(CellCode.metadata.isDirty(model));
@@ -136,13 +141,13 @@ function CodeCellTools({ context }: IContextProps) {
           setCompositeConfig(getCompositeConfig());
           break;
 
-        case CSMagicCell.metadata.name: // ##CSMagic
+        case CellCSMagic.metadata.name: // ##CSMagic
           // 셀 실행 > Client-side Magic Command
-          setCsMagic(change.newValue as CSMagicCell.IData);
+          setCsMagic(change.newValue as CellCSMagic.IData);
           setCompositeConfig(getCompositeConfig());
           break;
 
-        case CSMagicCell.metadata.dirtyFlagName: // ##CSMagic-dirty
+        case CellCSMagic.metadata.dirtyFlagName: // ##CSMagic-dirty
           // 셀 실행 시 dirty 해결 (false)
           // source 수정 시 dirty 설정 (true)
           setCsMagicDirty(change.newValue as boolean);
