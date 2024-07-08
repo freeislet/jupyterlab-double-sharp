@@ -27,7 +27,9 @@ export class CSMagicExecutor {
     this._execute(model, command => command.type === 'general');
   }
 
-  executeConfig(model: ICellModel) {
+  executeConfig(model: ICellModel, checkDirty = true) {
+    if (checkDirty && this.metadata?.isDirty(model) === false) return;
+
     this.metadata?.deferUpdate();
     this._execute(model, command => command.type === 'config');
     this.metadata?.flushUpdate([model]);
