@@ -22,7 +22,7 @@ export class CellTracker extends NotebookExt {
 
     panel.context.model.cells.changed.connect(this._onCellsChanged, this);
     // panel.context.ready.then(() => this.updateStyles());
-    panel.revealed.then(() => this.updateStyles()); // NOTE: cell.editor 참조 위해 revealed 사용
+    panel.revealed.then(() => this.updateStyles()); // NOTE: cell.editor 참조 위해 revealed 사용하지만 완벽하진 않음
     Settings.executionChanged.connect((_, change) => {
       this.updateStyles();
     });
