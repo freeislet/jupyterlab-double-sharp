@@ -19,20 +19,6 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
 }
 
 function setupCellActions() {
-  ExecutionActions.beforeExecution.connect(
-    (_, args: ExecutionActions.IParams) => {
-      // Log.debug('beforeExecution', args);
-
-      // 셀 실행 준비
-      for (const cell of args.cells) {
-        // ##% client-side magic command 실행
-        // - ##CSMagic metadata 업데이트 (skip, cache, ...)
-        // - load: 셀 추가
-        CellCSMagic.execute(cell.model);
-      }
-    }
-  );
-
   ExecutionActions.afterExecution.connect(
     (_, args: ExecutionActions.IParams) => {
       // Log.debug('afterExecution', args);
