@@ -66,14 +66,3 @@ export class CellCSMagic {
     return CellCSMagic._metadata;
   }
 }
-
-export namespace CellCSMagic {
-  export function execute(model: ICellModel) {
-    if (!Settings.data.enableCSMagic) return;
-
-    const config = CellConfig.get(model);
-    if (config.skip) return;
-
-    CSMagic.executor.execute(model);
-  }
-}
