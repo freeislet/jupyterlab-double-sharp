@@ -46,7 +46,12 @@ export function setupCellCSMagic() {
       const cell = CellDictionary.global.getBySharedModel(sharedModel);
       const model = cell?.model;
       if (model) {
-        CellCSMagic.metadata.setDirty(model);
+        if (Settings.data.enableCSMagic) {
+          // cs-magic config 즉시 업데이트
+          CSMagic.executor.executeConfig(model, false);
+        } else {
+          CellCSMagic.metadata.setDirty(model);
+        }
       }
     }
   );
