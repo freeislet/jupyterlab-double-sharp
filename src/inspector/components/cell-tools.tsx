@@ -194,8 +194,22 @@ function CodeCellTools({ context }: IContextProps) {
       <Config />
       <Code />
       <Execution />
-      {context.cell.model.id}
+      <Cell />
     </CodeCellContext.Provider>
+  );
+}
+
+/**
+ * Cell 일반 정보
+ */
+function Cell() {
+  const { context } = React.useContext(CodeCellContext)!;
+
+  return (
+    <Group>
+      <Group.Title>Cell</Group.Title>
+      {context.cell.model.id}
+    </Group>
   );
 }
 
