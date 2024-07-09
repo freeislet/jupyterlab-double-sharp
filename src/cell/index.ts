@@ -4,8 +4,6 @@ import { CellExtension } from './tracker';
 import { setupCellCSMagic } from './cs-magic';
 import { setupCellCode } from './code';
 import { setupCellStyle } from './style';
-import { ExecutionActions } from '../execution';
-import { CodeInspector } from '../code';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
@@ -13,19 +11,6 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
   setupCellCSMagic();
   setupCellCode();
   setupCellStyle();
-  setupCellActions();
-}
-
-function setupCellActions() {
-  ExecutionActions.afterExecution.connect(
-    (_, args: ExecutionActions.IParams) => {
-      // Log.debug('afterExecution', args);
-
-      // kernel variables 업데이트
-      const inspector = CodeInspector.getByCells(args.cells);
-      inspector?.updateKernelVariables();
-    }
-  );
 }
 
 export { CellContext } from './context';
