@@ -3,7 +3,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CellExtension } from './tracker';
 import { CellContext } from './context';
 import { CellCSMagic, setupCellCSMagic } from './cs-magic';
-import { CellCode } from './code';
+import { CellCode, setupCellCode } from './code';
 import { CellStyle } from './style';
 import { CellActions } from './actions';
 import { CellDictionary } from './dictionary';
@@ -15,6 +15,7 @@ export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
 
   setupCellCSMagic();
+  setupCellCode();
   setupCellActions();
 }
 
@@ -26,20 +27,6 @@ function setupCellActions() {
       // kernel variables 업데이트
       const inspector = CodeInspector.getByCells(args.cells);
       inspector?.updateKernelVariables();
-    }
-  );
-
-  CellActions.sourceChanged.connect(
-    (_, args: CellActions.ISourceChangeParams) => {
-      // Log.debug('cell sourceChanged', args);
-
-      const { sharedModel } = args;
-      const cell = CellDictionary.global.getBySharedModel(sharedModel);
-      const model = cell?.model;
-      if (model) {
-        CellCSMagic.metadata.setDirty(model);
-        CellCode.metadata.setDirty(model);
-      }
     }
   );
 

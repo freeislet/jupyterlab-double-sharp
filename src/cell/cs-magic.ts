@@ -4,6 +4,8 @@ import { CellConfig } from './config';
 import { CSMagic, ICSMagicData } from '../cs-magic';
 import { Settings } from '../settings';
 import { ExecutionActions } from '../execution';
+import { CellActions } from './actions';
+import { CellDictionary } from './dictionary';
 import { MetadataGroupDirtyable } from '../utils/metadata';
 import { metadataKeys } from '../const';
 
@@ -32,6 +34,19 @@ export function setupCellCSMagic() {
           // (주로) 일반 magic 실행 (load, ...)
           CSMagic.executor.execute(cell.model);
         }
+      }
+    }
+  );
+
+  CellActions.sourceChanged.connect(
+    (_, args: CellActions.ISourceChangeParams) => {
+      // Log.debug('cell sourceChanged', args);
+
+      const { sharedModel } = args;
+      const cell = CellDictionary.global.getBySharedModel(sharedModel);
+      const model = cell?.model;
+      if (model) {
+        CellCSMagic.metadata.setDirty(model);
       }
     }
   );

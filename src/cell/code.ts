@@ -2,6 +2,8 @@ import { Cell, CodeCell } from '@jupyterlab/cells';
 import { StreamType, MultilineString } from '@jupyterlab/nbformat';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 
+import { CellActions } from './actions';
+import { CellDictionary } from './dictionary';
 import { CellExecution, ExecutionPlan } from './execution';
 import { CodeInspector, ICodeVariables } from '../code';
 import { metadataKeys } from '../const';
@@ -10,6 +12,21 @@ import { isCodeCell } from '../utils/cell';
 import { Cache } from '../utils/cache';
 import { CellError } from '../utils/error';
 import { stringFrom } from '../utils/object';
+
+export function setupCellCode() {
+  CellActions.sourceChanged.connect(
+    (_, args: CellActions.ISourceChangeParams) => {
+      // Log.debug('cell sourceChanged', args);
+
+      const { sharedModel } = args;
+      const cell = CellDictionary.global.getBySharedModel(sharedModel);
+      const model = cell?.model;
+      if (model) {
+        CellCode.metadata.setDirty(model);
+      }
+    }
+  );
+}
 
 export namespace CellCode {
   export interface IData extends ICodeVariables {}
