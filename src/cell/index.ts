@@ -1,21 +1,18 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { CellExtension } from './tracker';
-import { CellContext } from './context';
-import { CellCSMagic, setupCellCSMagic } from './cs-magic';
-import { CellCode, setupCellCode } from './code';
-import { CellStyle } from './style';
-import { CellActions } from './actions';
-import { CellDictionary } from './dictionary';
+import { setupCellCSMagic } from './cs-magic';
+import { setupCellCode } from './code';
+import { setupCellStyle } from './style';
 import { ExecutionActions } from '../execution';
 import { CodeInspector } from '../code';
-import { metadataKeys } from '../const';
 
 export function setupCellExtensions(app: JupyterFrontEnd) {
   app.docRegistry.addWidgetExtension('Notebook', new CellExtension());
 
   setupCellCSMagic();
   setupCellCode();
+  setupCellStyle();
   setupCellActions();
 }
 
@@ -29,26 +26,13 @@ function setupCellActions() {
       inspector?.updateKernelVariables();
     }
   );
-
-  CellActions.metadataChanged.connect(
-    (_, args: CellActions.IMapChangeParams) => {
-      Log.debug('cell metadataChanged', args);
-
-      const { model, change } = args;
-      const cell = CellDictionary.global.getByModel(model);
-      const styleRelevantKeys = [
-        metadataKeys.config,
-        metadataKeys.csmagic,
-        metadataKeys.execution
-      ];
-      if (cell && styleRelevantKeys.includes(change.key)) {
-        CellStyle.update(cell);
-      }
-    }
-  );
 }
 
-export { CellContext, CellCSMagic, CellCode, CellActions, CellDictionary };
+export { CellContext } from './context';
 export { CellConfig } from './config';
-export { CodeContext } from './code';
+export { CellCSMagic } from './cs-magic';
+export { CellCode, CodeContext } from './code';
 export { CellExecution } from './execution';
+export { CellStyle } from './style';
+export { CellActions } from './actions';
+export { CellDictionary } from './dictionary';

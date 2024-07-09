@@ -2,6 +2,28 @@ import { Cell } from '@jupyterlab/cells';
 
 import { CellConfig } from './config';
 import { CellExecution } from './execution';
+import { CellActions } from './actions';
+import { CellDictionary } from './dictionary';
+import { metadataKeys } from '../const';
+
+export function setupCellStyle() {
+  CellActions.metadataChanged.connect(
+    (_, args: CellActions.IMapChangeParams) => {
+      Log.debug('cell metadataChanged', args);
+
+      const { model, change } = args;
+      const cell = CellDictionary.global.getByModel(model);
+      const styleRelevantKeys = [
+        metadataKeys.config,
+        metadataKeys.csmagic,
+        metadataKeys.execution
+      ];
+      if (cell && styleRelevantKeys.includes(change.key)) {
+        CellStyle.update(cell);
+      }
+    }
+  );
+}
 
 export namespace CellStyle {
   let updating = false;
