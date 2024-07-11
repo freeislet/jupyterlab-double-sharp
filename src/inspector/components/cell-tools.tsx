@@ -356,7 +356,7 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <ListRow header="Out Variables:" data={code?.variables} />
+      <ListRow header="Variables:" data={code?.variables} />
       <ListRow header="Unbound Vars:" data={code?.unboundVariables} />
     </Group>
   );
@@ -370,9 +370,9 @@ function Execution() {
 
   return (
     <Group className="jp-DoubleSharp-space-y-8">
-      <Group.Title>Execution Result</Group.Title>
+      <Group.Title>Execution Plan</Group.Title>
       {!execution ? (
-        <Block type="info">Execution info does not exist.</Block>
+        <Block type="info">Execution plan does not exist.</Block>
       ) : execution.skipped ? (
         <Block type="warning" iconType="info">
           Execution skipped.
@@ -382,24 +382,24 @@ function Execution() {
           <Block type="success">
             Execution skipped by <strong>cache</strong>.
           </Block>
-          <ListRow header="Cached Vars:" data={execution?.outVariables} />
+          <ListRow header="Cached Vars:" data={execution?.code?.variables} />
         </>
       ) : (
         <>
-          <HeaderRow header="Executed Cell Count:">
-            <span>{execution?.cells?.length}</span>
+          <HeaderRow header="Dependent Cell Count:">
+            <span>{execution?.dependentCells?.length}</span>
           </HeaderRow>
-          {/* <ListRow header="Out Variables:" data={execution?.outVariables} /> */}
-          {/* {execution?.dependency?.unresolvedCellVariables && (
+          <ListRow header="Variables:" data={execution?.code?.variables} />
+          {execution?.code?.unboundVariables && (
             <ListRow
-              header="Unresolved Cell Vars:"
-              data={execution?.dependency?.unresolvedCellVariables}
+              header="Unbound Vars:"
+              data={execution?.code?.unboundVariables}
             />
-          )} */}
-          {execution?.dependency?.unresolvedVariables && (
+          )}
+          {execution?.unresolvedVariables && (
             <ListRow
               header="Unresolved Vars:"
-              data={execution?.dependency?.unresolvedVariables}
+              data={execution?.unresolvedVariables}
             />
           )}
         </>

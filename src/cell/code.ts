@@ -30,13 +30,6 @@ export function setupCellCode() {
 
 export namespace CellCode {
   export interface IData extends ICodeVariables {}
-
-  export type IExecutionVariables = ICodeVariables & {
-    /**
-     * unboundVariables에서 kernel variables 제외한 변수들
-     */
-    unresolvedVariables: string[];
-  };
 }
 
 export class CellCode {
@@ -101,27 +94,30 @@ export class CodeContext {
   }
 
   /**
-   * ICode metadata + IExecutionVariables(unresolved variables) 조회
+   * Cell variables 중 uncached 리턴
    */
-  async getExecutionVariables(): Promise<CellCode.IExecutionVariables> {
-    const data = await this.getData();
-    const unresolvedVariables = this.inspector.filterNonKernelVariables(
-      data.unboundVariables
-    );
-    const execVars = { ...data, unresolvedVariables };
-    // console.debug('execution variables', execVars);
-    return execVars;
+  async getUncachedVariables(variables?: string[]): Promise<string[]> {
+    if (!variables) {
+      const data = await this.getData();
+      variables = data.variables;
+    }
+    return this.inspector.filterNonKernelVariables(variables);
   }
 
   /**
    * Cell variables cached 여부 리턴
    */
-  async isCached(): Promise<boolean> {
-    const data = await this.getData();
-    const uncachedVars = this.inspector.filterNonKernelVariables(
-      data.variables
-    );
+  async isCached(variables?: string[]): Promise<boolean> {
+    const uncachedVars = await this.getUncachedVariables(variables);
     return !uncachedVars.length;
+  }
+
+  /**
+   * Cell unbound variables 중 uncached 리턴
+   */
+  async getUncachedUnboundVariables(): Promise<string[]> {
+    const data = await this.getData();
+    return this.inspector.filterNonKernelVariables(data.unboundVariables);
   }
 
   /**
