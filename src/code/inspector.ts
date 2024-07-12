@@ -10,7 +10,7 @@ import { KernelExecutor } from './kernel';
 import { NotebookExt, NotebookExtDictionary } from '../utils/notebook';
 import { In, notIn } from '../utils/array';
 
-export interface ICodeVariables {
+export interface ICodeData {
   /**
    * 셀에서 정의하는 변수 목록
    */
@@ -90,27 +90,27 @@ export class CodeInspector extends NotebookExt {
     return nonKernelVars;
   }
 
-  async getCodeVariables(cell: CodeCell): Promise<ICodeVariables | undefined> {
-    return await this.getCodeVariablesFromKernel(cell.model);
+  async getCodeData(cell: CodeCell): Promise<ICodeData | undefined> {
+    return await this.getCodeDataFromKernel(cell.model);
   }
 
-  private async getCodeVariablesFromKernel(
+  private async getCodeDataFromKernel(
     model: ICodeCellModel
-  ): Promise<ICodeVariables | undefined> {
+  ): Promise<ICodeData | undefined> {
     const source = model.sharedModel.getSource();
     const result = await this.kernelExecutor.inspect(source);
     if (!result) return;
 
-    const vars: ICodeVariables = {
+    const data: ICodeData = {
       variables: result.stored_names,
       unboundVariables: result.unbound_names
     };
-    // Log.debug('code variables', vars);
-    return vars;
+    // Log.debug('code variables', data);
+    return data;
   }
 
   // deprecated
-  // private getCodeVariablesFromAst(cell: CodeCell): ICodeVariables {
+  // private getCodeDataFromAst(cell: CodeCell): ICodeData {
   //   const variables: string[] = [];
   //   const unboundVariables: string[] = [];
 

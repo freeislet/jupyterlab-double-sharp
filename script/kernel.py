@@ -110,9 +110,9 @@ class DoubleSharp:
                         codes.append(argval)
 
         return {
-            # stored_names -> ICodeVariables.variables
+            # stored_names -> ICodeData.variables
             "stored_names": list(stored_names),
-            # unbound_names -> ICodeVariables.unboundVariables
+            # unbound_names -> ICodeData.unboundVariables
             "unbound_names": list(unbound_names),
         }
 

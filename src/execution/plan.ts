@@ -81,7 +81,7 @@ export class ExecutionCells {
     // 셀 변수 테스트
     if (isCodeCell(cell)) {
       // CodeInspector.getByCell(cell)?.isCellCached(cell);
-      await CodeInspector.getByCell(cell)?.getCodeVariables(cell);
+      await CodeInspector.getByCell(cell)?.getCodeData(cell);
     }
 
     if (metadata.skip) {

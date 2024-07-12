@@ -5,7 +5,7 @@ import { IOutputAreaModel } from '@jupyterlab/outputarea';
 import { CellActions } from './actions';
 import { CellDictionary } from './dictionary';
 import { CellExecution, ExecutionPlan } from './execution';
-import { CodeInspector, ICodeVariables } from '../code';
+import { CodeInspector, ICodeData } from '../code';
 import { metadataKeys } from '../const';
 import { MetadataGroupDirtyable } from '../utils/metadata';
 import { isCodeCell } from '../utils/cell';
@@ -29,7 +29,7 @@ export function setupCellCode() {
 }
 
 export namespace CellCode {
-  export interface IData extends ICodeVariables {}
+  export type IData = ICodeData;
 }
 
 export class CellCode {
@@ -84,13 +84,13 @@ export class CodeContext {
    * ##Code metadata에 variables 정보 저장 및 리턴 (또는, 기존 metadata 조회))
    */
   async getData(): Promise<CellCode.IData> {
-    const cachedMetadata = CellCode.metadata.get(this.cell.model);
-    if (cachedMetadata) return cachedMetadata;
+    const cachedData = CellCode.metadata.get(this.cell.model);
+    if (cachedData) return cachedData;
 
-    const codeVars = await this.inspector.getCodeVariables(this.cell);
-    const metadata = CellCode.metadata.getCoalescedValue(codeVars);
-    CellCode.metadata.set(this.cell.model, metadata);
-    return metadata;
+    const codeData = await this.inspector.getCodeData(this.cell);
+    const data = CellCode.metadata.getCoalescedValue(codeData);
+    CellCode.metadata.set(this.cell.model, data);
+    return data;
   }
 
   /**

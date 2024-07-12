@@ -26,4 +26,4 @@ function setupCodeActions() {
 }
 
 export { CodeInspector };
-export { ICodeVariables } from './inspector';
+export { ICodeData } from './inspector';
