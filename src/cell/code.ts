@@ -5,8 +5,8 @@ import { CellDictionary } from './dictionary';
 import { CellConfig } from './config';
 import { CellExecution } from './execution';
 import {
-  ExecutionPlanner,
-  IExecutionPlan,
+  CodeExecutionBuilder,
+  ICodeExecution,
   ICodeContext,
   ICodeConfig
 } from '../execution';
@@ -153,14 +153,14 @@ export class CodeContext implements ICodeContext {
    * - skip, cache 처리 (실행 여부 판단)
    * - unbound variables resolve 위한 dependent cells 수집
    */
-  async buildExecutionPlan(): Promise<IExecutionPlan> {
-    Log.debug(`cell execution plan { (${this.cell.model.id})`);
+  async buildExecution(): Promise<ICodeExecution> {
+    Log.debug(`code execution { (${this.cell.model.id})`);
 
-    const planner = new ExecutionPlanner(this);
-    const plan = await planner.build();
-    CellExecution.saveMetadata(plan);
+    const builder = new CodeExecutionBuilder(this);
+    const execution = await builder.build();
+    CellExecution.saveMetadata(execution);
 
-    Log.debug(`} cell execution plan (${this.cell.model.id})`, plan);
-    return plan;
+    Log.debug(`} code execution (${this.cell.model.id})`, execution);
+    return execution;
   }
 }

@@ -24,9 +24,9 @@ export function setupExecution() {
 
 export { ExecutionActions } from './actions';
 export {
-  ExecutionPlanner,
-  IExecutionPlan,
+  CodeExecutionBuilder,
+  ICodeExecution,
   IDependency,
   ICodeConfig,
   ICodeContext
-} from './plan';
+} from './code';

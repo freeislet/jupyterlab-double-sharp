@@ -1,480 +1,234 @@
-import { CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 
-import { ICodeData } from '../code';
-import { Settings } from '../settings';
-import { getAboveCodeCells } from '../utils/cell';
-import { In, notIn } from '../utils/array';
-import { ReorderSet } from '../utils/set';
+import { CellConfig } from '../cell';
+import { CodeInspector } from '../code';
+import { isCodeCell } from '../utils/cell';
 
-export interface IExecutionPlan {
-  cell: CodeCell;
-  config?: ICodeConfig;
-  skipped?: boolean;
-  cached?: boolean;
-  code?: ICodeData;
-  unresolvedVariables?: string[];
-  dependencies?: IDependency[];
-  dependentCells?: CodeCell[];
-}
-
-/**
- * CodeCell 실행 config (== NonNullableField<CellConfig.IData>)
- */
-export interface ICodeConfig {
-  skip: boolean;
-  cache: boolean;
-  autoDependency: boolean;
-}
-
-export interface IDependency {
+export namespace ExecutionPlan {
   /**
-   * 현재 dependency 정보의 해당 셀
+   * Cell 실행정보
    */
-  cell: CodeCell;
-
-  /**
-   * 현재 셀의 code 정보 (variables, unbound variables)
-   */
-  code: ICodeData;
-
-  /**
-   * resolve 하려는 target variables (부모 dependency의 unresolvedVariables)
-   */
-  targetVariables: string[];
-
-  /**
-   * targetVariables 중 현재 셀에서 resolve 가능한 variables (code.variables에 포함된 변수들)
-   */
-  resolvedVariables: string[];
-
-  /**
-   * targetVariables + code.unboundVariables 중 현재 셀 및 하위 dependencies에서
-   * resolve하지 못 한 최종 unresolved variables
-   */
-  unresolvedVariables: string[];
-
-  /**
-   * targetVariables + code.unboundVariables를 resolve하기 위한 dependencies
-   */
-  dependencies?: IDependency[];
-}
-
-export interface ICodeContext {
-  readonly cell: CodeCell;
-
-  createAnother(cell: CodeCell): ICodeContext;
-  getConfig(): ICodeConfig;
-  getData(): Promise<ICodeData>;
-  isCached(variables?: string[]): Promise<boolean>;
-}
-
-interface IDependencyInfo {
-  unresolvedVariables: string[];
-  dependencies?: IDependency[];
-}
-
-export class ExecutionPlanner {
-  constructor(public readonly context: ICodeContext) {}
-
-  async build(): Promise<IExecutionPlan> {
-    const cell = this.context.cell;
-    const config = this.context.getConfig();
-    if (config.skip) {
-      // this._output.printSkipped();
-      return { cell, config, skipped: true };
-    }
-
-    const code = await this.context.getData();
-
-    if (config.cache) {
-      const cached = await this.context.isCached(code.variables);
-      if (cached) {
-        // this._output.printCached(data);
-        return { cell, config, cached, code };
-      }
-    }
-
-    if (config.autoDependency) {
-      const dependencyInfo = await this._getDependencyInfo(
-        code.unboundVariables
-      );
-      const unresolvedVariables = dependencyInfo.unresolvedVariables;
-      const dependencies = dependencyInfo.dependencies;
-      const dependentCells =
-        !unresolvedVariables.length && dependencies // NOTE: unresolved variables 있으면 dependency 실행하지 않음
-          ? this._collectDependentCells(dependencies)
-          : undefined;
-      return {
-        cell,
-        config,
-        code,
-        unresolvedVariables,
-        dependencies,
-        dependentCells
-      };
-    } else {
-      return {
-        cell,
-        config,
-        code
-      };
-    }
+  export interface IExecutionCell {
+    cell: Cell;
+    execute: boolean;
+    dependencies?: IExecutionCell[];
+    extra: IExecutionCellExtra;
   }
 
   /**
-   * 현재 셀 코드의 unbound variables에 대한 dependency 정보 수집
+   * Cell 실행 관련 추가 정보 (디버그, 시각화 용)
    */
-  private async _getDependencyInfo(
-    unboundVariables: string[]
-  ): Promise<IDependencyInfo> {
-    if (!unboundVariables.length) {
-      return { unresolvedVariables: [] };
-    }
+  export interface IExecutionCellExtra {
+    dependencyLevel?: number;
+    excludedReason?: ExcludedReason;
+    message?: string;
+  }
 
-    const scanCells = getAboveCodeCells(this.context.cell).reverse();
-    const scanContexts = scanCells.map(cell =>
-      this.context.createAnother(cell)
+  export type ExcludedReason = 'skipped' | 'cached' | 'already exists';
+}
+
+export class ExecutionCells {
+  protected _executionCells: ExecutionPlan.IExecutionCell[] = [];
+  protected _allCells = new Set<Cell>();
+
+  //
+
+  get executionCells(): ExecutionPlan.IExecutionCell[] {
+    return this._executionCells;
+  }
+
+  get cellsToExecute(): Cell[] {
+    return this._collectCellsToExecute();
+  }
+
+  get codeCellsToExecute(): CodeCell[] {
+    return this.cellsToExecute.filter(isCodeCell);
+  }
+
+  //
+
+  constructor() {}
+
+  /**
+   * Cell 배열로부터 IExecutionCell 목록 생성
+   */
+  async build(cells: readonly Cell[]): Promise<ExecutionPlan.IExecutionCell[]> {
+    this._executionCells = await Promise.all(
+      cells.map(async cell => await this._buildItem(cell))
     );
-    return await this._buildDependencyInfo(unboundVariables, scanContexts);
+    return this._executionCells;
   }
 
-  /**
-   * scanContexts를 대상으로 targetVariables에 대한 dependency 정보 수집 (recursively)
-   */
-  private async _buildDependencyInfo(
-    targetVariables: string[],
-    scanContexts: ICodeContext[]
-  ): Promise<IDependencyInfo> {
-    if (!targetVariables.length) {
-      return { unresolvedVariables: [] };
-    }
-
-    const dependencies: IDependency[] = [];
-
-    for (let i = 0; i < scanContexts.length; ++i) {
-      const scanContext = scanContexts[i];
-      const rescanContexts = scanContexts.slice(i + 1);
-      const dependency = await this._buildDependency(
-        targetVariables,
-        scanContext,
-        rescanContexts
-      );
-
-      if (dependency) {
-        const dependencyResolved = !dependency.unresolvedVariables.length;
-        if (dependencyResolved) {
-          targetVariables = targetVariables.filter(
-            notIn(dependency.resolvedVariables)
-          );
-        }
-
-        const saveUnresolvedDependencies = Settings.data.verbose.metadata;
-        if (dependencyResolved || saveUnresolvedDependencies) {
-          dependencies.push(dependency);
-        }
-
-        const allResolved = !targetVariables.length;
-        if (allResolved) break;
-      }
-    }
-
-    return { unresolvedVariables: targetVariables, dependencies };
-  }
-
-  /**
-   * dependency scan 대상 CodeContext의 CellExecution.IDependency object 생성
-   *
-   * @param targetVariables resolve 하려는 variables
-   * @param scanContext dependency scan 대상 CodeContext
-   * @param rescanContexts scanContext의 sub-dependency를 다시 찾기 위해 scan할 CodeContexts
-   * @returns scanContext의 CellExecution.IDependency object
-   */
-  private async _buildDependency(
-    targetVariables: string[],
-    scanContext: ICodeContext,
-    rescanContexts: ICodeContext[]
-  ): Promise<IDependency | undefined> {
-    const config = scanContext.getConfig();
-    if (config.skip) return;
-
-    const code = await scanContext.getData();
-    const resolvedVariables = targetVariables.filter(In(code.variables));
-    if (!resolvedVariables.length) return;
-
-    const retargetVariables = [
-      ...targetVariables.filter(notIn(code.variables)),
-      ...code.unboundVariables
-    ];
-    const dependencyInfo = await this._buildDependencyInfo(
-      retargetVariables,
-      rescanContexts
-    );
-    const dependency: IDependency = {
-      cell: scanContext.cell,
-      code,
-      targetVariables,
-      resolvedVariables,
-      unresolvedVariables: dependencyInfo.unresolvedVariables,
-      dependencies: dependencyInfo.dependencies
+  protected async _buildItem(
+    cell: Cell,
+    dependencyLevel?: number
+  ): Promise<ExecutionPlan.IExecutionCell> {
+    const item: ExecutionPlan.IExecutionCell = {
+      cell,
+      execute: true,
+      extra: {}
     };
-    Log.debug('dependency', dependency);
-    return dependency;
+
+    if (dependencyLevel) {
+      item.extra.dependencyLevel = dependencyLevel;
+    }
+
+    const metadata = CellConfig.metadata.getCoalesced(cell.model);
+    // console.log(metadata);
+
+    // 셀 변수 테스트
+    if (isCodeCell(cell)) {
+      // CodeInspector.getByCell(cell)?.isCellCached(cell);
+      await CodeInspector.getByCell(cell)?.getCodeData(cell);
+    }
+
+    if (metadata.skip) {
+      item.execute = false;
+      item.extra.excludedReason = 'skipped';
+      item.extra.message = this._message('skipped' /*, metadata.skipMessage*/);
+    } else if (metadata.cache && this.cached(cell)) {
+      item.execute = false;
+      item.extra.excludedReason = 'cached';
+    } else if (this.exists(cell)) {
+      item.execute = false;
+      item.extra.excludedReason = 'already exists';
+    }
+
+    this._allCells.add(cell); // NOTE: 반드시 바로 위 exclude 체크와 아래 dependencies 수집 사이에 추가해야 함
+
+    // dependencies
+    if (item.execute) {
+      // TODO
+      // const nextDependencyLevel = (dependencyLevel ?? 0) + 1
+      // item.dependencies = dependencies.map(c => this._buildItem(c, nextDependencyLevel))
+    }
+
+    return item;
   }
 
-  private _collectDependentCells(dependencies: IDependency[]): CodeCell[] {
-    const cells = new ReorderSet<CodeCell>();
+  protected _message(msg: string, desc?: string, noDesc = '.') {
+    return msg + (desc ? `: ${desc}` : noDesc);
+  }
 
-    function collect(dependencies?: IDependency[]) {
-      if (!dependencies) return;
+  cached(cell: Cell): boolean {
+    if (isCodeCell(cell) && cell.model.isDirty) {
+      // const varTracker = CodeInspector.getByCell(cell);
+      // return Boolean(varTracker?.isCellCached(cell));
+    }
+    return false;
+  }
 
-      for (const dep of dependencies) {
-        const resolved = !dep.unresolvedVariables.length; // dep.resolvedVariables.length 확인 생략
-        if (resolved) {
-          cells.add(dep.cell);
+  exists(cell: Cell): boolean {
+    return this._allCells.has(cell);
+  }
+
+  find(cell: Cell): ExecutionPlan.IExecutionCell | undefined {
+    return this._executionCells.find(ce => ce.cell === cell);
+  }
+
+  reconstruct(executionCells: ExecutionPlan.IExecutionCell[]): this {
+    this._executionCells = [...executionCells];
+    this._allCells.clear();
+
+    const add = (executionCell: ExecutionPlan.IExecutionCell) => {
+      if (executionCell.dependencies) {
+        for (const dependency of executionCell.dependencies) {
+          add(dependency);
         }
+      }
+      this._allCells.add(executionCell.cell);
+    };
 
-        collect(dep.dependencies);
+    executionCells.forEach(ec => add(ec));
+    return this;
+  }
+
+  processExcludedCells() {
+    function process(executionCell: ExecutionPlan.IExecutionCell) {
+      if (executionCell.execute) {
+        if (executionCell.dependencies) {
+          for (const dependency of executionCell.dependencies) {
+            process(dependency);
+          }
+        }
+      } else {
+        const msg = executionCell.extra.message;
+        const cell = executionCell.cell;
+        if (msg && isCodeCell(cell)) {
+          const output = {
+            output_type: 'stream',
+            name: 'stdout',
+            text: `## ${msg}\n`
+          };
+          cell.outputArea.model.clear(true);
+          cell.outputArea.model.add(output);
+          // console.log(executionCell, output);
+        }
       }
     }
 
-    collect(dependencies);
-    return Array.from(cells).reverse();
+    this._executionCells.forEach(ec => process(ec));
+  }
+
+  protected _collectCellsToExecute(): Cell[] {
+    const cells: Cell[] = [];
+
+    function collect(executionCell: ExecutionPlan.IExecutionCell) {
+      if (!executionCell.execute) return;
+      if (executionCell.dependencies) {
+        for (const dependency of executionCell.dependencies) {
+          collect(dependency);
+        }
+      }
+      cells.push(executionCell.cell);
+    }
+
+    this._executionCells.forEach(ec => collect(ec));
+    // console.log('cellsToExecute', cells);
+    return cells;
   }
 }
 
-// 제거 예정
+export class ExecutionPlan extends ExecutionCells {
+  private static _current: ExecutionPlan | null = null;
 
-// import { Cell, CodeCell } from '@jupyterlab/cells';
+  static async fromCells(cells: readonly Cell[]): Promise<ExecutionPlan> {
+    const plan = new ExecutionPlan();
+    await plan.build(cells);
+    return plan;
+  }
 
-// import { CellConfig } from '../cell';
-// import { CodeInspector } from '../code';
-// import { isCodeCell } from '../utils/cell';
+  /**
+   * global 접근 가능하도록 static ExecutionPlan 설정
+   * NOTE: NotebookActions의 Private.runCells를 patch할 수 없으므로,
+   *       CodeCell.execute 안에서 현재 실행계획을 참조하도록 함
+   */
+  static begin(plan: ExecutionPlan) {
+    if (this._current) throw 'Execution plan has already begun.';
+    this._current = plan;
+  }
 
-// export namespace ExecutionPlan {
-//   /**
-//    * Cell 실행정보
-//    */
-//   export interface IExecutionCell {
-//     cell: Cell;
-//     execute: boolean;
-//     dependencies?: IExecutionCell[];
-//     extra: IExecutionCellExtra;
-//   }
+  static end() {
+    if (!this._current) throw 'Execution plan has not begun.';
+    this._current = null;
+  }
 
-//   /**
-//    * Cell 실행 관련 추가 정보 (디버그, 시각화 용)
-//    */
-//   export interface IExecutionCellExtra {
-//     dependencyLevel?: number;
-//     excludedReason?: ExcludedReason;
-//     message?: string;
-//   }
+  static get current(): ExecutionPlan | null {
+    return this._current;
+  }
 
-//   export type ExcludedReason = 'skipped' | 'cached' | 'already exists';
-// }
+  //
 
-// export class ExecutionCells {
-//   protected _executionCells: ExecutionPlan.IExecutionCell[] = [];
-//   protected _allCells = new Set<Cell>();
+  constructor() {
+    super();
+  }
 
-//   //
-
-//   get executionCells(): ExecutionPlan.IExecutionCell[] {
-//     return this._executionCells;
-//   }
-
-//   get cellsToExecute(): Cell[] {
-//     return this._collectCellsToExecute();
-//   }
-
-//   get codeCellsToExecute(): CodeCell[] {
-//     return this.cellsToExecute.filter(isCodeCell);
-//   }
-
-//   //
-
-//   constructor() {}
-
-//   /**
-//    * Cell 배열로부터 IExecutionCell 목록 생성
-//    */
-//   async build(cells: readonly Cell[]): Promise<ExecutionPlan.IExecutionCell[]> {
-//     this._executionCells = await Promise.all(
-//       cells.map(async cell => await this._buildItem(cell))
-//     );
-//     return this._executionCells;
-//   }
-
-//   protected async _buildItem(
-//     cell: Cell,
-//     dependencyLevel?: number
-//   ): Promise<ExecutionPlan.IExecutionCell> {
-//     const item: ExecutionPlan.IExecutionCell = {
-//       cell,
-//       execute: true,
-//       extra: {}
-//     };
-
-//     if (dependencyLevel) {
-//       item.extra.dependencyLevel = dependencyLevel;
-//     }
-
-//     const metadata = CellConfig.metadata.getCoalesced(cell.model);
-//     // console.log(metadata);
-
-//     // 셀 변수 테스트
-//     if (isCodeCell(cell)) {
-//       // CodeInspector.getByCell(cell)?.isCellCached(cell);
-//       await CodeInspector.getByCell(cell)?.getCodeData(cell);
-//     }
-
-//     if (metadata.skip) {
-//       item.execute = false;
-//       item.extra.excludedReason = 'skipped';
-//       item.extra.message = this._message('skipped' /*, metadata.skipMessage*/);
-//     } else if (metadata.cache && this.cached(cell)) {
-//       item.execute = false;
-//       item.extra.excludedReason = 'cached';
-//     } else if (this.exists(cell)) {
-//       item.execute = false;
-//       item.extra.excludedReason = 'already exists';
-//     }
-
-//     this._allCells.add(cell); // NOTE: 반드시 바로 위 exclude 체크와 아래 dependencies 수집 사이에 추가해야 함
-
-//     // dependencies
-//     if (item.execute) {
-//       // TODO
-//       // const nextDependencyLevel = (dependencyLevel ?? 0) + 1
-//       // item.dependencies = dependencies.map(c => this._buildItem(c, nextDependencyLevel))
-//     }
-
-//     return item;
-//   }
-
-//   protected _message(msg: string, desc?: string, noDesc = '.') {
-//     return msg + (desc ? `: ${desc}` : noDesc);
-//   }
-
-//   cached(cell: Cell): boolean {
-//     if (isCodeCell(cell) && cell.model.isDirty) {
-//       // const varTracker = CodeInspector.getByCell(cell);
-//       // return Boolean(varTracker?.isCellCached(cell));
-//     }
-//     return false;
-//   }
-
-//   exists(cell: Cell): boolean {
-//     return this._allCells.has(cell);
-//   }
-
-//   find(cell: Cell): ExecutionPlan.IExecutionCell | undefined {
-//     return this._executionCells.find(ce => ce.cell === cell);
-//   }
-
-//   reconstruct(executionCells: ExecutionPlan.IExecutionCell[]): this {
-//     this._executionCells = [...executionCells];
-//     this._allCells.clear();
-
-//     const add = (executionCell: ExecutionPlan.IExecutionCell) => {
-//       if (executionCell.dependencies) {
-//         for (const dependency of executionCell.dependencies) {
-//           add(dependency);
-//         }
-//       }
-//       this._allCells.add(executionCell.cell);
-//     };
-
-//     executionCells.forEach(ec => add(ec));
-//     return this;
-//   }
-
-//   processExcludedCells() {
-//     function process(executionCell: ExecutionPlan.IExecutionCell) {
-//       if (executionCell.execute) {
-//         if (executionCell.dependencies) {
-//           for (const dependency of executionCell.dependencies) {
-//             process(dependency);
-//           }
-//         }
-//       } else {
-//         const msg = executionCell.extra.message;
-//         const cell = executionCell.cell;
-//         if (msg && isCodeCell(cell)) {
-//           const output = {
-//             output_type: 'stream',
-//             name: 'stdout',
-//             text: `## ${msg}\n`
-//           };
-//           cell.outputArea.model.clear(true);
-//           cell.outputArea.model.add(output);
-//           // console.log(executionCell, output);
-//         }
-//       }
-//     }
-
-//     this._executionCells.forEach(ec => process(ec));
-//   }
-
-//   protected _collectCellsToExecute(): Cell[] {
-//     const cells: Cell[] = [];
-
-//     function collect(executionCell: ExecutionPlan.IExecutionCell) {
-//       if (!executionCell.execute) return;
-//       if (executionCell.dependencies) {
-//         for (const dependency of executionCell.dependencies) {
-//           collect(dependency);
-//         }
-//       }
-//       cells.push(executionCell.cell);
-//     }
-
-//     this._executionCells.forEach(ec => collect(ec));
-//     // console.log('cellsToExecute', cells);
-//     return cells;
-//   }
-// }
-
-// export class ExecutionPlan extends ExecutionCells {
-//   private static _current: ExecutionPlan | null = null;
-
-//   static async fromCells(cells: readonly Cell[]): Promise<ExecutionPlan> {
-//     const plan = new ExecutionPlan();
-//     await plan.build(cells);
-//     return plan;
-//   }
-
-//   /**
-//    * global 접근 가능하도록 static ExecutionPlan 설정
-//    * NOTE: NotebookActions의 Private.runCells를 patch할 수 없으므로,
-//    *       CodeCell.execute 안에서 현재 실행계획을 참조하도록 함
-//    */
-//   static begin(plan: ExecutionPlan) {
-//     if (this._current) throw 'Execution plan has already begun.';
-//     this._current = plan;
-//   }
-
-//   static end() {
-//     if (!this._current) throw 'Execution plan has not begun.';
-//     this._current = null;
-//   }
-
-//   static get current(): ExecutionPlan | null {
-//     return this._current;
-//   }
-
-//   //
-
-//   constructor() {
-//     super();
-//   }
-
-//   /**
-//    * 특정 Cell의 ExecutionCells 객체 생성
-//    * CodeCell.execute 안에서 종속 셀들과 함께 실행하기 위한 용도
-//    */
-//   getExecutionCellsOf(cell: Cell): ExecutionCells | undefined {
-//     const executionCell = this.find(cell);
-//     return executionCell && new ExecutionCells().reconstruct([executionCell]);
-//   }
-// }
+  /**
+   * 특정 Cell의 ExecutionCells 객체 생성
+   * CodeCell.execute 안에서 종속 셀들과 함께 실행하기 위한 용도
+   */
+  getExecutionCellsOf(cell: Cell): ExecutionCells | undefined {
+    const executionCell = this.find(cell);
+    return executionCell && new ExecutionCells().reconstruct([executionCell]);
+  }
+}

@@ -2,17 +2,17 @@ import { Cell } from '@jupyterlab/cells';
 
 import { metadataKeys } from '../const';
 import { MetadataGroup } from '../utils/metadata';
-import { IExecutionPlan, IDependency } from '../execution';
+import { ICodeExecution, IDependency } from '../execution';
 
 export namespace CellExecution {
   /**
-   * IExecutionPlan metadata (##Execution)
+   * ICodeExecution metadata (##Execution)
    */
   export type IData = {
     cell?: ICellData;
     dependencies?: IDependencyData[];
     dependentCells?: ICellData[];
-  } & Partial<Omit<IExecutionPlan, 'cell' | 'dependencies' | 'dependentCells'>>;
+  } & Partial<Omit<ICodeExecution, 'cell' | 'dependencies' | 'dependentCells'>>;
 
   export type IDependencyData = {
     cell: ICellData;
@@ -36,21 +36,21 @@ export class CellExecution {
 }
 
 export namespace CellExecution {
-  export function saveMetadata(plan: IExecutionPlan) {
-    const metadata = planData(plan);
-    CellExecution.metadata.set(plan.cell.model, metadata);
+  export function saveMetadata(execution: ICodeExecution) {
+    const metadata = executionData(execution);
+    CellExecution.metadata.set(execution.cell.model, metadata);
   }
 
-  function planData(plan: IExecutionPlan): CellExecution.IData {
+  function executionData(execution: ICodeExecution): CellExecution.IData {
     return {
-      cell: cellData(plan.cell),
-      config: plan.config,
-      skipped: plan.skipped,
-      cached: plan.cached,
-      code: plan.code,
-      unresolvedVariables: plan.unresolvedVariables,
-      dependencies: plan.dependencies?.map(dependencyData),
-      dependentCells: plan.dependentCells?.map(cellData)
+      cell: cellData(execution.cell),
+      config: execution.config,
+      skipped: execution.skipped,
+      cached: execution.cached,
+      code: execution.code,
+      unresolvedVariables: execution.unresolvedVariables,
+      dependencies: execution.dependencies?.map(dependencyData),
+      dependentCells: execution.dependentCells?.map(cellData)
     };
   }
 

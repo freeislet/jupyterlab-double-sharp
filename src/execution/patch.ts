@@ -123,14 +123,12 @@ namespace NewCodeCell {
 
     // 셀 실행 계획 조회 (dependent cells 포함)
     const context = new CodeContext(cell);
-    const plan = await context.buildExecutionPlan();
-    const cellsToExecute = [...(plan.dependentCells ?? []), plan.cell];
-    if (cellsToExecute) {
-      for (const codeCell of cellsToExecute) {
-        // 기존 실행 함수
-        ret = await OrgCodeCell.execute(codeCell, sessionContext, metadata);
-        Log.debug('CodeCell.execute:', cell.model.id, ret, metadata);
-      }
+    const execution = await context.buildExecution();
+    const cells = [...(execution.dependentCells ?? []), execution.cell];
+    for (const cell of cells) {
+      // 기존 실행 함수
+      ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
+      Log.debug('CodeCell.execute:', cell.model.id, ret, metadata);
     }
 
     return ret;

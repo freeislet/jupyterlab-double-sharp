@@ -1,7 +1,7 @@
 import { StreamType, MultilineString } from '@jupyterlab/nbformat';
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
 
-import { ICodeContext } from './plan';
+import { ICodeContext } from './code';
 import { ICodeData } from '../code';
 import { stringFrom } from '../utils/object';
 
