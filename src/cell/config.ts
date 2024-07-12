@@ -57,7 +57,7 @@ export namespace CellConfig {
       removeNull(csmagic),
       forcedSettings
     );
-    Log.debug('cell config', composite);
+    // Log.debug('cell config', composite);
     return composite;
   }
 
