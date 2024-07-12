@@ -69,12 +69,44 @@ export namespace CellCode {
     const cachedData = CellCode.metadata.get(cell.model);
     if (cachedData) return cachedData;
 
-    inspector = inspector ?? getInspector(cell);
+    if (!inspector) {
+      inspector = getInspector(cell);
+    }
 
     const codeData = await inspector.getCodeData(cell);
     const data = CellCode.metadata.getCoalescedValue(codeData);
     CellCode.metadata.set(cell.model, data);
     return data;
+  }
+
+  /**
+   * Cell variables cached 여부 리턴
+   */
+  export async function isCached(
+    cell: CodeCell,
+    inspector?: CodeInspector,
+    variables?: string[]
+  ): Promise<boolean> {
+    const uncachedVars = await getUncachedVariables(cell, inspector, variables);
+    return !uncachedVars.length;
+  }
+
+  /**
+   * Cell variables 중 uncached 리턴
+   */
+  export async function getUncachedVariables(
+    cell: CodeCell,
+    inspector?: CodeInspector,
+    variables?: string[]
+  ): Promise<string[]> {
+    if (!inspector) {
+      inspector = getInspector(cell);
+    }
+    if (!variables) {
+      const data = await getData(cell, inspector);
+      variables = data.variables;
+    }
+    return inspector.filterNonKernelVariables(variables);
   }
 }
 
@@ -86,6 +118,13 @@ export class CodeContext implements ICodeContext {
     if (isCodeCell(cell)) {
       return new CodeContext(cell, inspector);
     }
+  }
+
+  static fromCells(
+    cells: readonly Cell[],
+    inspector?: CodeInspector
+  ): CodeContext[] {
+    return cells.flatMap(cell => CodeContext.fromCell(cell, inspector) ?? []);
   }
 
   //----
@@ -131,30 +170,26 @@ export class CodeContext implements ICodeContext {
     return CellCode.getData(this.cell, this.inspector);
   }
 
-  /**
-   * Cell variables 중 uncached 리턴
-   */
-  async getUncachedVariables(variables?: string[]): Promise<string[]> {
-    if (!variables) {
-      const data = await this.getData();
-      variables = data.variables;
-    }
-    return this.inspector.filterNonKernelVariables(variables);
+  async isCached(variables?: string[]): Promise<boolean> {
+    return CellCode.isCached(this.cell, this.inspector, variables);
   }
 
   /**
-   * Cell variables cached 여부 리턴
+   * Cell variables 중 uncached 리턴
    */
-  async isCached(variables?: string[]): Promise<boolean> {
-    const uncachedVars = await this.getUncachedVariables(variables);
-    return !uncachedVars.length;
-  }
+  // async getUncachedVariables(variables?: string[]): Promise<string[]> {
+  //   if (!variables) {
+  //     const data = await this.getData();
+  //     variables = data.variables;
+  //   }
+  //   return this.inspector.filterNonKernelVariables(variables);
+  // }
 
   /**
    * Cell unbound variables 중 uncached 리턴
    */
-  async getUncachedUnboundVariables(): Promise<string[]> {
-    const data = await this.getData();
-    return this.inspector.filterNonKernelVariables(data.unboundVariables);
-  }
+  // async getUncachedUnboundVariables(): Promise<string[]> {
+  //   const data = await this.getData();
+  //   return this.inspector.filterNonKernelVariables(data.unboundVariables);
+  // }
 }
