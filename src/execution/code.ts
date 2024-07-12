@@ -62,6 +62,7 @@ export interface IDependency {
 export interface ICodeContext {
   readonly cell: CodeCell;
 
+  buildExecution(): Promise<ICodeExecution>;
   createAnother(cell: CodeCell): ICodeContext;
   getConfig(): ICodeConfig;
   getData(): Promise<ICodeData>;
@@ -76,6 +77,11 @@ interface IDependencyInfo {
 export class CodeExecutionBuilder {
   constructor() {}
 
+  /**
+   * 셀 실행 계획 수집 (dependent cells 포함)
+   * - skip, cache 처리 (실행 여부 판단)
+   * - unbound variables resolve 위한 dependent cells 수집
+   */
   async build(context: ICodeContext): Promise<ICodeExecution> {
     const cell = context.cell;
     const config = context.getConfig();

@@ -109,6 +109,16 @@ export class CodeContext implements ICodeContext {
     );
   }
 
+  async buildExecution(): Promise<ICodeExecution> {
+    Log.debug(`code execution { (${this.cell.model.id})`);
+
+    const execution = await new CodeExecutionBuilder().build(this);
+    CellExecution.saveMetadata(execution);
+
+    Log.debug(`} code execution (${this.cell.model.id})`, execution);
+    return execution;
+  }
+
   createAnother(cell: CodeCell): ICodeContext {
     return new CodeContext(cell, this.inspector);
   }
@@ -146,20 +156,5 @@ export class CodeContext implements ICodeContext {
   async getUncachedUnboundVariables(): Promise<string[]> {
     const data = await this.getData();
     return this.inspector.filterNonKernelVariables(data.unboundVariables);
-  }
-
-  /**
-   * 셀 실행 계획 수집 (dependent cells 포함)
-   * - skip, cache 처리 (실행 여부 판단)
-   * - unbound variables resolve 위한 dependent cells 수집
-   */
-  async buildExecution(): Promise<ICodeExecution> {
-    Log.debug(`code execution { (${this.cell.model.id})`);
-
-    const execution = await new CodeExecutionBuilder().build(this);
-    CellExecution.saveMetadata(execution);
-
-    Log.debug(`} code execution (${this.cell.model.id})`, execution);
-    return execution;
   }
 }
