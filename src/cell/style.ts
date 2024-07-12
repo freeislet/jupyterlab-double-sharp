@@ -42,7 +42,8 @@ export namespace CellStyle {
     const classes = {
       'jp-DoubleSharp-skip': config.skip,
       'jp-DoubleSharp-skipped': execution?.skipped,
-      'jp-DoubleSharp-cached': execution?.cached
+      'jp-DoubleSharp-cached':
+        execution?.cached && !!execution?.code?.variables.length
     };
 
     setClasses(cell, classes);

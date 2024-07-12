@@ -370,20 +370,26 @@ function Execution() {
 
   return (
     <Group className="jp-DoubleSharp-space-y-8">
-      <Group.Title>Execution Plan</Group.Title>
+      <Group.Title>Execution</Group.Title>
       {!execution ? (
-        <Block type="info">Execution plan does not exist.</Block>
+        <Block type="info">Execution info does not exist.</Block>
       ) : execution.skipped ? (
         <Block type="warning" iconType="info">
           Execution skipped.
         </Block>
       ) : execution.cached ? (
-        <>
-          <Block type="success">
-            Execution skipped by <strong>cache</strong>.
+        !execution.code?.variables.length ? (
+          <Block type="success" iconType="info">
+            Execution skipped. <strong>(no variables)</strong>
           </Block>
-          <ListRow header="Cached Vars:" data={execution?.code?.variables} />
-        </>
+        ) : (
+          <>
+            <Block type="success">
+              Execution skipped by <strong>cache</strong>.
+            </Block>
+            <ListRow header="Cached Vars:" data={execution?.code?.variables} />
+          </>
+        )
       ) : (
         <>
           <HeaderRow header="Dependent Cell Count:">
