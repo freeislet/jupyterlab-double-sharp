@@ -156,8 +156,7 @@ export class CodeContext implements ICodeContext {
   async buildExecution(): Promise<ICodeExecution> {
     Log.debug(`code execution { (${this.cell.model.id})`);
 
-    const builder = new CodeExecutionBuilder(this);
-    const execution = await builder.build();
+    const execution = await new CodeExecutionBuilder().build(this);
     CellExecution.saveMetadata(execution);
 
     Log.debug(`} code execution (${this.cell.model.id})`, execution);

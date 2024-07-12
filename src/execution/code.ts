@@ -74,20 +74,20 @@ interface IDependencyInfo {
 }
 
 export class CodeExecutionBuilder {
-  constructor(public readonly context: ICodeContext) {}
+  constructor() {}
 
-  async build(): Promise<ICodeExecution> {
-    const cell = this.context.cell;
-    const config = this.context.getConfig();
+  async build(context: ICodeContext): Promise<ICodeExecution> {
+    const cell = context.cell;
+    const config = context.getConfig();
     if (config.skip) {
       // this._output.printSkipped();
       return { cell, config, skipped: true };
     }
 
-    const code = await this.context.getData();
+    const code = await context.getData();
 
     if (config.cache) {
-      const cached = await this.context.isCached(code.variables);
+      const cached = await context.isCached(code.variables);
       if (cached) {
         // this._output.printCached(data);
         return { cell, config, cached, code };
@@ -96,6 +96,7 @@ export class CodeExecutionBuilder {
 
     if (config.autoDependency) {
       const dependencyInfo = await this._getDependencyInfo(
+        context,
         code.unboundVariables
       );
       const unresolvedVariables = dependencyInfo.unresolvedVariables;
@@ -125,16 +126,15 @@ export class CodeExecutionBuilder {
    * 현재 셀 코드의 unbound variables에 대한 dependency 정보 수집
    */
   private async _getDependencyInfo(
+    context: ICodeContext,
     unboundVariables: string[]
   ): Promise<IDependencyInfo> {
     if (!unboundVariables.length) {
       return { unresolvedVariables: [] };
     }
 
-    const scanCells = getAboveCodeCells(this.context.cell).reverse();
-    const scanContexts = scanCells.map(cell =>
-      this.context.createAnother(cell)
-    );
+    const scanCells = getAboveCodeCells(context.cell).reverse();
+    const scanContexts = scanCells.map(cell => context.createAnother(cell));
     return await this._buildDependencyInfo(unboundVariables, scanContexts);
   }
 
