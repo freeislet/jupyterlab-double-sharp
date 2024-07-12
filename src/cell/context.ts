@@ -1,3 +1,5 @@
+// TODO: 제거 검토
+
 import { Cell } from '@jupyterlab/cells';
 
 import { CodeContext } from './code';
