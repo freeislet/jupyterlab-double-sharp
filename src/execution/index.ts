@@ -12,9 +12,8 @@ export function setupExecution() {
     commandIds.RUN_ALL_CELLS,
     {
       icon: fastForwardIcon,
-      label: '## Run all cells (with cache)',
+      label: '## Run all cells',
       execute: () => {
-        // TODO: run all w/ cache 구현 (execution plan? context?)
         App.instance.commands.execute('notebook:run-all-cells');
       }
     },
