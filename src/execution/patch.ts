@@ -7,6 +7,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
+import { ExecutionPlanner } from './plan';
 import { ExecutionActions } from './actions';
 import { CodeContext } from '../cell';
 
@@ -26,14 +27,30 @@ namespace OrgCodeCell {
 
 namespace NewNotebookActions {
   async function _run(
-    cells: readonly Cell[],
     runFn: (...args: any) => Promise<boolean>,
-    args: IArguments
+    args: IArguments,
+    cells: readonly Cell[],
+    sessionContext: ISessionContext | undefined
   ): Promise<boolean> {
     ExecutionActions.beforeExecution.emit({ cells });
-    // ExecutionPlan.begin(await ExecutionPlan.fromCells(cells));
+
+    const contexts = CodeContext.fromCells(cells);
+    const plan = await ExecutionPlanner.buildFromContexts(contexts);
+    if (plan.dependentCells) {
+      const validSession =
+        sessionContext &&
+        !sessionContext.isTerminating &&
+        !sessionContext.pendingInput &&
+        !sessionContext.hasNoKernel;
+      if (validSession) {
+        for (const cell of plan.dependentCells) {
+          await CodeCell.execute(cell, sessionContext);
+        }
+      }
+    }
+
     const ret = await runFn.call(null, ...args);
-    // ExecutionPlan.end();
+
     ExecutionActions.afterExecution.emit({ cells });
     return ret;
   }
@@ -48,8 +65,9 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
+    Log.debug('run');
     const cells = getSelectedCells(notebook);
-    return _run(cells, OrgNotebookActions.run, arguments);
+    return _run(OrgNotebookActions.run, arguments, cells, sessionContext);
   }
 
   export async function runAndAdvance(
@@ -58,8 +76,14 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
+    Log.debug('runAndAdvance');
     const cells = getSelectedCells(notebook);
-    return await _run(cells, OrgNotebookActions.runAndAdvance, arguments);
+    return await _run(
+      OrgNotebookActions.runAndAdvance,
+      arguments,
+      cells,
+      sessionContext
+    );
   }
 
   export async function runAndInsert(
@@ -68,8 +92,14 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
+    Log.debug('runAndInsert');
     const cells = getSelectedCells(notebook);
-    return await _run(cells, OrgNotebookActions.runAndInsert, arguments);
+    return await _run(
+      OrgNotebookActions.runAndInsert,
+      arguments,
+      cells,
+      sessionContext
+    );
   }
 
   export function runCells(
@@ -79,7 +109,8 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    return _run(cells, OrgNotebookActions.runCells, arguments);
+    Log.debug('runCells');
+    return _run(OrgNotebookActions.runCells, arguments, cells, sessionContext);
   }
 
   export function runAll(
@@ -88,8 +119,9 @@ namespace NewNotebookActions {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
+    Log.debug('runAll');
     const allCells = notebook.widgets;
-    return _run(allCells, OrgNotebookActions.runAll, arguments);
+    return _run(OrgNotebookActions.runAll, arguments, allCells, sessionContext);
   }
 
   export function runAllAbove(
@@ -99,7 +131,12 @@ namespace NewNotebookActions {
     translator?: ITranslator
   ): Promise<boolean> {
     const aboveCells = notebook.widgets.slice(0, notebook.activeCellIndex);
-    return _run(aboveCells, OrgNotebookActions.runAllAbove, arguments);
+    return _run(
+      OrgNotebookActions.runAllAbove,
+      arguments,
+      aboveCells,
+      sessionContext
+    );
   }
 
   export function runAllBelow(
@@ -109,7 +146,12 @@ namespace NewNotebookActions {
     translator?: ITranslator
   ): Promise<boolean> {
     const belowCells = notebook.widgets.slice(notebook.activeCellIndex);
-    return _run(belowCells, OrgNotebookActions.runAllBelow, arguments);
+    return _run(
+      OrgNotebookActions.runAllBelow,
+      arguments,
+      belowCells,
+      sessionContext
+    );
   }
 }
 
@@ -119,18 +161,19 @@ namespace NewCodeCell {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    let ret: Awaited<ReturnType<typeof OrgCodeCell.execute>> = undefined;
-
-    // 셀 실행 계획 조회 (dependent cells 포함)
+    // 셀 config 및 cache 여부 조회
     const context = new CodeContext(cell);
-    const execution = await context.buildExecution();
-    const cells = [...(execution.dependentCells ?? []), execution.cell];
-    for (const cell of cells) {
-      // 기존 실행 함수
-      ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
-      Log.debug('CodeCell.execute:', cell.model.id, ret, metadata);
+    const config = context.getConfig();
+    // TODO; force execution
+    if (config.skip) return;
+    if (config.cache) {
+      const cached = await context.isCached();
+      if (cached) return;
     }
 
+    // 기존 실행 함수
+    const ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
+    Log.debug('CodeCell.execute:', cell.model.id, ret, metadata);
     return ret;
   }
 }
