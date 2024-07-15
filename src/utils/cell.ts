@@ -1,19 +1,32 @@
 import { Cell, CodeCell, isCodeCellModel } from '@jupyterlab/cells';
 import { Notebook } from '@jupyterlab/notebook';
 
+import { CellError } from './error';
+
 export function isCodeCell(cell: Cell): cell is CodeCell {
   return isCodeCellModel(cell.model);
 }
 
-export function getAboveCells(cell: Cell): Cell[] {
+export function getCellIndex(cell: Cell): number {
   const notebook = cell.parent as Notebook;
-  if (!notebook) return [];
+  if (!notebook) throw new CellError(cell, 'Cell notebook is null.');
 
   const index = notebook.widgets.indexOf(cell);
-  if (index < 0) return [];
+  if (index < 0) throw new CellError(cell, 'Cell not found in the notebook.');
 
-  const aboves = notebook.widgets.slice(0, index);
-  return aboves;
+  return index;
+}
+
+export function getAboveCells(cell: Cell): Cell[] {
+  try {
+    const index = getCellIndex(cell);
+    const notebook = cell.parent as Notebook;
+    const aboves = notebook.widgets.slice(0, index);
+    return aboves;
+  } catch (e) {
+    if (e instanceof CellError) return [];
+    else throw e;
+  }
 }
 
 export function getAboveCodeCells(cell: Cell): CodeCell[] {
