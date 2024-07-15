@@ -3,7 +3,7 @@ import { CodeCell } from '@jupyterlab/cells';
 import { ICodeData } from '../code';
 import { Settings } from '../settings';
 import { getAboveCodeCells, sortCells } from '../utils/cell';
-import { In, notIn } from '../utils/array';
+import { In, notIn, uniq } from '../utils/array';
 
 export interface ICodeExecution {
   cell: CodeCell;
@@ -179,6 +179,8 @@ export class CodeExecutionBuilder {
       if (dependency) {
         const dependencyResolved = !dependency.unresolvedVariables.length;
         if (dependencyResolved) {
+          Log.debug('- resolved dep', scanContext.cell.model.id, dependency);
+
           targetVariables = targetVariables.filter(
             notIn(dependency.resolvedVariables)
           );
@@ -213,14 +215,16 @@ export class CodeExecutionBuilder {
     const config = scanContext.getConfig();
     if (config.skip) return;
 
+    Log.debug('dependency {', scanContext.cell.model.id, targetVariables);
+
     const code = await scanContext.getData();
     const resolvedVariables = targetVariables.filter(In(code.variables));
     if (!resolvedVariables.length) return;
 
-    const retargetVariables = [
+    const retargetVariables = uniq([
       ...targetVariables.filter(notIn(code.variables)),
       ...code.unboundVariables
-    ];
+    ]);
     const dependencyInfo = await this._buildDependencyInfo(
       retargetVariables,
       rescanContexts
@@ -233,7 +237,7 @@ export class CodeExecutionBuilder {
       unresolvedVariables: dependencyInfo.unresolvedVariables,
       dependencies: dependencyInfo.dependencies
     };
-    Log.debug('dependency', dependency);
+    Log.debug('} dependency', scanContext.cell.model.id, dependency);
     return dependency;
   }
 
