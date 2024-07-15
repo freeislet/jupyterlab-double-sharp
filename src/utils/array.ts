@@ -30,7 +30,7 @@ export function notIn<T>(list: Array<T> | Set<T>): (item: T) => boolean {
  * 첫 번째 array element 리턴
  * array가 null or undefined or empty이면 undefined 리턴
  */
-export function first<T>(array?: Array<T>): T | undefined {
+export function first<T>(array?: T[]): T | undefined {
   if (array?.length) {
     return array[0];
   }
@@ -43,10 +43,10 @@ export function first<T>(array?: Array<T>): T | undefined {
  *   - mapsort (https://github.com/Pimm/mapsort)
  */
 export function mapSort<T, U>(
-  list: Array<T>,
+  list: T[],
   keyFn: (value: T, index: number, array: T[]) => U,
   compareFn?: (a: U, b: U) => number
-): Array<T> {
+): T[] {
   const keys: U[] = [];
   const indexes: number[] = [];
 
@@ -61,4 +61,11 @@ export function mapSort<T, U>(
 
   const result = indexes.map(index => list[index]);
   return result;
+}
+
+/**
+ * 중복 제거
+ */
+export function uniq<T>(list: T[]): T[] {
+  return [...new Set(list)];
 }
