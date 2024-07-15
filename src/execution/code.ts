@@ -2,8 +2,8 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { ICodeData } from '../code';
 import { Settings } from '../settings';
-import { getAboveCodeCells, getCellIndex } from '../utils/cell';
-import { In, notIn, mapSort } from '../utils/array';
+import { getAboveCodeCells, sortCells } from '../utils/cell';
+import { In, notIn } from '../utils/array';
 
 export interface ICodeExecution {
   cell: CodeCell;
@@ -255,7 +255,7 @@ export class CodeExecutionBuilder {
 
     collect(dependencies);
 
-    const sortedCells = mapSort([...cells], getCellIndex);
+    const sortedCells = sortCells([...cells]);
     Log.debug('collectDependentCells', sortedCells);
     return sortedCells;
   }
