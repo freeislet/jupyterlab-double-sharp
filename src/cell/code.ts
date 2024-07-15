@@ -64,10 +64,7 @@ export namespace CellCode {
     const cachedData = CellCode.metadata.get(cell.model);
     if (cachedData) return cachedData;
 
-    if (!inspector) {
-      inspector = getInspector(cell);
-    }
-
+    inspector ??= getInspector(cell);
     const codeData = await inspector.getCodeData(cell);
     const data = CellCode.metadata.getCoalescedValue(codeData);
     CellCode.metadata.set(cell.model, data);
@@ -94,9 +91,7 @@ export namespace CellCode {
     inspector?: CodeInspector,
     variables?: string[]
   ): Promise<string[]> {
-    if (!inspector) {
-      inspector = getInspector(cell);
-    }
+    inspector ??= getInspector(cell);
     if (!variables) {
       const data = await getData(cell, inspector);
       variables = data.variables;
