@@ -35,3 +35,30 @@ export function first<T>(array?: Array<T>): T | undefined {
     return array[0];
   }
 }
+
+/**
+ * sort compareFn 부하가 클 경우 keyFn으로 key를 미리 계산한 후에 sort
+ * * 참고
+ *   - Sorting with map (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#sorting_with_map)
+ *   - mapsort (https://github.com/Pimm/mapsort)
+ */
+export function mapSort<T, U>(
+  list: Array<T>,
+  keyFn: (value: T, index: number, array: T[]) => U,
+  compareFn?: (a: U, b: U) => number
+): Array<T> {
+  const keys: U[] = [];
+  const indexes: number[] = [];
+
+  list.forEach((value, index, array) => {
+    const key = keyFn(value, index, array);
+    keys[index] = key;
+    indexes.push(index);
+  });
+
+  compareFn ??= (a, b) => (a > b ? 1 : a < b ? -1 : 0);
+  indexes.sort((a, b) => compareFn!(keys[a], keys[b]));
+
+  const result = indexes.map(index => list[index]);
+  return result;
+}
