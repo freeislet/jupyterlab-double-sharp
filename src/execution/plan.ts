@@ -1,6 +1,7 @@
 import { CodeCell } from '@jupyterlab/cells';
 
 import { ICodeExecution, ICodeContext, CodeExecutionBuilder } from './code';
+import { sortCells } from '../utils/cell';
 import { notIn } from '../utils/array';
 
 export interface IExecutionPlan {
@@ -28,9 +29,11 @@ export class ExecutionPlanner {
 
   build(executions: ICodeExecution[]): IExecutionPlan {
     const cells = executions.map(execution => execution.cell);
-    const dependentCells = executions
-      .flatMap(execution => execution.dependentCells ?? [])
-      .filter(notIn(cells));
+    const dependentCells = sortCells(
+      executions
+        .flatMap(execution => execution.dependentCells ?? [])
+        .filter(notIn(cells))
+    );
 
     const plan = { executions, cells, dependentCells };
     Log.debug('execution plan', plan);
