@@ -2,6 +2,7 @@ import { Cell, CodeCell, isCodeCellModel } from '@jupyterlab/cells';
 import { Notebook } from '@jupyterlab/notebook';
 
 import { CellError } from './error';
+import { mapSort } from './array';
 
 export function isCodeCell(cell: Cell): cell is CodeCell {
   return isCodeCellModel(cell.model);
@@ -31,4 +32,8 @@ export function getAboveCells(cell: Cell): Cell[] {
 
 export function getAboveCodeCells(cell: Cell): CodeCell[] {
   return getAboveCells(cell).filter(c => isCodeCell(c)) as CodeCell[];
+}
+
+export function sortCells<T extends Cell>(cells: T[]): T[] {
+  return mapSort(cells, getCellIndex);
 }
