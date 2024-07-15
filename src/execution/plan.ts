@@ -1,6 +1,6 @@
 import { CodeCell } from '@jupyterlab/cells';
 
-import { ICodeExecution, ICodeContext } from './code';
+import { ICodeExecution, ICodeContext, CodeExecutionBuilder } from './code';
 import { notIn } from '../utils/array';
 
 export interface IExecutionPlan {
@@ -11,10 +11,12 @@ export interface IExecutionPlan {
 
 export class ExecutionPlanner {
   static async buildFromContexts(
-    contexts: ICodeContext[]
+    contexts: ICodeContext[],
+    forceExecute?: boolean
   ): Promise<IExecutionPlan> {
+    const builder = new CodeExecutionBuilder();
     const executions = await Promise.all(
-      contexts.map(context => context.buildExecution())
+      contexts.map(context => builder.build(context, forceExecute))
     );
     const plan = new ExecutionPlanner().build(executions);
     return plan;

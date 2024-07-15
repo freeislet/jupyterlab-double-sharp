@@ -4,12 +4,7 @@ import { CellActions } from './actions';
 import { CellDictionary } from './dictionary';
 import { CellConfig } from './config';
 import { CellExecution } from './execution';
-import {
-  CodeExecutionBuilder,
-  ICodeExecution,
-  ICodeContext,
-  ICodeConfig
-} from '../execution';
+import { ICodeExecution, ICodeContext, ICodeConfig } from '../execution';
 import { CodeInspector, ICodeData } from '../code';
 import { metadataKeys } from '../const';
 import { MetadataGroupDirtyable } from '../utils/metadata';
@@ -148,20 +143,6 @@ export class CodeContext implements ICodeContext {
     );
   }
 
-  async buildExecution(): Promise<ICodeExecution> {
-    Log.debug(`code execution { (${this.cell.model.id})`);
-
-    const execution = await new CodeExecutionBuilder().build(this);
-    CellExecution.saveMetadata(execution);
-
-    Log.debug(`} code execution (${this.cell.model.id})`, execution);
-    return execution;
-  }
-
-  createAnother(cell: CodeCell): ICodeContext {
-    return new CodeContext(cell, this.inspector);
-  }
-
   getConfig(): ICodeConfig {
     return CellConfig.get(this.cell.model);
   }
@@ -172,6 +153,19 @@ export class CodeContext implements ICodeContext {
 
   async isCached(variables?: string[]): Promise<boolean> {
     return CellCode.isCached(this.cell, this.inspector, variables);
+  }
+
+  saveExecutionData(execution: ICodeExecution) {
+    CellExecution.saveMetadata(execution);
+  }
+
+  isForced(): boolean {
+    const data = CellExecution.metadata.get(this.cell.model);
+    return data?.forced ?? false;
+  }
+
+  createAnother(cell: CodeCell): ICodeContext {
+    return new CodeContext(cell, this.inspector);
   }
 
   /**

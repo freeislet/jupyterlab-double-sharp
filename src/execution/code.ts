@@ -8,6 +8,7 @@ import { ReorderSet } from '../utils/set';
 
 export interface ICodeExecution {
   cell: CodeCell;
+  forced?: boolean;
   config?: ICodeConfig;
   skipped?: boolean;
   cached?: boolean;
@@ -62,11 +63,12 @@ export interface IDependency {
 export interface ICodeContext {
   readonly cell: CodeCell;
 
-  buildExecution(): Promise<ICodeExecution>;
-  createAnother(cell: CodeCell): ICodeContext;
   getConfig(): ICodeConfig;
   getData(): Promise<ICodeData>;
   isCached(variables?: string[]): Promise<boolean>;
+  saveExecutionData(execution: ICodeExecution): void;
+  isForced(): boolean;
+  createAnother(cell: CodeCell): ICodeContext;
 }
 
 interface IDependencyInfo {
@@ -82,49 +84,58 @@ export class CodeExecutionBuilder {
    * - skip, cache 처리 (실행 여부 판단)
    * - unbound variables resolve 위한 dependent cells 수집
    */
-  async build(context: ICodeContext): Promise<ICodeExecution> {
+  async build(
+    context: ICodeContext,
+    forceExecute?: boolean
+  ): Promise<ICodeExecution> {
+    Log.debug(`code execution { (${context.cell.model.id})`);
+
+    const execution = await this._build(context, forceExecute);
+    context.saveExecutionData(execution);
+
+    Log.debug(`} code execution (${context.cell.model.id})`, execution);
+    return execution;
+  }
+
+  private async _build(
+    context: ICodeContext,
+    forced: boolean | undefined
+  ): Promise<ICodeExecution> {
     const cell = context.cell;
     const config = context.getConfig();
-    if (config.skip) {
+    const execution: ICodeExecution = { cell, forced, config };
+
+    if (config.skip && !forced) {
       // this._output.printSkipped();
-      return { cell, config, skipped: true };
+      return { ...execution, skipped: true };
     }
 
     const code = await context.getData();
+    execution.code = code;
 
-    if (config.cache) {
+    if (config.cache && !forced) {
       const cached = await context.isCached(code.variables);
       if (cached) {
         // this._output.printCached(data);
-        return { cell, config, cached, code };
+        return { ...execution, cached };
       }
     }
 
     if (config.autoDependency) {
-      const dependencyInfo = await this._getDependencyInfo(
-        context,
-        code.unboundVariables
-      );
-      const unresolvedVariables = dependencyInfo.unresolvedVariables;
-      const dependencies = dependencyInfo.dependencies;
-      const dependentCells =
-        !unresolvedVariables.length && dependencies // NOTE: unresolved variables 있으면 dependency 실행하지 않음
-          ? this._collectDependentCells(dependencies)
-          : undefined;
+      const { unresolvedVariables, dependencies } =
+        await this._getDependencyInfo(context, code.unboundVariables);
+      const validDependency = unresolvedVariables.length && dependencies; // NOTE: unresolved variables 있으면 dependency 실행하지 않음
+      const dependentCells = validDependency
+        ? this._collectDependentCells(dependencies)
+        : undefined;
       return {
-        cell,
-        config,
-        code,
+        ...execution,
         unresolvedVariables,
         dependencies,
         dependentCells
       };
     } else {
-      return {
-        cell,
-        config,
-        code
-      };
+      return execution;
     }
   }
 
