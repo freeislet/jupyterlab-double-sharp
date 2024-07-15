@@ -2,9 +2,8 @@ import { CodeCell } from '@jupyterlab/cells';
 
 import { ICodeData } from '../code';
 import { Settings } from '../settings';
-import { getAboveCodeCells } from '../utils/cell';
-import { In, notIn } from '../utils/array';
-import { ReorderSet } from '../utils/set';
+import { getAboveCodeCells, getCellIndex } from '../utils/cell';
+import { In, notIn, mapSort } from '../utils/array';
 
 export interface ICodeExecution {
   cell: CodeCell;
@@ -124,7 +123,7 @@ export class CodeExecutionBuilder {
     if (config.autoDependency) {
       const { unresolvedVariables, dependencies } =
         await this._getDependencyInfo(context, code.unboundVariables);
-      const validDependency = unresolvedVariables.length && dependencies; // NOTE: unresolved variables 있으면 dependency 실행하지 않음
+      const validDependency = !unresolvedVariables.length && dependencies; // NOTE: unresolved variables 있으면 dependency 실행하지 않음
       const dependentCells = validDependency
         ? this._collectDependentCells(dependencies)
         : undefined;
@@ -239,7 +238,7 @@ export class CodeExecutionBuilder {
   }
 
   private _collectDependentCells(dependencies: IDependency[]): CodeCell[] {
-    const cells = new ReorderSet<CodeCell>();
+    const cells = new Set<CodeCell>();
 
     function collect(dependencies?: IDependency[]) {
       if (!dependencies) return;
@@ -255,6 +254,9 @@ export class CodeExecutionBuilder {
     }
 
     collect(dependencies);
-    return Array.from(cells).reverse();
+
+    const sortedCells = mapSort([...cells], getCellIndex);
+    Log.debug('collectDependentCells', sortedCells);
+    return sortedCells;
   }
 }
