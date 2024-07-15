@@ -59,7 +59,7 @@ export default function Settings() {
           value={execution.forceSelected}
           onChange={(value: boolean) => apply({ forceSelected: value })}
         >
-          Force Execution on Selected Cells
+          Force Execution for Selected Cells
         </Boolean_>
         <Boolean_
           value={execution.disableCache}

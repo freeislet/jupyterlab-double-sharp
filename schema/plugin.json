@@ -35,7 +35,7 @@
           "default": true
         },
         "forceSelected": {
-          "title": "Force Execution on Selected Cells",
+          "title": "Force Execution for Selected Cells",
           "type": "boolean",
           "description": "Force execution for selected cells regardless of cache or skip configurations.",
           "default": true
