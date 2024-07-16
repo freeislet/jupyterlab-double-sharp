@@ -3,7 +3,7 @@ import { CodeCell } from '@jupyterlab/cells';
 import { ICodeData } from '../code';
 import { Settings } from '../settings';
 import { getAboveCodeCells, sortCells } from '../utils/cell';
-import { In, notIn, uniq } from '../utils/array';
+import { In, notIn } from '../utils/array';
 
 export interface ICodeExecution {
   cell: CodeCell;
@@ -75,6 +75,8 @@ export interface ICodeContext {
 }
 
 export class CodeExecutionBuilder {
+  saveUnresolvedDependencies = Settings.data.verbose.metadata;
+
   constructor() {}
 
   /**
@@ -153,57 +155,55 @@ export class CodeExecutionBuilder {
    * scanContexts를 대상으로 targetVariables에 대한 dependency 정보 수집
    */
   private async _buildDependency(
-    targetVariables: string[],
+    unboundVariables: string[],
     scanContexts: ICodeContext[]
   ): Promise<IDependency | undefined> {
-    if (!targetVariables.length) return;
+    if (!unboundVariables.length) return;
 
+    let unresolvedVariables = unboundVariables;
     const dependencies: IDependencyItem[] = [];
 
     for (let i = 0; i < scanContexts.length; ++i) {
-      const scanContext = scanContexts[i];
-      const rescanContexts = scanContexts.slice(i + 1);
-      const dependency = await this._buildDependencyItem(
-        targetVariables,
-        scanContext,
-        rescanContexts
+      const dependencyItem = await this._buildDependencyItem(
+        unresolvedVariables,
+        scanContexts[i],
+        () => scanContexts.slice(i + 1)
       );
+      if (dependencyItem) {
+        Log.debug(
+          '- dependency resolved',
+          dependencyItem.resolvedVariables,
+          scanContexts[i].cell.model.id
+        );
 
-      if (dependency) {
-        const dependencyResolved = !dependency.unresolvedVariables.length;
-        if (dependencyResolved) {
-          Log.debug('- resolved dep', scanContext.cell.model.id, dependency);
+        dependencies.push(dependencyItem);
+        unresolvedVariables = unresolvedVariables.filter(
+          notIn(dependencyItem.resolvedVariables)
+        );
 
-          targetVariables = targetVariables.filter(
-            notIn(dependency.resolvedVariables)
-          );
-        }
-
-        const saveUnresolvedDependencies = Settings.data.verbose.metadata;
-        if (dependencyResolved || saveUnresolvedDependencies) {
-          dependencies.push(dependency);
-        }
-
-        const allResolved = !targetVariables.length;
+        const allResolved = !unresolvedVariables.length;
         if (allResolved) break;
       }
     }
 
-    return { unresolvedVariables: targetVariables, dependencies };
+    const allResolved = !unresolvedVariables.length;
+    if (allResolved || this.saveUnresolvedDependencies) {
+      return { unresolvedVariables, dependencies };
+    }
   }
 
   /**
-   * dependency scan 대상 CodeContext의 CellExecution.IDependency object 생성
+   * dependency scan 대상 CodeContext의 CellExecution.IDependencyItem 생성
    *
    * @param targetVariables resolve 하려는 variables
    * @param scanContext dependency scan 대상 CodeContext
-   * @param rescanContexts scanContext의 sub-dependency를 다시 찾기 위해 scan할 CodeContexts
-   * @returns scanContext의 CellExecution.IDependency object
+   * @param rescanContextsFn scanContext의 sub-dependency를 다시 찾기 위해 scan할 CodeContexts 조회 함수
+   * @returns scanContext의 CellExecution.IDependencyItem
    */
   private async _buildDependencyItem(
     targetVariables: string[],
     scanContext: ICodeContext,
-    rescanContexts: ICodeContext[]
+    rescanContextsFn: () => ICodeContext[]
   ): Promise<IDependencyItem | undefined> {
     const config = scanContext.getConfig();
     if (config.skip) return;
@@ -217,14 +217,11 @@ export class CodeExecutionBuilder {
     let unresolvedVariables = targetVariables.filter(notIn(resolvedVariables));
     let dependencies: IDependencyItem[] | undefined;
 
-    if (code.unboundVariables) {
+    if (code.unboundVariables.length) {
       // 셀 자체 unbound variables 있으면, 재귀적으로 dependency 수집해서 resolve
-      const retargetVariables = uniq(
-        unresolvedVariables.concat(code.unboundVariables)
-      );
       const dependency = await this._buildDependency(
-        retargetVariables,
-        rescanContexts
+        code.unboundVariables,
+        rescanContextsFn()
       );
       if (dependency) {
         unresolvedVariables = dependency.unresolvedVariables;
