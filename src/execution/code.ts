@@ -13,7 +13,7 @@ export interface ICodeExecution {
   cached?: boolean;
   code?: ICodeData;
   unresolvedVariables?: string[];
-  dependencies?: IDependency[];
+  dependencies?: IDependencyItem[];
   dependencyCells?: CodeCell[];
 }
 
@@ -26,7 +26,7 @@ export interface ICodeConfig {
   autoDependency: boolean;
 }
 
-export interface IDependency {
+export interface IDependencyItem {
   /**
    * 현재 dependency 정보의 해당 셀
    */
@@ -56,7 +56,7 @@ export interface IDependency {
   /**
    * targetVariables + code.unboundVariables를 resolve하기 위한 dependencies
    */
-  dependencies?: IDependency[];
+  dependencies?: IDependencyItem[];
 }
 
 export interface ICodeContext {
@@ -72,7 +72,7 @@ export interface ICodeContext {
 
 interface IDependencyInfo {
   unresolvedVariables: string[];
-  dependencies?: IDependency[];
+  dependencies?: IDependencyItem[];
 }
 
 export class CodeExecutionBuilder {
@@ -165,12 +165,12 @@ export class CodeExecutionBuilder {
       return { unresolvedVariables: [] };
     }
 
-    const dependencies: IDependency[] = [];
+    const dependencies: IDependencyItem[] = [];
 
     for (let i = 0; i < scanContexts.length; ++i) {
       const scanContext = scanContexts[i];
       const rescanContexts = scanContexts.slice(i + 1);
-      const dependency = await this._buildDependency(
+      const dependency = await this._buildDependencyItem(
         targetVariables,
         scanContext,
         rescanContexts
@@ -207,11 +207,11 @@ export class CodeExecutionBuilder {
    * @param rescanContexts scanContext의 sub-dependency를 다시 찾기 위해 scan할 CodeContexts
    * @returns scanContext의 CellExecution.IDependency object
    */
-  private async _buildDependency(
+  private async _buildDependencyItem(
     targetVariables: string[],
     scanContext: ICodeContext,
     rescanContexts: ICodeContext[]
-  ): Promise<IDependency | undefined> {
+  ): Promise<IDependencyItem | undefined> {
     const config = scanContext.getConfig();
     if (config.skip) return;
 
@@ -229,7 +229,7 @@ export class CodeExecutionBuilder {
       retargetVariables,
       rescanContexts
     );
-    const dependency: IDependency = {
+    const dependency: IDependencyItem = {
       cell: scanContext.cell,
       code,
       targetVariables,
@@ -241,10 +241,10 @@ export class CodeExecutionBuilder {
     return dependency;
   }
 
-  private _collectDependencyCells(dependencies: IDependency[]): CodeCell[] {
+  private _collectDependencyCells(dependencies: IDependencyItem[]): CodeCell[] {
     const cells = new Set<CodeCell>();
 
-    function collect(dependencies?: IDependency[]) {
+    function collect(dependencies?: IDependencyItem[]) {
       if (!dependencies) return;
 
       for (const dep of dependencies) {

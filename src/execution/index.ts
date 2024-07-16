@@ -25,7 +25,7 @@ export { ExecutionActions } from './actions';
 export {
   CodeExecutionBuilder,
   ICodeExecution,
-  IDependency,
+  IDependencyItem,
   ICodeConfig,
   ICodeContext
 } from './code';

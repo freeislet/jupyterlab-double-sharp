@@ -2,7 +2,7 @@ import { Cell } from '@jupyterlab/cells';
 
 import { metadataKeys } from '../const';
 import { MetadataGroup } from '../utils/metadata';
-import { ICodeExecution, IDependency } from '../execution';
+import { ICodeExecution, IDependencyItem } from '../execution';
 
 export namespace CellExecution {
   /**
@@ -10,16 +10,16 @@ export namespace CellExecution {
    */
   export type IData = {
     cell?: ICellData;
-    dependencies?: IDependencyData[];
+    dependencies?: IDependencyItemData[];
     dependencyCells?: ICellData[];
   } & Partial<
     Omit<ICodeExecution, 'cell' | 'dependencies' | 'dependencyCells'>
   >;
 
-  export type IDependencyData = {
+  export type IDependencyItemData = {
     cell: ICellData;
-    dependencies?: IDependencyData[];
-  } & Omit<IDependency, 'cell' | 'dependencies'>;
+    dependencies?: IDependencyItemData[];
+  } & Omit<IDependencyItem, 'cell' | 'dependencies'>;
 
   export interface ICellData {
     modelId: string;
@@ -52,21 +52,21 @@ export namespace CellExecution {
       cached: execution.cached,
       code: execution.code,
       unresolvedVariables: execution.unresolvedVariables,
-      dependencies: execution.dependencies?.map(dependencyData),
+      dependencies: execution.dependencies?.map(dependencyItemData),
       dependencyCells: execution.dependencyCells?.map(cellData)
     };
   }
 
-  function dependencyData(
-    dependency: IDependency
-  ): CellExecution.IDependencyData {
+  function dependencyItemData(
+    dependency: IDependencyItem
+  ): CellExecution.IDependencyItemData {
     return {
       cell: cellData(dependency.cell),
       code: dependency.code,
       targetVariables: dependency.targetVariables,
       resolvedVariables: dependency.resolvedVariables,
       unresolvedVariables: dependency.unresolvedVariables,
-      dependencies: dependency.dependencies?.map(dependencyData)
+      dependencies: dependency.dependencies?.map(dependencyItemData)
     };
   }
 
