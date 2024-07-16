@@ -40,14 +40,14 @@ namespace NewNotebookActions {
       contexts,
       forceExecute
     );
-    if (plan.dependentCells) {
+    if (plan.dependencyCells) {
       const validSession =
         sessionContext &&
         !sessionContext.isTerminating &&
         !sessionContext.pendingInput &&
         !sessionContext.hasNoKernel;
       if (validSession) {
-        for (const cell of plan.dependentCells) {
+        for (const cell of plan.dependencyCells) {
           await CodeCell.execute(cell, sessionContext);
         }
       }
@@ -193,6 +193,8 @@ namespace NewCodeCell {
         const cached = await context.isCached();
         if (cached) return;
       }
+
+      Log.debug('CodeCell.execute not forced.', cell.model.id, config);
     }
 
     // 기존 실행 함수

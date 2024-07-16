@@ -11,8 +11,10 @@ export namespace CellExecution {
   export type IData = {
     cell?: ICellData;
     dependencies?: IDependencyData[];
-    dependentCells?: ICellData[];
-  } & Partial<Omit<ICodeExecution, 'cell' | 'dependencies' | 'dependentCells'>>;
+    dependencyCells?: ICellData[];
+  } & Partial<
+    Omit<ICodeExecution, 'cell' | 'dependencies' | 'dependencyCells'>
+  >;
 
   export type IDependencyData = {
     cell: ICellData;
@@ -51,7 +53,7 @@ export namespace CellExecution {
       code: execution.code,
       unresolvedVariables: execution.unresolvedVariables,
       dependencies: execution.dependencies?.map(dependencyData),
-      dependentCells: execution.dependentCells?.map(cellData)
+      dependencyCells: execution.dependencyCells?.map(cellData)
     };
   }
 

@@ -7,7 +7,7 @@ import { notIn } from '../utils/array';
 export interface IExecutionPlan {
   executions: ICodeExecution[];
   cells: CodeCell[];
-  dependentCells?: CodeCell[];
+  dependencyCells?: CodeCell[];
 }
 
 export class ExecutionPlanner {
@@ -29,13 +29,13 @@ export class ExecutionPlanner {
 
   build(executions: ICodeExecution[]): IExecutionPlan {
     const cells = executions.map(execution => execution.cell);
-    const dependentCells = sortCells(
+    const dependencyCells = sortCells(
       executions
-        .flatMap(execution => execution.dependentCells ?? [])
+        .flatMap(execution => execution.dependencyCells ?? [])
         .filter(notIn(cells))
     );
 
-    const plan = { executions, cells, dependentCells };
+    const plan = { executions, cells, dependencyCells };
     Log.debug('execution plan', plan);
     return plan;
   }

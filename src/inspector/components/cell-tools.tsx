@@ -392,8 +392,8 @@ function Execution() {
         )
       ) : (
         <>
-          <HeaderRow header="Dependent Cell Count:">
-            <span>{execution?.dependentCells?.length ?? 0}</span>
+          <HeaderRow header="Dependency Cell Count:">
+            <span>{execution?.dependencyCells?.length ?? 0}</span>
           </HeaderRow>
           <ListRow header="Variables:" data={execution?.code?.variables} />
           {execution?.code?.unboundVariables && (

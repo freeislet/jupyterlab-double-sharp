@@ -31,7 +31,7 @@
         "autoDependency": {
           "title": "Auto Dependency",
           "type": "boolean",
-          "description": "Execute dependent cells if unresolved variables or modules of the cell are assigned in the cells above.\nThis option can be overridden with 'Auto Dependency' config in '## Cell Inspector' panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
+          "description": "Execute dependency cells if unresolved variables or modules of the cell are assigned in the cells above.\nThis option can be overridden with 'Auto Dependency' config in '## Cell Inspector' panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
           "default": true
         },
         "forceSelected": {

@@ -14,7 +14,7 @@ export interface ICodeExecution {
   code?: ICodeData;
   unresolvedVariables?: string[];
   dependencies?: IDependency[];
-  dependentCells?: CodeCell[];
+  dependencyCells?: CodeCell[];
 }
 
 /**
@@ -79,9 +79,9 @@ export class CodeExecutionBuilder {
   constructor() {}
 
   /**
-   * 셀 실행 계획 수집 (dependent cells 포함)
+   * 셀 실행 계획 수집 (dependency cells 포함)
    * - skip, cache 처리 (실행 여부 판단)
-   * - unbound variables resolve 위한 dependent cells 수집
+   * - unbound variables resolve 위한 dependency cells 수집
    */
   async build(
     context: ICodeContext,
@@ -124,14 +124,14 @@ export class CodeExecutionBuilder {
       const { unresolvedVariables, dependencies } =
         await this._getDependencyInfo(context, code.unboundVariables);
       const validDependency = !unresolvedVariables.length && dependencies; // NOTE: unresolved variables 있으면 dependency 실행하지 않음
-      const dependentCells = validDependency
-        ? this._collectDependentCells(dependencies)
+      const dependencyCells = validDependency
+        ? this._collectDependencyCells(dependencies)
         : undefined;
       return {
         ...execution,
         unresolvedVariables,
         dependencies,
-        dependentCells
+        dependencyCells
       };
     } else {
       return execution;
@@ -241,7 +241,7 @@ export class CodeExecutionBuilder {
     return dependency;
   }
 
-  private _collectDependentCells(dependencies: IDependency[]): CodeCell[] {
+  private _collectDependencyCells(dependencies: IDependency[]): CodeCell[] {
     const cells = new Set<CodeCell>();
 
     function collect(dependencies?: IDependency[]) {
@@ -260,7 +260,7 @@ export class CodeExecutionBuilder {
     collect(dependencies);
 
     const sortedCells = sortCells([...cells]);
-    Log.debug('collectDependentCells', sortedCells);
+    Log.debug('collectDependencyCells', sortedCells);
     return sortedCells;
   }
 }
