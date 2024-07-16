@@ -12,8 +12,7 @@ export interface ICodeExecution {
   skipped?: boolean;
   cached?: boolean;
   code?: ICodeData;
-  unresolvedVariables?: string[];
-  dependencies?: IDependencyItem[];
+  dependency?: IDependency;
   dependencyCells?: CodeCell[];
 }
 
@@ -24,6 +23,11 @@ export interface ICodeConfig {
   skip: boolean;
   cache: boolean;
   autoDependency: boolean;
+}
+
+export interface IDependency {
+  unresolvedVariables: string[];
+  dependencies?: IDependencyItem[];
 }
 
 export interface IDependencyItem {
@@ -38,7 +42,7 @@ export interface IDependencyItem {
   code: ICodeData;
 
   /**
-   * resolve 하려는 target variables (부모 dependency의 unresolvedVariables)
+   * resolve 하려는 target variables (이전 dependency의 unresolvedVariables)
    */
   targetVariables: string[];
 
@@ -54,7 +58,7 @@ export interface IDependencyItem {
   unresolvedVariables: string[];
 
   /**
-   * targetVariables + code.unboundVariables를 resolve하기 위한 dependencies
+   * code.unboundVariables를 resolve하기 위한 dependencies
    */
   dependencies?: IDependencyItem[];
 }
@@ -68,11 +72,6 @@ export interface ICodeContext {
   saveExecutionData(execution: ICodeExecution): void;
   isForced(): boolean;
   createAnother(cell: CodeCell): ICodeContext;
-}
-
-interface IDependencyInfo {
-  unresolvedVariables: string[];
-  dependencies?: IDependencyItem[];
 }
 
 export class CodeExecutionBuilder {
@@ -121,16 +120,14 @@ export class CodeExecutionBuilder {
     }
 
     if (config.autoDependency) {
-      const { unresolvedVariables, dependencies } =
-        await this._getDependencyInfo(context, code.unboundVariables);
-      const validDependency = !unresolvedVariables.length && dependencies; // NOTE: unresolved variables 있으면 dependency 실행하지 않음
-      const dependencyCells = validDependency
-        ? this._collectDependencyCells(dependencies)
-        : undefined;
+      const dependency = await this._getDependency(
+        context,
+        code.unboundVariables
+      );
+      const dependencyCells = this._collectDependencyCells(dependency);
       return {
         ...execution,
-        unresolvedVariables,
-        dependencies,
+        dependency,
         dependencyCells
       };
     } else {
@@ -141,29 +138,25 @@ export class CodeExecutionBuilder {
   /**
    * 현재 셀 코드의 unbound variables에 대한 dependency 정보 수집
    */
-  private async _getDependencyInfo(
+  private async _getDependency(
     context: ICodeContext,
     unboundVariables: string[]
-  ): Promise<IDependencyInfo> {
-    if (!unboundVariables.length) {
-      return { unresolvedVariables: [] };
-    }
+  ): Promise<IDependency | undefined> {
+    if (!unboundVariables.length) return;
 
     const scanCells = getAboveCodeCells(context.cell).reverse();
     const scanContexts = scanCells.map(cell => context.createAnother(cell));
-    return await this._buildDependencyInfo(unboundVariables, scanContexts);
+    return await this._buildDependency(unboundVariables, scanContexts);
   }
 
   /**
-   * scanContexts를 대상으로 targetVariables에 대한 dependency 정보 수집 (recursively)
+   * scanContexts를 대상으로 targetVariables에 대한 dependency 정보 수집
    */
-  private async _buildDependencyInfo(
+  private async _buildDependency(
     targetVariables: string[],
     scanContexts: ICodeContext[]
-  ): Promise<IDependencyInfo> {
-    if (!targetVariables.length) {
-      return { unresolvedVariables: [] };
-    }
+  ): Promise<IDependency | undefined> {
+    if (!targetVariables.length) return;
 
     const dependencies: IDependencyItem[] = [];
 
@@ -215,33 +208,51 @@ export class CodeExecutionBuilder {
     const config = scanContext.getConfig();
     if (config.skip) return;
 
-    Log.debug('dependency {', scanContext.cell.model.id, targetVariables);
-
     const code = await scanContext.getData();
     const resolvedVariables = targetVariables.filter(In(code.variables));
     if (!resolvedVariables.length) return;
 
-    const retargetVariables = uniq([
-      ...targetVariables.filter(notIn(code.variables)),
-      ...code.unboundVariables
-    ]);
-    const dependencyInfo = await this._buildDependencyInfo(
-      retargetVariables,
-      rescanContexts
-    );
-    const dependency: IDependencyItem = {
+    Log.debug('dependency {', scanContext.cell.model.id, targetVariables);
+
+    let unresolvedVariables = targetVariables.filter(notIn(resolvedVariables));
+    let dependencies: IDependencyItem[] | undefined;
+
+    if (code.unboundVariables) {
+      // 셀 자체 unbound variables 있으면, 재귀적으로 dependency 수집해서 resolve
+      const retargetVariables = uniq(
+        unresolvedVariables.concat(code.unboundVariables)
+      );
+      const dependency = await this._buildDependency(
+        retargetVariables,
+        rescanContexts
+      );
+      if (dependency) {
+        unresolvedVariables = dependency.unresolvedVariables;
+        dependencies = dependency.dependencies;
+      }
+    }
+
+    const dependencyItem: IDependencyItem = {
       cell: scanContext.cell,
       code,
       targetVariables,
       resolvedVariables,
-      unresolvedVariables: dependencyInfo.unresolvedVariables,
-      dependencies: dependencyInfo.dependencies
+      unresolvedVariables,
+      dependencies
     };
-    Log.debug('} dependency', scanContext.cell.model.id, dependency);
-    return dependency;
+    Log.debug('} dependency', scanContext.cell.model.id, dependencyItem);
+    return dependencyItem;
   }
 
-  private _collectDependencyCells(dependencies: IDependencyItem[]): CodeCell[] {
+  private _collectDependencyCells(
+    dependency: IDependency | undefined
+  ): CodeCell[] | undefined {
+    if (!dependency) return;
+
+    const { unresolvedVariables, dependencies } = dependency;
+    const valid = dependencies && !unresolvedVariables.length; // NOTE: unresolved variables 있으면 dependency 실행하지 않음
+    if (!valid) return;
+
     const cells = new Set<CodeCell>();
 
     function collect(dependencies?: IDependencyItem[]) {

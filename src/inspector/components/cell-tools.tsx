@@ -402,10 +402,10 @@ function Execution() {
               data={execution?.code?.unboundVariables}
             />
           )}
-          {execution?.unresolvedVariables && (
+          {execution?.dependency?.unresolvedVariables && (
             <ListRow
               header="Unresolved Vars:"
-              data={execution?.unresolvedVariables}
+              data={execution?.dependency?.unresolvedVariables}
             />
           )}
         </>

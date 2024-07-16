@@ -2,7 +2,7 @@ import { Cell } from '@jupyterlab/cells';
 
 import { metadataKeys } from '../const';
 import { MetadataGroup } from '../utils/metadata';
-import { ICodeExecution, IDependencyItem } from '../execution';
+import { ICodeExecution, IDependency, IDependencyItem } from '../execution';
 
 export namespace CellExecution {
   /**
@@ -10,11 +10,13 @@ export namespace CellExecution {
    */
   export type IData = {
     cell?: ICellData;
-    dependencies?: IDependencyItemData[];
+    dependency?: IDependencyData;
     dependencyCells?: ICellData[];
-  } & Partial<
-    Omit<ICodeExecution, 'cell' | 'dependencies' | 'dependencyCells'>
-  >;
+  } & Partial<Omit<ICodeExecution, 'cell' | 'dependency' | 'dependencyCells'>>;
+
+  export type IDependencyData = {
+    dependencies?: IDependencyItemData[];
+  } & Omit<IDependency, 'dependencies'>;
 
   export type IDependencyItemData = {
     cell: ICellData;
@@ -51,22 +53,31 @@ export namespace CellExecution {
       skipped: execution.skipped,
       cached: execution.cached,
       code: execution.code,
-      unresolvedVariables: execution.unresolvedVariables,
-      dependencies: execution.dependencies?.map(dependencyItemData),
+      dependency: dependencyData(execution.dependency),
       dependencyCells: execution.dependencyCells?.map(cellData)
     };
   }
 
-  function dependencyItemData(
-    dependency: IDependencyItem
-  ): CellExecution.IDependencyItemData {
+  function dependencyData(
+    dependency: IDependency | undefined
+  ): CellExecution.IDependencyData | undefined {
+    if (!dependency) return;
     return {
-      cell: cellData(dependency.cell),
-      code: dependency.code,
-      targetVariables: dependency.targetVariables,
-      resolvedVariables: dependency.resolvedVariables,
       unresolvedVariables: dependency.unresolvedVariables,
       dependencies: dependency.dependencies?.map(dependencyItemData)
+    };
+  }
+
+  function dependencyItemData(
+    dependencyItem: IDependencyItem
+  ): CellExecution.IDependencyItemData {
+    return {
+      cell: cellData(dependencyItem.cell),
+      code: dependencyItem.code,
+      targetVariables: dependencyItem.targetVariables,
+      resolvedVariables: dependencyItem.resolvedVariables,
+      unresolvedVariables: dependencyItem.unresolvedVariables,
+      dependencies: dependencyItem.dependencies?.map(dependencyItemData)
     };
   }
 
