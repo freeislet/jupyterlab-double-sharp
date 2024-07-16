@@ -37,6 +37,27 @@ export function first<T>(array?: T[]): T | undefined {
 }
 
 /**
+ * filter 함수에 의해 포함/미포함 배열 나누기
+ */
+export function partition<T>(
+  list: T[],
+  predicate: (value: T, index: number, array: T[]) => unknown
+) {
+  const result: [T[], T[]] = [[], []];
+  list.forEach((value, index, array) => {
+    result[predicate(value, index, array) ? 0 : 1].push(value);
+  });
+  return result;
+}
+
+/**
+ * 중복 제거
+ */
+export function uniq<T>(list: T[]): T[] {
+  return [...new Set(list)];
+}
+
+/**
  * sort compareFn 부하가 클 경우 keyFn으로 key를 미리 계산한 후에 sort
  * * 참고
  *   - Sorting with map (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#sorting_with_map)
@@ -61,11 +82,4 @@ export function mapSort<T, U>(
 
   const result = indexes.map(index => list[index]);
   return result;
-}
-
-/**
- * 중복 제거
- */
-export function uniq<T>(list: T[]): T[] {
-  return [...new Set(list)];
 }
