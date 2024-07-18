@@ -20,8 +20,8 @@ export namespace CellExecution {
 
   export type IDependencyItemData = {
     cell: ICellData;
-    dependencies?: IDependencyItemData[];
-  } & Omit<IDependencyItem, 'cell' | 'dependencies'>;
+    dependency?: IDependencyData;
+  } & Omit<IDependencyItem, 'cell' | 'dependency'>;
 
   export interface ICellData {
     modelId: string;
@@ -63,6 +63,7 @@ export namespace CellExecution {
   ): CellExecution.IDependencyData | undefined {
     if (!dependency) return;
     return {
+      resolved: dependency.resolved,
       unresolvedVariables: dependency.unresolvedVariables,
       dependencies: dependency.dependencies?.map(dependencyItemData)
     };
@@ -76,8 +77,7 @@ export namespace CellExecution {
       code: dependencyItem.code,
       targetVariables: dependencyItem.targetVariables,
       resolvedVariables: dependencyItem.resolvedVariables,
-      unresolvedVariables: dependencyItem.unresolvedVariables,
-      dependencies: dependencyItem.dependencies?.map(dependencyItemData)
+      dependency: dependencyData(dependencyItem.dependency)
     };
   }
 
