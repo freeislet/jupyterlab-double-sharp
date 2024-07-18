@@ -81,8 +81,8 @@ export class MetadataGroup<T> extends Metadata<T> {
 export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   public readonly dirtyFlagName: string;
   private _dirtyResolver?: (model: ICellModel) => void;
-  private _deferUpdate = false;
-  private _deferredUpdates = new Map<ICellModel, Partial<T>>();
+  private _cumulativeUpdating = false;
+  private _cumulativeUpdates = new Map<ICellModel, T>();
 
   constructor(
     public readonly name: string,
@@ -124,7 +124,7 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
   }
 
   update(model: ICellModel, value: Partial<T>, deleteIfEqualDefault = false) {
-    if (this._deferUpdate) {
+    if (this._cumulativeUpdating) {
       this._accumulateUpdate(model, value);
       return;
     }
@@ -137,36 +137,35 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     }
   }
 
-  deferUpdate() {
-    this._deferUpdate = true;
-    this._deferredUpdates.clear();
-  }
+  beginCumulativeUpdate(targets?: Iterable<ICellModel>) {
+    this._cumulativeUpdating = true;
+    this._cumulativeUpdates.clear();
 
-  flushUpdate(resolveTargets?: Iterable<ICellModel>) {
-    this._deferUpdate = false;
-
-    for (const [model, update] of this._deferredUpdates.entries()) {
-      this.update(model, update);
-    }
-
-    if (resolveTargets) {
-      for (const model of resolveTargets) {
-        if (!this._deferredUpdates.has(model)) {
-          this.delete(model);
-        }
+    if (targets) {
+      for (const model of targets) {
+        const initial = structuredClone(this.defaultValue);
+        this._cumulativeUpdates.set(model, initial);
       }
     }
+  }
 
-    this._deferredUpdates.clear();
+  endCumulativeUpdate() {
+    this._cumulativeUpdating = false;
+
+    for (const [model, update] of this._cumulativeUpdates.entries()) {
+      this.set(model, update);
+    }
+
+    this._cumulativeUpdates.clear();
   }
 
   private _accumulateUpdate(model: ICellModel, value: Partial<T>) {
-    let modelUpdate = this._deferredUpdates.get(model);
-    if (!modelUpdate) {
-      modelUpdate = {};
-      this._deferredUpdates.set(model, modelUpdate);
+    let update = this._cumulativeUpdates.get(model);
+    if (!update) {
+      update = structuredClone(this.defaultValue);
     }
-    Object.assign(modelUpdate, value);
+    update = { ...update, ...value };
+    this._cumulativeUpdates.set(model, update);
   }
 
   delete(model: ICellModel) {

@@ -30,9 +30,9 @@ export class CSMagicExecutor {
   executeConfig(model: ICellModel, checkDirty = true) {
     if (checkDirty && this.metadata?.isDirty(model) === false) return;
 
-    this.metadata?.deferUpdate();
+    this.metadata?.beginCumulativeUpdate([model]);
     this._execute(model, command => command.type === 'config');
-    this.metadata?.flushUpdate([model]);
+    this.metadata?.endCumulativeUpdate();
   }
 
   private _execute(
