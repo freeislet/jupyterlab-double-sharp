@@ -15,7 +15,7 @@ export namespace Settings {
   export interface IExecution {
     cache: boolean;
     autoDependency: boolean;
-    forceSelected: boolean;
+    ignoreCacheSelected: boolean;
     disableCache: boolean;
     disableAutoDependency: boolean;
     disableSkip: boolean;
@@ -41,7 +41,7 @@ export class Settings {
     execution: {
       cache: true,
       autoDependency: true,
-      forceSelected: true,
+      ignoreCacheSelected: true,
       disableCache: false,
       disableAutoDependency: false,
       disableSkip: false

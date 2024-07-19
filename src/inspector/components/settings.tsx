@@ -56,10 +56,10 @@ export default function Settings() {
           Auto Dependency
         </Boolean_>
         <Boolean_
-          value={execution.forceSelected}
-          onChange={(value: boolean) => apply({ forceSelected: value })}
+          value={execution.ignoreCacheSelected}
+          onChange={(value: boolean) => apply({ ignoreCacheSelected: value })}
         >
-          Force Execution for Selected Cells
+          Ignore Cache for Selected Cells
         </Boolean_>
         <Boolean_
           value={execution.disableCache}

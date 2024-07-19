@@ -34,10 +34,10 @@
           "description": "Execute dependency cells if unresolved variables or modules of the cell are assigned in the cells above.\nThis option can be overridden with 'Auto Dependency' config in '## Cell Inspector' panel.\nThis behavior can be disabled by checking 'Disable Auto Dependency'.",
           "default": true
         },
-        "forceSelected": {
-          "title": "Force Execution for Selected Cells",
+        "ignoreCacheSelected": {
+          "title": "Ignore Cache for Selected Cells",
           "type": "boolean",
-          "description": "Force execution for selected cells regardless of cache or skip configurations.",
+          "description": "Ignore cache when executing selected cells, regardless of cache configuration.",
           "default": true
         },
         "disableCache": {
@@ -62,7 +62,7 @@
       "default": {
         "cache": true,
         "autoDependency": true,
-        "forceSelected": true,
+        "ignoreCacheSelected": true,
         "disableCache": false,
         "disableAutoDependency": false,
         "disableSkip": false
