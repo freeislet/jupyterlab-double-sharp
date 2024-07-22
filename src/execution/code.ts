@@ -1,19 +1,23 @@
 import { CodeCell } from '@jupyterlab/cells';
 
 import { ICodeData } from '../code';
-import { Settings } from '../settings';
 import { getAboveCodeCells, sortCells } from '../utils/cell';
 import { In, notIn } from '../utils/array';
 
 export interface ICodeExecution {
   cell: CodeCell;
-  forced?: boolean;
+  options?: ICodeExecutionOptions;
   config?: ICodeConfig;
   skipped?: boolean;
   cached?: boolean;
   code?: ICodeData;
   dependency?: IDependency;
   dependencyCells?: CodeCell[];
+}
+
+export interface ICodeExecutionOptions {
+  ignoreCache?: boolean;
+  saveUnresolvedDependencies?: boolean;
 }
 
 /**
@@ -77,43 +81,37 @@ export interface ICodeContext {
   getConfig(): ICodeConfig;
   getData(): Promise<ICodeData>;
   isCached(variables?: string[]): Promise<boolean>;
-  saveExecutionData(execution: ICodeExecution): void;
-  isForced(): boolean;
   createAnother(cell: CodeCell): ICodeContext;
+  saveExecutionData(execution: ICodeExecution): void;
+  // isForced(): boolean;
+  // TODO: getExecutionConfig or getIgnoreCache...
 }
 
 export class CodeExecutionBuilder {
-  saveUnresolvedDependencies = Settings.data.verbose.metadata;
-
-  constructor() {}
+  constructor(public readonly options?: ICodeExecutionOptions) {}
 
   /**
    * 셀 실행 계획 수집 (dependency cells 포함)
    * - skip, cache 처리 (실행 여부 판단)
    * - unbound variables resolve 위한 dependency cells 수집
    */
-  async build(
-    context: ICodeContext,
-    forceExecute?: boolean
-  ): Promise<ICodeExecution> {
+  async build(context: ICodeContext): Promise<ICodeExecution> {
     // Log.debug(`code execution { (${context.cell.model.id})`);
 
-    const execution = await this._build(context, forceExecute);
+    const execution = await this._build(context);
     context.saveExecutionData(execution);
 
     // Log.debug(`} code execution (${context.cell.model.id})`, execution);
     return execution;
   }
 
-  private async _build(
-    context: ICodeContext,
-    forced: boolean | undefined
-  ): Promise<ICodeExecution> {
+  private async _build(context: ICodeContext): Promise<ICodeExecution> {
     const cell = context.cell;
+    const options = this.options;
     const config = context.getConfig();
-    const execution: ICodeExecution = { cell, forced, config };
+    const execution: ICodeExecution = { cell, options, config };
 
-    if (config.skip && !forced) {
+    if (config.skip) {
       // this._output.printSkipped();
       return { ...execution, skipped: true };
     }
@@ -121,7 +119,7 @@ export class CodeExecutionBuilder {
     const code = await context.getData();
     execution.code = code;
 
-    if (config.cache && !forced) {
+    if (config.cache && !options?.ignoreCache) {
       const cached = await context.isCached(code.variables);
       if (cached) {
         // this._output.printCached(data);
@@ -190,7 +188,7 @@ export class CodeExecutionBuilder {
     const resolved = !unresolvedVariables.length;
     const dependency = resolved
       ? { resolved, dependencies }
-      : this.saveUnresolvedDependencies
+      : this.options?.saveUnresolvedDependencies
         ? { resolved, unresolvedVariables, dependencies }
         : { resolved, unresolvedVariables };
     // Log.debug('* dependency', unboundVariables, dependency);
@@ -230,7 +228,7 @@ export class CodeExecutionBuilder {
 
       // dependency unresolved 시 리턴, 또는, resolvedVariables 제거 (verbose 세팅에 따라)
       if (!dependency.resolved) {
-        if (this.saveUnresolvedDependencies) {
+        if (this.options?.saveUnresolvedDependencies) {
           resolvedVariables = [];
         } else {
           // Log.debug('} dependency (not resolved):', id);
@@ -276,5 +274,27 @@ export class CodeExecutionBuilder {
     const sortedCells = sortCells([...cells]);
     // Log.debug('collectDependencyCells', sortedCells);
     return sortedCells;
+  }
+}
+
+export namespace CodeExecution {
+  export async function build(
+    context: ICodeContext,
+    options?: ICodeExecutionOptions
+  ): Promise<ICodeExecution> {
+    const builder = new CodeExecutionBuilder(options);
+    const execution = await builder.build(context);
+    return execution;
+  }
+
+  export async function buildMultiple(
+    contexts: ICodeContext[],
+    options?: ICodeExecutionOptions
+  ): Promise<ICodeExecution[]> {
+    const builder = new CodeExecutionBuilder(options);
+    const executions = await Promise.all(
+      contexts.map(context => builder.build(context))
+    );
+    return executions;
   }
 }

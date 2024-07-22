@@ -150,18 +150,18 @@ export class CodeContext implements ICodeContext {
     return CellCode.isCached(this.cell, this.inspector, variables);
   }
 
+  createAnother(cell: CodeCell): ICodeContext {
+    return new CodeContext(cell, this.inspector);
+  }
+
   saveExecutionData(execution: ICodeExecution) {
     CellExecution.saveMetadata(execution);
   }
 
-  isForced(): boolean {
-    const data = CellExecution.metadata.get(this.cell.model);
-    return data?.forced ?? false;
-  }
-
-  createAnother(cell: CodeCell): ICodeContext {
-    return new CodeContext(cell, this.inspector);
-  }
+  // isForced(): boolean {
+  //   const data = CellExecution.metadata.get(this.cell.model);
+  //   return data?.forced ?? false;
+  // }
 
   /**
    * Cell variables 중 uncached 리턴

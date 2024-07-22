@@ -7,9 +7,8 @@ import { ITranslator } from '@jupyterlab/translation';
 import { KernelMessage } from '@jupyterlab/services';
 import { JSONObject } from '@lumino/coreutils';
 
-import { ExecutionPlanner } from './plan';
+import { ExecutionPlan } from './plan';
 import { ExecutionActions } from './actions';
-import { CodeContext } from '../cell';
 
 namespace OrgNotebookActions {
   export const run = NotebookActions.run;
@@ -31,32 +30,33 @@ namespace NewNotebookActions {
     args: IArguments,
     cells: readonly Cell[],
     sessionContext: ISessionContext | undefined,
-    forceExecute?: boolean
+    isSelected?: boolean
   ): Promise<boolean> {
     ExecutionActions.beforeExecution.emit({ cells });
 
-    const contexts = CodeContext.fromCells(cells);
-    const plan = await ExecutionPlanner.buildFromContexts(
-      contexts,
-      forceExecute
-    );
-    if (plan.dependencyCells) {
-      const validSession =
-        sessionContext &&
-        !sessionContext.isTerminating &&
-        !sessionContext.pendingInput &&
-        !sessionContext.hasNoKernel;
-      if (validSession) {
-        for (const cell of plan.dependencyCells) {
-          await CodeCell.execute(cell, sessionContext);
-        }
+    const plan = await ExecutionPlan.beginFromCells(cells, isSelected);
+    if (plan.dependencyCells && isValidSession(sessionContext)) {
+      for (const cell of plan.dependencyCells) {
+        await CodeCell.execute(cell.cell, sessionContext);
       }
     }
 
     const ret = await runFn.call(null, ...args);
 
+    ExecutionPlan.end();
     ExecutionActions.afterExecution.emit({ cells });
     return ret;
+  }
+
+  function isValidSession(
+    sessionContext: ISessionContext | undefined
+  ): sessionContext is ISessionContext {
+    const valid =
+      sessionContext &&
+      !sessionContext.isTerminating &&
+      !sessionContext.pendingInput &&
+      !sessionContext.hasNoKernel;
+    return valid ?? false;
   }
 
   function getSelectedCells(notebook: Notebook): Cell[] {
@@ -184,18 +184,10 @@ namespace NewCodeCell {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    // 셀 실행 여부 확인 - forced 여부, skip, cache config, cache 여부
-    const context = new CodeContext(cell);
-    if (!context.isForced()) {
-      const config = context.getConfig();
-      if (config.skip) return;
-      if (config.cache) {
-        const cached = await context.isCached();
-        if (cached) return;
-      }
-
-      Log.debug('CodeCell.execute not forced.', cell.model.id, config);
-    }
+    // 셀 실행 여부 확인 - skip, cache config, ignoreCache 여부
+    const executionCell = ExecutionPlan.current?.getExecutionCell(cell);
+    const needExecute = executionCell?.needExecute ?? true;
+    if (!needExecute) return;
 
     // 기존 실행 함수
     const ret = await OrgCodeCell.execute(cell, sessionContext, metadata);

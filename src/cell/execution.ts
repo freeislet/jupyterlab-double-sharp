@@ -48,7 +48,7 @@ export namespace CellExecution {
   function executionData(execution: ICodeExecution): CellExecution.IData {
     return {
       cell: cellData(execution.cell),
-      forced: execution.forced,
+      options: execution.options,
       config: execution.config,
       skipped: execution.skipped,
       cached: execution.cached,

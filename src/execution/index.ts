@@ -23,7 +23,6 @@ export function setupExecution() {
 
 export { ExecutionActions } from './actions';
 export {
-  CodeExecutionBuilder,
   ICodeExecution,
   IDependency,
   IDependencyItem,
