@@ -143,11 +143,11 @@ export class CodeContext implements ICodeContext {
   }
 
   async getData(): Promise<CellCode.IData> {
-    return CellCode.getData(this.cell, this.inspector);
+    return await CellCode.getData(this.cell, this.inspector);
   }
 
   async isCached(variables?: string[]): Promise<boolean> {
-    return CellCode.isCached(this.cell, this.inspector, variables);
+    return await CellCode.isCached(this.cell, this.inspector, variables);
   }
 
   createAnother(cell: CodeCell): ICodeContext {
@@ -157,11 +157,6 @@ export class CodeContext implements ICodeContext {
   saveExecutionData(execution: ICodeExecution) {
     CellExecution.saveMetadata(execution);
   }
-
-  // isForced(): boolean {
-  //   const data = CellExecution.metadata.get(this.cell.model);
-  //   return data?.forced ?? false;
-  // }
 
   /**
    * Cell variables 중 uncached 리턴

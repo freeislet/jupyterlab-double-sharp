@@ -83,8 +83,6 @@ export interface ICodeContext {
   isCached(variables?: string[]): Promise<boolean>;
   createAnother(cell: CodeCell): ICodeContext;
   saveExecutionData(execution: ICodeExecution): void;
-  // isForced(): boolean;
-  // TODO: getExecutionConfig or getIgnoreCache...
 }
 
 export class CodeExecutionBuilder {

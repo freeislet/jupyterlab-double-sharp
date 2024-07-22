@@ -1,14 +1,14 @@
 import { CodeCell, Cell } from '@jupyterlab/cells';
 
 import { ICodeExecution, CodeExecution } from './code';
-import { CodeContext } from '../cell';
+import { CodeContext, CellCode, CellExecution } from '../cell'; // TODO: ../cell 의존성 제거 검토
 import { Settings } from '../settings';
 import { sortCells } from '../utils/cell';
 import { notIn } from '../utils/array';
 
 export interface IExecutionCell {
   readonly cell: CodeCell;
-  readonly needExecute: boolean;
+  needExecute(): Promise<boolean>;
 }
 
 export class ExecutionPlan {
@@ -84,27 +84,41 @@ export class ExecutionCell implements IExecutionCell {
     return this.execution.cell;
   }
 
-  get needExecute(): boolean {
-    // const config = context.getConfig();
-    // if (config.skip) return;
-    // if (config.cache) {
-    //   const cached = await context.isCached();
-    //   if (cached) return;
-    // }
+  async needExecute(): Promise<boolean> {
+    const execution = this.execution;
+    if (execution.skipped) return false;
+    if (execution.cached) return false;
+
+    const options = execution.options;
+    const config = execution.config;
+    if (config?.cache && !options?.ignoreCache) {
+      // ICodeExecution 생성 시점에는 cache가 없었지만 셀들 실행 중에 cache 됐는지 여부 확인
+      const cell = this.cell;
+      const variables = execution.code?.variables;
+      const cached = await CellCode.isCached(cell, undefined, variables);
+      if (cached) {
+        CellExecution.metadata.update(cell.model, { cached: true });
+        return false;
+      }
+    }
     return true;
   }
-
-  getConfig() {}
-
-  isCached() {}
 }
 
 export class DependencyCell implements IExecutionCell {
-  constructor(public readonly cell: CodeCell) {}
+  context: CodeContext;
 
-  get needExecute(): boolean {
-    return true;
+  constructor(public readonly cell: CodeCell) {
+    this.context = new CodeContext(cell);
   }
 
-  getConfig() {}
+  async needExecute(): Promise<boolean> {
+    const config = this.context.getConfig();
+    if (config.skip) return false;
+    if (config.cache) {
+      const cached = await this.context.isCached();
+      if (cached) return false;
+    }
+    return true;
+  }
 }

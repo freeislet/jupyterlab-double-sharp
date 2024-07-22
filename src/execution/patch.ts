@@ -186,8 +186,10 @@ namespace NewCodeCell {
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     // 셀 실행 여부 확인 - skip, cache config, ignoreCache 여부
     const executionCell = ExecutionPlan.current?.getExecutionCell(cell);
-    const needExecute = executionCell?.needExecute ?? true;
-    if (!needExecute) return;
+    if (executionCell) {
+      const needExecute = await executionCell.needExecute();
+      if (!needExecute) return;
+    }
 
     // 기존 실행 함수
     const ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
