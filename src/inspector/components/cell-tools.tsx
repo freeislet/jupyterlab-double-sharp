@@ -10,15 +10,9 @@ import {
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import {
-  Row,
-  Boolean_,
-  NullableBoolean,
-  StatusIcon,
-  TooltipIcon,
-  Block,
-  List
-} from './common';
+import { Row, Boolean_, NullableBoolean, List } from './common';
+import { Block } from './block';
+import { StatusIcon, TooltipIcon } from './icon';
 
 export interface ICellToolsProps {
   context: CellContext | null;
