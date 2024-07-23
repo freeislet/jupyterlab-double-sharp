@@ -10,7 +10,8 @@ import {
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import { CellId, Boolean_, NullableBoolean, Row, List } from './common';
+import { CellId, Boolean_, NullableBoolean } from './common';
+import { Row, HeaderRow, ListRow } from './row';
 import { Block } from './block';
 import { StatusIcon, TooltipIcon } from './icon';
 
@@ -407,34 +408,5 @@ function Execution() {
         </>
       )}
     </Group>
-  );
-}
-
-interface IHeaderRowProps {
-  header: string;
-  children?: React.ReactNode;
-}
-
-function HeaderRow({ header, children }: IHeaderRowProps) {
-  return (
-    <Row spaceX={4} wrap={true}>
-      <strong>{header}</strong>
-      {children}
-    </Row>
-  );
-}
-
-interface IListRowProps<T> extends IHeaderRowProps {
-  data: T[] | undefined;
-}
-
-function ListRow<T extends React.ReactNode>({
-  data,
-  ...props
-}: IListRowProps<T>) {
-  return (
-    <HeaderRow {...props}>
-      <List data={data} />
-    </HeaderRow>
   );
 }
