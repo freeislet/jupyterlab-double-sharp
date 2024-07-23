@@ -3,6 +3,7 @@ import cn from 'classnames';
 
 import { IDivProps } from '../../ui';
 import Checkbox, { NullableCheckbox } from '../../ui/checkbox';
+import InlineBlock from '../../ui/inline';
 
 // Boolean
 
@@ -43,6 +44,33 @@ export function NullableBoolean({
     >
       <span>{children}</span>
     </NullableCheckbox>
+  );
+}
+
+// Cell ID
+
+export interface ICellIdProps extends IDivProps {
+  id: string;
+  length?: number;
+}
+
+export function CellId({
+  id,
+  length = 8,
+  className,
+  children,
+  ...props
+}: ICellIdProps) {
+  return (
+    <>
+      <InlineBlock
+        className={cn('jp-DoubleSharp-Inspector-Id', className)}
+        {...props}
+      >
+        {id.substring(0, length)}
+      </InlineBlock>
+      {children}
+    </>
   );
 }
 

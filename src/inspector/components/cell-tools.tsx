@@ -10,7 +10,7 @@ import {
 import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
-import { Row, Boolean_, NullableBoolean, List } from './common';
+import { CellId, Boolean_, NullableBoolean, Row, List } from './common';
 import { Block } from './block';
 import { StatusIcon, TooltipIcon } from './icon';
 
@@ -202,7 +202,7 @@ function Cell() {
   return (
     <Group>
       <Group.Title>Cell</Group.Title>
-      {context.cell.model.id}
+      <CellId id={context.cell.model.id} />
     </Group>
   );
 }
