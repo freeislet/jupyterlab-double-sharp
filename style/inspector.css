@@ -148,6 +148,7 @@
 /* Id (Cell) */
 
 .jp-DoubleSharp-Inspector-Id {
-  background-color: var(--jp-warn-bg-color);
-  border: 1px solid var(--jp-warn-color);
+  color: var(--jp-brand-color1);
+  background-color: var(--jp-brand-color4);
+  border-color: var(--jp-brand-color2);
 }
