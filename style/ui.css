@@ -99,6 +99,17 @@
   background-color: var(--jp-border-color1);
 }
 
+/* Inline Block */
+
+.jp-DoubleSharp-InlineBlock {
+  display: inline;
+  color: var(--jp-inline-color);
+  background-color: var(--jp-inline-bg-color);
+  border: 1px solid var(--jp-inline-border-color);
+  border-radius: 2px;
+  padding: 2px 3px;
+}
+
 /* Icon */
 
 .jp-DoubleSharp-icon-inline {

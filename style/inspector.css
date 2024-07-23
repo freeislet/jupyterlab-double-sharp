@@ -1,0 +1,153 @@
+/* Inspector */
+
+.jp-DoubleSharp-Inspector {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.jp-DoubleSharp-Inspector-content {
+  display: block;
+  min-width: var(--jp-sidebar-min-width);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  overflow: auto;
+}
+
+/* link */
+
+/* Accessibility for links inside dialog box text */
+.jp-DoubleSharp-Inspector a {
+  text-decoration: revert;
+  color: var(--jp-content-link-color);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.jp-DoubleSharp-Inspector a:hover {
+  text-decoration: revert;
+}
+
+/* Status Icon */
+
+.jp-DoubleSharp-Inspector-StatusIcon {
+  height: 18px;
+  width: auto;
+}
+
+.jp-DoubleSharp-Inspector-StatusIcon-ok {
+  color: var(--jp-success-color1);
+}
+
+.jp-DoubleSharp-Inspector-StatusIcon-no {
+  color: var(--jp-layout-color3);
+}
+
+/* Tooltip Icon */
+
+.jp-DoubleSharp-Inspector-TooltipIcon {
+  position: relative;
+  line-height: 1;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
+  --offset: 0px;
+
+  visibility: hidden;
+
+  /* position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translate(-50%, -100%); */
+  position: fixed;
+  margin-left: var(--offset);
+  transform: translate(calc(-50% + 8px), calc(-100% - 24px));
+  min-width: max-content;
+  padding: 4px;
+  color: var(--jp-ui-font-color2);
+  background-color: var(--jp-layout-color2);
+  border-radius: 2px;
+  text-align: left;
+  font-size: 11px;
+  z-index: 100;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon:hover
+  .jp-DoubleSharp-Inspector-TooltipIcon-tooltip {
+  visibility: visible;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-tooltip::before {
+  --size: 8px;
+
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: calc(50% - var(--size) - var(--offset));
+  border-width: var(--size);
+  border-style: solid;
+  border-color: var(--jp-layout-color2) transparent transparent;
+}
+
+.jp-DoubleSharp-Inspector-TooltipIcon-icon {
+  height: 16px;
+  width: auto;
+  vertical-align: middle;
+  color: var(--jp-ui-font-color2);
+}
+
+/* Block */
+
+.jp-DoubleSharp-Inspector-Block {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-DoubleSharp-Inspector-Block-info {
+  background-color: var(--jp-input-background);
+  box-shadow: 0 0 0 1px var(--jp-border-color1) inset;
+}
+
+.jp-DoubleSharp-Inspector-Block-warning {
+  background-color: var(--jp-warn-bg-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-error {
+  background-color: var(--jp-error-bg-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-success {
+  background-color: var(--jp-success-bg-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon {
+  flex-shrink: 0;
+  margin-right: 6px;
+  height: 16px;
+  width: auto;
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-info {
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-warning {
+  color: var(--jp-warn-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-error {
+  color: var(--jp-error-color);
+}
+
+.jp-DoubleSharp-Inspector-Block-icon-success {
+  color: var(--jp-success-color);
+}
+
+/* Id (Cell) */
+
+.jp-DoubleSharp-Inspector-Id {
+  background-color: var(--jp-warn-bg-color);
+  border: 1px solid var(--jp-warn-color);
+}
