@@ -74,6 +74,10 @@
   margin-top: 8px;
 }
 
+.jp-DoubleSharp-flex-row-gap-4 {
+  row-gap: 8px;
+}
+
 .jp-DoubleSharp-space-x-2 > :not([hidden]) ~ :not([hidden]) {
   margin-left: 2px;
 }

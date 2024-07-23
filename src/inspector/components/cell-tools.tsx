@@ -11,7 +11,7 @@ import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
 import { CellId, Boolean_, NullableBoolean } from './common';
-import { Row, HeaderRow, NameListRow } from './row';
+import { Row, HeaderRow, NameListRow, CellIdListRow } from './row';
 import { Block } from './block';
 import { StatusIcon, TooltipIcon } from './icon';
 
@@ -392,9 +392,10 @@ function Execution() {
         )
       ) : (
         <>
-          <HeaderRow header="Dependency Cell Count:">
-            <span>{execution?.dependencyCells?.length ?? 0}</span>
-          </HeaderRow>
+          <CellIdListRow
+            header="Dependency:"
+            data={execution?.dependencyCells?.map(cell => cell.modelId)}
+          />
           <NameListRow header="Variables:" data={execution?.code?.variables} />
           {execution?.code?.unboundVariables && (
             <NameListRow
