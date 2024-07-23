@@ -64,6 +64,7 @@ export function CellId({
   return (
     <>
       <InlineBlock
+        title={id}
         className={cn('jp-DoubleSharp-Inspector-Id', className)}
         {...props}
       >

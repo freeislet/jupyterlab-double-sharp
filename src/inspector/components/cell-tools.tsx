@@ -202,7 +202,9 @@ function Cell() {
   return (
     <Group>
       <Group.Title>Cell</Group.Title>
-      <CellId id={context.cell.model.id} />
+      <HeaderRow header="Model ID:">
+        <CellId id={context.cell.model.id} />
+      </HeaderRow>
     </Group>
   );
 }
