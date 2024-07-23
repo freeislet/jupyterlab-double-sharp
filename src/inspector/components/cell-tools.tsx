@@ -11,7 +11,7 @@ import { Settings } from '../../settings';
 import { useStateObject, useSignal } from '../../ui/hooks';
 import Group from '../../ui/group';
 import { CellId, Boolean_, NullableBoolean } from './common';
-import { Row, HeaderRow, ListRow } from './row';
+import { Row, HeaderRow, NameListRow } from './row';
 import { Block } from './block';
 import { StatusIcon, TooltipIcon } from './icon';
 
@@ -353,8 +353,8 @@ function Code() {
           <a onClick={updateCode}>click</a> to update.
         </Block>
       )}
-      <ListRow header="Variables:" data={code?.variables} />
-      <ListRow header="Unbound Vars:" data={code?.unboundVariables} />
+      <NameListRow header="Variables:" data={code?.variables} />
+      <NameListRow header="Unbound Vars:" data={code?.unboundVariables} />
     </Group>
   );
 }
@@ -384,7 +384,10 @@ function Execution() {
             <Block type="success">
               Execution skipped by <strong>cache</strong>.
             </Block>
-            <ListRow header="Cached Vars:" data={execution?.code?.variables} />
+            <NameListRow
+              header="Cached Vars:"
+              data={execution?.code?.variables}
+            />
           </>
         )
       ) : (
@@ -392,15 +395,15 @@ function Execution() {
           <HeaderRow header="Dependency Cell Count:">
             <span>{execution?.dependencyCells?.length ?? 0}</span>
           </HeaderRow>
-          <ListRow header="Variables:" data={execution?.code?.variables} />
+          <NameListRow header="Variables:" data={execution?.code?.variables} />
           {execution?.code?.unboundVariables && (
-            <ListRow
+            <NameListRow
               header="Unbound Vars:"
               data={execution?.code?.unboundVariables}
             />
           )}
           {execution?.dependency?.unresolvedVariables && (
-            <ListRow
+            <NameListRow
               header="Unresolved Vars:"
               data={execution?.dependency?.unresolvedVariables}
             />

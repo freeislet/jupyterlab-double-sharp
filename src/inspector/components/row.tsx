@@ -2,6 +2,7 @@ import * as React from 'react';
 import cn from 'classnames';
 
 import { IDivProps } from '../../ui';
+import InlineBlock from '../../ui/inline';
 
 // Row
 
@@ -59,27 +60,25 @@ export function HeaderRow({
 
 // Row with header, list
 
-export interface IListRowProps<T> extends IHeaderRowProps {
+export interface INameListRowProps<T> extends IHeaderRowProps {
   data: T[] | undefined;
-  inline?: boolean;
 }
 
-export function ListRow<T extends React.ReactNode>({
+export function NameListRow<T extends React.ReactNode>({
   data,
-  inline = true,
   className,
   ...props
-}: IListRowProps<T>) {
+}: INameListRowProps<T>) {
   return (
     <HeaderRow {...props}>
       {data?.map((item, idx) => (
-        <div
+        <InlineBlock
           key={idx}
-          className={cn(className, inline && 'jp-DoubleSharp-inline-block')}
+          className={cn('jp-DoubleSharp-inline-block', className)}
           {...props}
         >
           {item}
-        </div>
+        </InlineBlock>
       ))}
     </HeaderRow>
   );
