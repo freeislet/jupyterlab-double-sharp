@@ -368,49 +368,71 @@ function Execution() {
   return (
     <Group>
       <Group.Title>Execution</Group.Title>
-      {!execution ? (
-        <Block type="info">Execution info does not exist.</Block>
-      ) : execution.skipped ? (
-        <Block type="warning" iconType="info">
-          Execution skipped.
-        </Block>
-      ) : execution.cached ? (
-        !execution.code?.variables.length ? (
-          <Block type="success" iconType="info">
-            Execution skipped. <strong>(no variables)</strong>
-          </Block>
-        ) : (
-          <>
-            <Block type="success">
-              Execution skipped by <strong>cache</strong>.
-            </Block>
-            <NameListRow
-              header="Cached Vars:"
-              data={execution?.code?.variables}
-            />
-          </>
-        )
-      ) : (
-        <>
-          <CellIdListRow
-            header="Dependency:"
-            data={execution?.dependencyCells?.map(cell => cell.modelId)}
-          />
-          <NameListRow header="Variables:" data={execution?.code?.variables} />
-          {execution?.code?.unboundVariables && (
-            <NameListRow
-              header="Unbound Vars:"
-              data={execution?.code?.unboundVariables}
-            />
-          )}
-          {execution?.dependency?.unresolvedVariables && (
-            <NameListRow
-              header="Unresolved Vars:"
-              data={execution?.dependency?.unresolvedVariables}
-            />
-          )}
-        </>
-      )}
+      <ExecutionInfo data={execution} />
     </Group>
+  );
+}
+
+function ExecutionInfo({ data }: { data: CellExecution.IData | undefined }) {
+  if (!data) {
+    return <Block type="info">Execution info does not exist.</Block>;
+  } else if (data.skipped) {
+    return (
+      <Block type="warning" iconType="info">
+        Execution skipped.
+      </Block>
+    );
+  } else if (data.cached) {
+    return !data.code?.variables.length ? (
+      <Block type="success" iconType="info">
+        Execution skipped. <strong>(no variables)</strong>
+      </Block>
+    ) : (
+      <>
+        <Block type="success">
+          Execution skipped by <strong>cache</strong>.
+        </Block>
+        <NameListRow header="Cached Vars:" data={data.code?.variables} />
+      </>
+    );
+  }
+
+  const { config, code, dependency, dependencyCells } = data;
+
+  function statusType(status: boolean) {
+    return status ? 'ok' : 'no';
+  }
+
+  return (
+    <>
+      {config && (
+        <Group>
+          <Group.Title>Config</Group.Title>
+          <HeaderRow header="Execution Cache:">
+            <StatusIcon type={statusType(config.cache)} />
+          </HeaderRow>
+          <HeaderRow header="Auto Dependency:">
+            <StatusIcon type={statusType(config.autoDependency)} />
+          </HeaderRow>
+        </Group>
+      )}
+      {code && (
+        <Group>
+          <Group.Title>Code</Group.Title>
+          <NameListRow header="Variables:" data={code.variables} />
+          <NameListRow header="Unbound Vars:" data={code.unboundVariables} />
+        </Group>
+      )}
+      {dependency?.unresolvedVariables && (
+        <NameListRow
+          header="Unresolved Vars:"
+          data={dependency.unresolvedVariables}
+        />
+      )}
+      <CellIdListRow
+        header="Dependency:"
+        data={dependencyCells?.map(cell => cell.modelId)}
+      />
+    </>
   );
 }
