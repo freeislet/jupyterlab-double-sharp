@@ -92,6 +92,8 @@ class DoubleSharp:
         stored_names = {}  # set() # 순서 유지 위해 set 대신 dict 사용
         # LOAD_NAME, LOAD_GLOBAL argval 중 stored_names, builtins에 없는 이름
         unbound_names = {}  # set()
+        # NOTE: nested function 안의 unbound variables는 해당 함수가 사용되지 않는다면
+        #       실행 오류를 발생하지 않는다. 이런 경우에 대해서도 예외 처리하면 좋을 듯.
 
         codes = [code]
         for code in codes:
