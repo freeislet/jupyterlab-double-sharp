@@ -43,14 +43,14 @@ export function Row({
 // Row with header
 
 export interface IHeaderRowProps extends IRowProps {
-  header: string;
+  header: React.ReactNode;
   // TODO: inlineHeader: boolean;
 }
 
 export function HeaderRow({ header, children, ...props }: IHeaderRowProps) {
   return (
     <Row {...props}>
-      <strong>{header}</strong>
+      {header}
       {children}
     </Row>
   );
