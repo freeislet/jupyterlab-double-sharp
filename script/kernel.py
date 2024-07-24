@@ -89,9 +89,9 @@ class DoubleSharp:
         #   - LOAD_GLOBAL로 global variables 로드
 
         # STORE_NAME에서 할당하는 variables, modules, ...
-        stored_names = set()
+        stored_names = {}  # set() # 순서 유지 위해 set 대신 dict 사용
         # LOAD_NAME, LOAD_GLOBAL argval 중 stored_names, builtins에 없는 이름
-        unbound_names = set()
+        unbound_names = {}  # set()
 
         codes = [code]
         for code in codes:
@@ -106,20 +106,20 @@ class DoubleSharp:
                 argval = inst.argval
 
                 if opname == "STORE_NAME":
-                    stored_names.add(argval)
+                    stored_names[argval] = None
                 elif opname in ["LOAD_NAME", "LOAD_GLOBAL"]:
                     unbound = argval not in stored_names and argval not in cls.builtins
                     if unbound:
-                        unbound_names.add(argval)
+                        unbound_names[argval] = None
                 elif opname == "LOAD_CONST":
                     if inspect.iscode(argval):
                         codes.append(argval)
 
         return {
             # stored_names -> ICodeData.variables
-            "stored_names": list(stored_names),
+            "stored_names": list(stored_names.keys()),
             # unbound_names -> ICodeData.unboundVariables
-            "unbound_names": list(unbound_names),
+            "unbound_names": list(unbound_names.keys()),
         }
 
 
