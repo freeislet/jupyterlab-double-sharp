@@ -9,7 +9,7 @@ import { metadataKeys } from '../const';
 export function setupCellStyle() {
   CellActions.metadataChanged.connect(
     (_, args: CellActions.IMapChangeParams) => {
-      Log.debug('cell metadataChanged', args);
+      // Log.debug('cell metadataChanged', args);
 
       const { model, change } = args;
       const cell = CellDictionary.global.getByModel(model);

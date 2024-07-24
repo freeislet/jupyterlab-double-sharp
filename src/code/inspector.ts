@@ -71,7 +71,7 @@ export class CodeInspector extends NotebookExt {
   async updateKernelVariables(): Promise<Set<string>> {
     const vars = await this.kernelExecutor.getInteractiveVariables();
     this._kernelVars = new Set(vars);
-    Log.debug('kernel vars:', this._kernelVars);
+    // Log.debug('kernel vars:', this._kernelVars);
     return this._kernelVars;
   }
 

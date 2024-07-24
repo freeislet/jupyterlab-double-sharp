@@ -193,7 +193,7 @@ namespace NewCodeCell {
 
     // 기존 실행 함수
     const ret = await OrgCodeCell.execute(cell, sessionContext, metadata);
-    Log.debug('CodeCell.execute:', cell.model.id, ret, metadata);
+    // Log.debug('CodeCell.execute:', cell.model.id, ret, metadata);
     return ret;
   }
 }

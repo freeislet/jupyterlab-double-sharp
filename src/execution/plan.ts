@@ -65,7 +65,7 @@ export class ExecutionPlan {
         .flatMap(execution => execution.dependencyCells ?? [])
         .filter(notIn(cells))
     ).map(cell => new DependencyCell(cell));
-    Log.debug('execution plan', this);
+    // Log.debug('execution plan', this);
   }
 
   getExecutionCell(cell: CodeCell): IExecutionCell | undefined {
