@@ -31,6 +31,9 @@ class DoubleSharp:
 
                 return json.dumps(obj, ensure_ascii=False)
 
+            def print_obj(self, obj, **kwargs):
+                print(self.dumps(obj))
+
             def print_code(self, code, members=None):
                 log = {
                     "co_name": code.co_name,
@@ -47,8 +50,9 @@ class DoubleSharp:
 
                 self.print_obj(log)
 
-            def print_obj(self, obj, **kwargs):
-                print(self.dumps(obj))
+            def print_bytecode(self, bytecode):
+                for instr in bytecode:
+                    print(f"{instr.opname} arg:{instr.arg} argval:{instr.argval}")
 
         cls.util = Util()
 
@@ -95,6 +99,8 @@ class DoubleSharp:
             # cls.util.print_code(code)
 
             bytecode = dis.Bytecode(code)
+            # cls.util.print_bytecode(bytecode)
+
             for inst in bytecode:
                 opname = inst.opname
                 argval = inst.argval

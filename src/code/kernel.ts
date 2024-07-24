@@ -7,6 +7,31 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import INIT_SCRIPT from '/script/kernel.py';
 import { joinMultiline } from '../utils/nbformat';
 
+export namespace KernelExecutor {
+  export interface IExecuteOptions {
+    onResult?: (result: any) => void;
+    onExecuteResult?: (result: any) => void;
+    onStream?: (result: any, type: StreamType) => void;
+
+    /**
+     * (따옴표로 둘러싸였을 수 있는) result 문자열을 json object로 파싱
+     * default: true
+     */
+    resultAsJson?: boolean;
+
+    /**
+     * stream msg_type을 JSON Lines 배열로 파싱
+     * default: onStream 있으면 true, 없으면 false
+     */
+    streamAsJsonl?: boolean;
+  }
+
+  export interface IInspectResult {
+    stored_names: string[];
+    unbound_names: string[];
+  }
+}
+
 export class KernelExecutor {
   private _ready = new PromiseDelegate<void>();
   private _initialized = new Signal<
@@ -24,7 +49,7 @@ export class KernelExecutor {
 
   constructor(public readonly sessionContext: ISessionContext) {
     sessionContext.kernelChanged.connect((sender, args) => {
-      // console.debug('sessionContext.kernelChanged', sender, args);
+      // Log.debug('sessionContext.kernelChanged', sender, args);
 
       if (args.newValue) {
         this._initializeKernel();
@@ -37,7 +62,7 @@ export class KernelExecutor {
   private _initializeKernel() {
     this._requestExecute(INIT_SCRIPT).then(
       (msg: KernelMessage.IExecuteReplyMsg) => {
-        // console.debug('kernel initialized', msg);
+        // Log.debug('kernel initialized', msg);
 
         this._ready.resolve();
         this._initialized.emit(msg);
@@ -79,7 +104,7 @@ export class KernelExecutor {
       const streamAsJsonl = options?.streamAsJsonl ?? Boolean(onStream);
 
       future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
-        // console.debug(msg);
+        // Log.debug(msg);
 
         const msgType = msg.header.msg_type;
         switch (msgType) {
@@ -87,7 +112,7 @@ export class KernelExecutor {
             if (onResult || onExecuteResult) {
               const executeResult = msg.content as IExecuteResult;
               const text = executeResult.data['text/plain'] as string;
-              // console.debug(msgType, { text });
+              // Log.debug(msgType, { text });
 
               const result = resultAsJson ? Private.parseJSON(text) : text;
               onResult?.(result);
@@ -100,7 +125,7 @@ export class KernelExecutor {
               const content = msg.content as IStream;
               const streamType = content.name;
               const text = joinMultiline(content.text);
-              // console.debug(msgType, streamType, { text });
+              // Log.debug(msgType, streamType, { text });
 
               const result = streamAsJsonl
                 ? Private.parseJSONL(text)
@@ -146,35 +171,10 @@ export class KernelExecutor {
         // Log.debug('inspect result:', result);
       },
       onStream(result, streamType) {
-        // Log.debug('inspect log:', result);
+        Log.debug('inspect log:', result);
       }
     });
     return ret;
-  }
-}
-
-export namespace KernelExecutor {
-  export interface IExecuteOptions {
-    onResult?: (result: any) => void;
-    onExecuteResult?: (result: any) => void;
-    onStream?: (result: any, type: StreamType) => void;
-
-    /**
-     * (따옴표로 둘러싸였을 수 있는) result 문자열을 json object로 파싱
-     * default: true
-     */
-    resultAsJson?: boolean;
-
-    /**
-     * stream msg_type을 JSON Lines 배열로 파싱
-     * default: onStream 있으면 true, 없으면 false
-     */
-    streamAsJsonl?: boolean;
-  }
-
-  export interface IInspectResult {
-    stored_names: string[];
-    unbound_names: string[];
   }
 }
 
