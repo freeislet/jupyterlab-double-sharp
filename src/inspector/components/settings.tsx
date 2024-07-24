@@ -41,7 +41,7 @@ export default function Settings() {
 
   return (
     <>
-      <Group className="jp-DoubleSharp-space-y-8">
+      <Group>
         <Group.Title>Execution settings</Group.Title>
         <Boolean_
           value={execution.cache}

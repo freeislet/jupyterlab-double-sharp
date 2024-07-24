@@ -339,7 +339,7 @@ function Code() {
     !compositeConfig.skip;
 
   return (
-    <Group className="jp-DoubleSharp-space-y-8">
+    <Group>
       <Group.Title>Code</Group.Title>
       {codeDirty && (
         <Block type="warning">
@@ -366,7 +366,7 @@ function Execution() {
   const { execution } = React.useContext(CodeCellContext)!;
 
   return (
-    <Group className="jp-DoubleSharp-space-y-8">
+    <Group>
       <Group.Title>Execution</Group.Title>
       {!execution ? (
         <Block type="info">Execution info does not exist.</Block>
