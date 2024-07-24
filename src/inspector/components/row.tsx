@@ -8,17 +8,17 @@ import { CellId } from './common';
 // Row
 
 export interface IRowProps extends IDivProps {
-  rowGap?: 8 | null;
-  rowGapInner?: 4 | null;
-  spaceX?: 2 | 4 | 8 | null;
+  rowGapSelf?: 8 | null;
+  rowGap?: 4 | null;
+  columnGap?: 2 | 4 | 8 | null;
   wrap?: boolean;
 }
 
 export function Row({
-  rowGap = 8,
-  rowGapInner = 4,
-  spaceX,
-  wrap,
+  rowGapSelf,
+  rowGap = 4,
+  columnGap = 4,
+  wrap = true,
   className,
   children,
   ...props
@@ -27,9 +27,9 @@ export function Row({
     <div
       className={cn(
         'jp-DoubleSharp-row',
+        rowGapSelf && `jp-DoubleSharp-row-gap-self-${rowGapSelf}`,
         rowGap && `jp-DoubleSharp-row-gap-${rowGap}`,
-        rowGapInner && `jp-DoubleSharp-flex-row-gap-${rowGapInner}`,
-        spaceX && `jp-DoubleSharp-space-x-${spaceX}`,
+        columnGap && `jp-DoubleSharp-column-gap-${columnGap}`,
         wrap && 'jp-DoubleSharp-flex-wrap',
         className
       )}
@@ -47,15 +47,9 @@ export interface IHeaderRowProps extends IRowProps {
   // TODO: inlineHeader: boolean;
 }
 
-export function HeaderRow({
-  spaceX = 4,
-  wrap = true,
-  header,
-  children,
-  ...props
-}: IHeaderRowProps) {
+export function HeaderRow({ header, children, ...props }: IHeaderRowProps) {
   return (
-    <Row spaceX={spaceX} wrap={wrap} {...props}>
+    <Row {...props}>
       <strong>{header}</strong>
       {children}
     </Row>

@@ -70,15 +70,27 @@
   align-items: center;
 }
 
-.jp-DoubleSharp-row-gap-8 ~ .jp-DoubleSharp-row-gap-8 {
+.jp-DoubleSharp-row ~ .jp-DoubleSharp-row-gap-self-8 {
   margin-top: 8px;
 }
 
-.jp-DoubleSharp-flex-row-gap-4 {
-  row-gap: 8px;
+.jp-DoubleSharp-row-gap-4 {
+  row-gap: 4px;
 }
 
-.jp-DoubleSharp-space-x-2 > :not([hidden]) ~ :not([hidden]) {
+.jp-DoubleSharp-column-gap-2 {
+  column-gap: 2px;
+}
+
+.jp-DoubleSharp-column-gap-4 {
+  column-gap: 4px;
+}
+
+.jp-DoubleSharp-column-gap-8 {
+  column-gap: 8px;
+}
+
+/* .jp-DoubleSharp-space-x-2 > :not([hidden]) ~ :not([hidden]) {
   margin-left: 2px;
 }
 
@@ -88,16 +100,16 @@
 
 .jp-DoubleSharp-space-x-8 > :not([hidden]) ~ :not([hidden]) {
   margin-left: 8px;
-}
+} */
 
 .jp-DoubleSharp-space-y-8 > :not([hidden]) ~ :not([hidden]) {
   margin-top: 8px;
 }
 
-.jp-DoubleSharp-inline-block {
-  display: inline-block;
-}
-
 .jp-DoubleSharp-flex-wrap {
   flex-wrap: wrap;
+}
+
+.jp-DoubleSharp-inline-block {
+  display: inline-block;
 }

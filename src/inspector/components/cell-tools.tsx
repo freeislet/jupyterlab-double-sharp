@@ -307,9 +307,9 @@ function ConfigRow<T>({
   }
 
   return (
-    <Row spaceX={8}>
+    <Row columnGap={8}>
       {children}
-      <Row spaceX={2}>
+      <Row columnGap={2}>
         <StatusIcon type={statusType} />
         {comments.length > 0 && (
           <TooltipIcon>
