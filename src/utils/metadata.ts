@@ -1,4 +1,4 @@
-import { ICellModel } from '@jupyterlab/cells';
+import { ICellModel, ICodeCellModel } from '@jupyterlab/cells';
 import equal from 'fast-deep-equal';
 
 import { encodeNull, decodeNull } from './json';
@@ -100,6 +100,17 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
 
   isDirty(model: ICellModel): boolean {
     const dirty = model.getMetadata(this.dirtyFlagName) as boolean;
+    if (dirty === undefined) {
+      // dirty flag metadata가 없지만, dirty == false인 경우 확인 (새로 추가한 셀)
+      // Log.debug('dirty flag metadata is null', this.name, model.id);
+      const codeNotDirty = (model as ICodeCellModel).isDirty == false;
+      const noSource = model.sharedModel.source.length === 0;
+      const noMetadata = model.getMetadata(this.name) === undefined;
+      if (codeNotDirty && noSource && noMetadata) {
+        // Log.debug('- return false (not dirty)', this.name, model.id);
+        return false;
+      }
+    }
     return dirty ?? true;
   }
 
