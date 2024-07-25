@@ -103,7 +103,7 @@ export class MetadataGroupDirtyable<T> extends MetadataGroup<T> {
     if (dirty === undefined) {
       // dirty flag metadata가 없지만, dirty == false인 경우 확인 (새로 추가한 셀)
       // Log.debug('dirty flag metadata is null', this.name, model.id);
-      const codeNotDirty = (model as ICodeCellModel).isDirty == false;
+      const codeNotDirty = (model as ICodeCellModel).isDirty === false;
       const noSource = model.sharedModel.source.length === 0;
       const noMetadata = model.getMetadata(this.name) === undefined;
       if (codeNotDirty && noSource && noMetadata) {
