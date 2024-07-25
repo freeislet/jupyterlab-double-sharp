@@ -201,7 +201,7 @@ function Cell() {
   const { context } = React.useContext(CodeCellContext)!;
 
   return (
-    <Group>
+    <Group data-group="Cell">
       <Group.Title>Cell</Group.Title>
       <HeaderRow header="Model ID:">
         <CellId id={context.cell.model.id} />
@@ -218,7 +218,7 @@ function Config() {
     React.useContext(CodeCellContext)!;
 
   return (
-    <Group>
+    <Group data-group="Config">
       <Group.Title>Config</Group.Title>
       <ConfigRow
         value={config.cache}
@@ -339,7 +339,7 @@ function Code() {
     !compositeConfig.skip;
 
   return (
-    <Group>
+    <Group data-group="Code">
       <Group.Title>Code</Group.Title>
       {codeDirty && (
         <Block type="warning">
@@ -366,7 +366,7 @@ function Execution() {
   const { execution } = React.useContext(CodeCellContext)!;
 
   return (
-    <Group>
+    <Group data-group="Execution">
       <Group.Title>Execution</Group.Title>
       <ExecutionInfo data={execution} />
     </Group>
