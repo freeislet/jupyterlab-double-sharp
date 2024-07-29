@@ -99,7 +99,7 @@ async function runAllCells(
   byShortcut?: boolean
 ): Promise<void> {
   if (byShortcut) {
-    await page.keyboard.press('ControlOrMeta+Shift+Enter');
+    await page.keyboard.press('ControlOrMeta+Shift+Enter'); // github actions 실패?
   } else {
     await clickToolbarButton(page, 'double-sharp:run-all-cells');
   }
@@ -232,7 +232,7 @@ test('cache', async ({ page }) => {
     'text = "Hello, JupyterLab"\nprint(text)'
   );
   await runAllCells(page); // 첫 번째 실행 시 text 변수가 kernel interactive namespace에 저장됨
-  await runAllCells(page, true); // 두 번째 실행 시 cache에 의해 실행 skip
+  await runAllCells(page); // 두 번째 실행 시 cache에 의해 실행 skip
   await expectVisible(page, INSPECTOR_EXECUTION_CACHED);
   await expectExecutionVariables(page, 'Cached Vars', ['text']);
   await expectOutput(page, 'Hello, JupyterLab');
