@@ -1,7 +1,7 @@
 {
     "name": "jupyterlab-double-sharp",
     "version": "0.1.0",
-    "description": "Jupyterlab extension that improves workflow with client-side magic commands and GUI that provides convenience such as execution dependency management, external file loading and more.",
+    "description": "Jupyterlab extension that provides features like execution cache, auto-dependency, external file loading(TODO) and more.",
     "keywords": [
         "jupyter",
         "jupyterlab",
