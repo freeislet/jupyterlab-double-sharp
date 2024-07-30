@@ -1,4 +1,4 @@
-class DoubleSharp:
+class __DoubleSharp:
     @classmethod
     def init(cls):
         from IPython import get_ipython
@@ -125,4 +125,4 @@ class DoubleSharp:
         }
 
 
-DoubleSharp.init()
+__DoubleSharp.init()

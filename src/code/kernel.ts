@@ -148,7 +148,7 @@ export class KernelExecutor {
   async getInteractiveVariables(): Promise<string[]> {
     const retVars: string[] = [];
 
-    await this.execute('DoubleSharp.who()', {
+    await this.execute('__DoubleSharp.who()', {
       onResult: (vars: string[]) => {
         retVars.push(...vars);
       }
@@ -160,7 +160,7 @@ export class KernelExecutor {
     source: string
   ): Promise<KernelExecutor.IInspectResult | undefined> {
     const escaped = source.replace(/"""/g, '\\"\\"\\"');
-    const code = `DoubleSharp.inspect("""${escaped}""")`;
+    const code = `__DoubleSharp.inspect("""${escaped}""")`;
     // Log.debug(code);
 
     let ret: KernelExecutor.IInspectResult | undefined;
