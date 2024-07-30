@@ -22,7 +22,10 @@ test('should emit an activation console message', async ({ page }) => {
   ).toHaveLength(1);
 });
 
-test.use({ autoGoto: true });
+test.use({
+  autoGoto: true
+  // video: 'on'
+});
 
 // selectors
 
