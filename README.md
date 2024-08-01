@@ -11,15 +11,15 @@ Skip execution if the variables assigned in the cells (and also the imported mod
 
 For example, suppose the following code cells are executed.
 
-![](./images/cache1.png)
+![](https://github.com/freeislet/jupyterlab-double-sharp/raw/release/images/cache1.png)
 
 At this point, the kernel stores the variables `text`, `a`, `np`, `pd`, and `s`. Note that this list of variables is the same as the result of the `%who` magic command.
 
-![](./images/cache2.png)
+![](https://github.com/freeislet/jupyterlab-double-sharp/raw/release/images/cache2.png)
 
 To run all cells, click the **"## Run all cells"** button on the toolbar, which is red rectangled in the image below, and was added by this extension for ease of execution and keyboard shortcut.
 
-![](./images/cache3.png)
+![](https://github.com/freeislet/jupyterlab-double-sharp/raw/release/images/cache3.png)
 
 At the time of execution of all cells, if all the variables assigned in the cell and all the imported modules already exist in the kernel, the cell will not be executed. Also, the background color of unexecuted (i.e., cached) cells will be changed to **light green**, as shown above.
 
@@ -27,11 +27,11 @@ At the time of execution of all cells, if all the variables assigned in the cell
 
 Currently, no cells have been executed because all variables and modules exist in the kernel. However, if you edit the code so that new variables are assigned, the next time you click "## Run all cells", the edited cell will be executed as shown in the image below. (Note that the light green background color has disappeared because the cell was run with the `dates` and `df` variables added)
 
-![](./images/cache4.png)
+![](https://github.com/freeislet/jupyterlab-double-sharp/raw/release/images/cache4.png)
 
 You can change the behavior of this feature in the **"## Cell Inspector"** provided by the extension. Clicking the **"## Inspector"** button on the toolbar, red rectangled in the image below, will open the Inspector on the right side with the "## Cell Inspector" expanded. You can also set global settings in the Settings panel, which will be covered later.
 
-![](./images/cache5.png)
+![](https://github.com/freeislet/jupyterlab-double-sharp/raw/release/images/cache5.png)
 
 **"Execution Cache"** option in the blue rectangle allows you to turn the cache feature on, off, or to follow global settings. In the image above, the "Execution Cache" option is set to indeterminate, which means it follows the global setting. The green checkmark after the option means that the cache feature is eventually enabled (because the global setting is set to enable cache).
 
