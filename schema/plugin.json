@@ -25,7 +25,7 @@
         "cache": {
           "title": "Execution Cache",
           "type": "boolean",
-          "description": "Skip execution if the outputs of the cell, such as assigned variables and imported modules, already exist.\nThis option can be overridden with 'Execution Cache' config in '## Cell Inspector' panel or '##%cache' client-side magic command.\nThis behavior can be disabled by checking 'Disable Execution Cache'.",
+          "description": "Skip execution if the variables assigned in the cells (and also the imported modules) already exist in the kernel.\nThis option can be overridden with 'Execution Cache' config in '## Cell Inspector' panel or '##%cache' client-side magic command.\nThis behavior can be disabled by checking 'Disable Execution Cache'.",
           "default": true
         },
         "autoDependency": {
