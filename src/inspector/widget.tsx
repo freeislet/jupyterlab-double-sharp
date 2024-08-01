@@ -4,6 +4,7 @@ import { Cell } from '@jupyterlab/cells';
 import { Signal } from '@lumino/signaling';
 import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 import { settingsIcon } from '@jupyterlab/ui-components';
+import { TbHelp } from 'react-icons/tb';
 
 import { doubleSharpIcon } from '../icon';
 import { App } from '../app';
@@ -68,10 +69,20 @@ export class InspectorWidget extends ReactWidget {
           </Accordion.Content>
         </Accordion>
         <Accordion initialActive={true}>
-          <Accordion.Trigger>
-            <doubleSharpIcon.react className="jp-DoubleSharp-icon-inline" />
-            Cell Inspector
-          </Accordion.Trigger>
+          <Accordion.TriggerContainer>
+            <Accordion.TriggerInner>
+              <doubleSharpIcon.react className="jp-DoubleSharp-icon-inline" />
+              Cell Inspector
+            </Accordion.TriggerInner>
+            <Toolbar>
+              <Toolbar.Button
+                title="Double Sharp document"
+                onClick={() => App.instance.openDocument()}
+              >
+                <TbHelp className="jp-DoubleSharp-icon" />
+              </Toolbar.Button>
+            </Toolbar>
+          </Accordion.TriggerContainer>
           <Accordion.Content>
             <UseSignal signal={this._cellChanged}>
               {(_, cellContext) => <CellTools context={cellContext ?? null} />}

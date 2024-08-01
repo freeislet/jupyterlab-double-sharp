@@ -64,7 +64,7 @@
 .jp-DoubleSharp-Toolbar-button {
   cursor: pointer;
   display: flex;
-  align-items: end;
+  align-items: center;
   height: 24px;
   background-color: transparent;
   border: none;

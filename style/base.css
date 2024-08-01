@@ -113,3 +113,8 @@
 .jp-DoubleSharp-inline-block {
   display: inline-block;
 }
+
+.jp-DoubleSharp-icon {
+  height: 16px;
+  width: auto;
+}

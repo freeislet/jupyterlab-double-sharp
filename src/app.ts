@@ -79,4 +79,15 @@ export class App {
       query: 'Double Sharp'
     });
   }
+
+  openDocument() {
+    const newWindow = window.open(
+      'https://github.com/freeislet/jupyterlab-double-sharp#jupyterlab_double_sharp',
+      '_blank',
+      'noopener,noreferrer'
+    );
+    if (newWindow) {
+      newWindow.opener = null;
+    }
+  }
 }
