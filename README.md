@@ -1,5 +1,6 @@
 # jupyterlab_double_sharp
 
+[![PyPI - Version](https://img.shields.io/pypi/v/jupyterlab-double-sharp)](https://pypi.org/project/jupyterlab-double-sharp/)
 [![Github Actions Status](https://github.com/freeislet/jupyterlab-double-sharp/workflows/Build/badge.svg)](https://github.com/freeislet/jupyterlab-double-sharp/actions/workflows/build.yml)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/freeislet/jupyterlab-double-sharp/main?urlpath=lab)
 
