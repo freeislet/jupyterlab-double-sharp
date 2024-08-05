@@ -45,9 +45,13 @@ The Variables list (green underlined in the image above) shows the assigned vari
 
 ## Auto Dependency
 
+Execute dependency cells if unresolved variables or modules of the cell are assigned in the cells above.
+
 TBD
 
-## Skip Execution
+## Skip Cell Execution
+
+Skip code cell execution.
 
 TBD
 
