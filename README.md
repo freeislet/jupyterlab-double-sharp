@@ -4,11 +4,16 @@
 [![Github Actions Status](https://github.com/freeislet/jupyterlab-double-sharp/workflows/Build/badge.svg)](https://github.com/freeislet/jupyterlab-double-sharp/actions/workflows/build.yml)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/freeislet/jupyterlab-double-sharp/main?urlpath=lab)
 
-Double-Sharp(##) is a jupyterlab extension that provides features like execution cache, auto-dependency, external file loading(TODO) and more.
+Double-Sharp(##) is a jupyterlab extension that provides features like cell execution cache, auto-dependency, external file loading(TODO) and more.
 
-## Execution Cache
+> This project is still in its early stages, so please be careful when using the extension.
+> If you have any problems, we're always happy to hear from you with [issue reports](https://github.com/freeislet/jupyterlab-double-sharp/issues) or feedback.
+>
+> Also, if you would like to help maintain the project, a [donation](https://github.com/sponsors/freeislet) would be greatly appreciated.
 
-Skip execution if the variables assigned in the cells (and also the imported modules) already exist in the kernel.
+## Cell Execution Cache
+
+Skip execution if the variables assigned in the cells (and also the imported modules) already exist in the kernel. This feature doesn't actually cache data on the server like [ipycache](https://github.com/rossant/ipycache) does. It just references a list of variables that exist in the kernel while using the notebook on the client side to determine whether or not to execute a cell.
 
 For example, suppose the following code cells are executed.
 
